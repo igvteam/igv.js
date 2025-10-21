@@ -17,6 +17,12 @@ export class GeneViewModel {
         
         // Create scale
         this.xScale = this.createXScale(region, dimensions.width)
+        this.scale = { bpPerPixel: (region.end - region.start) / dimensions.width }
+        this.width = dimensions.width
+        this.height = config.height || 50
+        this.margin = 10
+        this.featureHeight = 14
+        this.arrowSpacing = 30
         
         // Compute layout (row assignments to avoid overlaps)
         this.layout = this.computeLayout(features, region, dimensions.width)
@@ -96,4 +102,3 @@ export class GeneViewModel {
         return this.xScale.toPixels(end) - this.xScale.toPixels(start)
     }
 }
-
