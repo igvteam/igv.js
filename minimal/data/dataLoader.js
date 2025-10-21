@@ -22,6 +22,12 @@ export class DataLoader {
     async load(trackConfig, region, bpPerPixel) {
         console.log('DataLoader.load() called with bpPerPixel:', bpPerPixel)
         // console.log('DataLoader.load() trackConfig:', trackConfig)
+        
+        // Ruler doesn't load external data - it generates ticks from the region
+        if (trackConfig.type === 'ruler') {
+            return null
+        }
+        
         const source = this.getSource(trackConfig)
 
         try {
