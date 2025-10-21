@@ -27,6 +27,10 @@ export class MinimalBrowser {
         this.trackConfigs = []
         this.genome = null
         this.chromosomeInfo = null
+        this.resizeObserver = null
+        this.resizeDebounceTimer = null
+        this.onResizeComplete = config.onResizeComplete || null
+        this.lastRenderedWidth = null
     }
 
     /**
@@ -120,6 +124,9 @@ export class MinimalBrowser {
             // 7. Render
             this.render()
 
+            // 8. Set up resize observer
+            this.setupResizeObserver()
+
         } catch (error) {
             this.renderError(error)
             throw error
@@ -132,6 +139,9 @@ export class MinimalBrowser {
     render() {
         // Clear existing UI
         this.ui.cleanup()
+
+        // Store the width we're rendering at
+        this.lastRenderedWidth = this.ui.getAvailableWidth()
 
         // Render each track
         for (const viewModel of this.viewModels) {
@@ -192,9 +202,121 @@ export class MinimalBrowser {
     }
 
     /**
+     * Set up ResizeObserver to handle container size changes
+     */
+    setupResizeObserver() {
+        // Clean up existing observer
+        if (this.resizeObserver) {
+            this.resizeObserver.disconnect()
+        }
+
+        this.resizeObserver = new ResizeObserver(entries => {
+            for (const entry of entries) {
+                this.handleResize(entry.contentRect.width)
+            }
+        })
+
+        this.resizeObserver.observe(this.container)
+    }
+
+    /**
+     * Handle resize events with debouncing
+     */
+    handleResize(newWidth) {
+        // Debounce: wait 150ms after resize stops
+        clearTimeout(this.resizeDebounceTimer)
+        this.resizeDebounceTimer = setTimeout(() => {
+            this.onResize(newWidth)
+        }, 150)
+    }
+
+    /**
+     * Process resize after debounce period
+     */
+    async onResize(newWidth) {
+        console.log(`Browser: Resize to ${newWidth}px (last: ${this.lastRenderedWidth}px)`)
+        
+        // Don't re-render if width hasn't meaningfully changed from last render
+        if (this.lastRenderedWidth && Math.abs(newWidth - this.lastRenderedWidth) < 5) {
+            console.log('Browser: Width change too small, skipping resize')
+            return
+        }
+        
+        // Maintain current locus and re-render at new width
+        await this.refreshAtCurrentLocus()
+
+        // Notify listener
+        if (this.onResizeComplete) {
+            this.onResizeComplete({
+                width: newWidth,
+                region: this.region,
+                bpPerPixel: this.region.length / newWidth
+            })
+        }
+    }
+
+    /**
+     * Refresh the view at the current locus with new dimensions
+     */
+    async refreshAtCurrentLocus() {
+        try {
+            if (!this.region) {
+                console.warn('Browser: No region set, cannot refresh')
+                return
+            }
+
+            console.log(`Browser: Refreshing at current locus ${this.region.chr}:${this.region.start}-${this.region.end}`)
+
+            // 1. Calculate new pixel width
+            const availableWidth = this.ui.getAvailableWidth()
+            const bpPerPixel = this.region.length / availableWidth
+            console.log(`Browser: New width = ${availableWidth} px, bpPerPixel = ${bpPerPixel.toFixed(2)}`)
+
+            // 2. Re-fetch all track data at new resolution
+            const dataPromises = this.trackConfigs.map(config =>
+                this.dataLoader.load(config, this.region, bpPerPixel)
+            )
+
+            const trackData = await Promise.all(dataPromises)
+
+            // 3. Rebuild view models with new dimensions
+            this.viewModels = trackData.map((data, i) =>
+                ViewModelBuilder.build(
+                    this.trackConfigs[i],
+                    data,
+                    this.region,
+                    {
+                        width: availableWidth,
+                        height: this.trackConfigs[i].height
+                    }
+                )
+            )
+
+            // 4. Re-render
+            this.render()
+
+        } catch (error) {
+            console.error('Browser: Error during resize refresh:', error)
+        }
+    }
+
+    /**
      * Clean up and remove browser
      */
     destroy() {
+        // Disconnect resize observer
+        if (this.resizeObserver) {
+            this.resizeObserver.disconnect()
+            this.resizeObserver = null
+        }
+
+        // Clear any pending resize timers
+        if (this.resizeDebounceTimer) {
+            clearTimeout(this.resizeDebounceTimer)
+            this.resizeDebounceTimer = null
+        }
+
+        // Clean up UI
         this.ui.cleanup()
         this.viewModels = []
         this.trackConfigs = []
