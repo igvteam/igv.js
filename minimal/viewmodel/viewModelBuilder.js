@@ -2,6 +2,7 @@ import { WigViewModel } from './wigViewModel.js'
 import { GeneViewModel } from './geneViewModel.js'
 import { SequenceViewModel } from './sequenceViewModel.js'
 import { IdeogramViewModel } from './ideogramViewModel.js'
+import { RulerViewModel } from './rulerViewModel.js'
 
 /**
  * Factory for building view models from track configuration and data
@@ -12,6 +13,9 @@ export class ViewModelBuilder {
      */
     static build(trackConfig, data, region, dimensions) {
         switch (trackConfig.type) {
+            case 'ruler':
+                return new RulerViewModel(trackConfig, data, region, dimensions)
+            
             case 'ideogram':
                 return new IdeogramViewModel(trackConfig, data, region, dimensions)
             

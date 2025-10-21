@@ -55,6 +55,15 @@ export class MinimalBrowser {
                 this.chromosomeInfo = await ChromosomeInfo.load(genomeConfig.chromSizesURL)
                 console.log('Browser: Loaded genome:', genomeConfig.name, 'with', this.chromosomeInfo.chromosomes.length, 'chromosomes')
 
+                // Add ruler track (always first)
+                const rulerTrack = {
+                    type: 'ruler',
+                    name: '',
+                    order: Number.MIN_SAFE_INTEGER,
+                    height: 40
+                }
+                this.config.tracks = [rulerTrack, ...this.config.tracks]
+
                 // Optionally add default tracks
                 if (this.config.includeDefaultTracks) {
                     console.log('Browser: Getting default tracks...')
@@ -68,7 +77,7 @@ export class MinimalBrowser {
                         color: track.color || '#666666'
                     }))
 
-                    this.config.tracks = [...configuredDefaultTracks, ...this.config.tracks]
+                    this.config.tracks = [...this.config.tracks, ...configuredDefaultTracks]
                     console.log('Browser: Added', configuredDefaultTracks.length, 'default tracks')
                 }
             }
