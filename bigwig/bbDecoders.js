@@ -1,4 +1,4 @@
-import {IGVColor} from "../../node_modules/igv-utils/src/index.js"
+import {IGVColor} from "igv-utils"
 
 function getDecoder(definedFieldCount, fieldCount, autoSql, format) {
 //biggenepred

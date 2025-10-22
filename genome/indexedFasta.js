@@ -1,5 +1,5 @@
 // Indexed fasta files
-import {BGZip, igvxhr, StringUtils} from "../../node_modules/igv-utils/src/index.js"
+import {BGZip, igvxhr, StringUtils} from "igv-utils"
 import GenomicInterval from "./genomicInterval.js"
 import Chromosome from "./chromosome.js"
 import {buildOptions} from "../util/igvUtils.js"
