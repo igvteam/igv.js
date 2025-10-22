@@ -1,5 +1,6 @@
 import { Cytoband } from '../models/cytoband.js'
 import BWReader from '../bigwig/bwReader.js'
+import { BGZip } from 'igv-utils'
 
 /**
  * Data source for cytoband tracks - fetches and parses cytoband data
@@ -128,10 +129,8 @@ export class CytobandSource {
      */
     async decompressGzip(arrayBuffer) {
         try {
-            // Dynamically import pako when needed
-            const pako = await import('../../node_modules/igv-utils/src/pako.esm.js')
             const compressed = new Uint8Array(arrayBuffer)
-            const decompressed = pako.ungzip(compressed)
+            const decompressed = BGZip.ungzip(compressed)
             return decompressed
         } catch (error) {
             console.error('Error decompressing gzip data:', error)
