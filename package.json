@@ -3,13 +3,23 @@
   "version": "1.0.0",
   "type": "module",
   "description": "Minimal embeddable genome browser",
-  "main": "minimal/index.js",
-  "module": "minimal/index.js",
+  "main": "index.js",
+  "module": "index.js",
   "exports": {
-    ".": "./minimal/index.js"
+    ".": "./index.js"
   },
   "files": [
-    "minimal/**",
+    "bigwig/**",
+    "core/**",
+    "data/**",
+    "genome/**",
+    "models/**",
+    "render/**",
+    "ui/**",
+    "util/**",
+    "viewmodel/**",
+    "index.js",
+    "binary.js",
     "node_modules/igv-utils/**",
     "node_modules/@gmod/cram/**",
     "LICENSE",
