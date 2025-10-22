@@ -1,169 +1,221 @@
-# igv.js
-![build](https://github.com/igvteam/igv.js/actions/workflows/ci_build.yml/badge.svg)
-[![](https://img.shields.io/npm/dw/igv.svg)](https://www.npmjs.com/package/igv)
-[![](https://img.shields.io/github/last-commit/igvteam/igv.js.svg)](https://github.com/igvteam/igv.js)
-[![](https://img.shields.io/npm/l/igv.svg)](LICENSE)
-[![](https://data.jsdelivr.com/v1/package/npm/igv/badge)](https://www.jsdelivr.com/package/npm/igv)
+# IGV Minimal Browser
 
-igv.js is an embeddable interactive genome visualization component developed by the 
- [Integrative Genomics Viewer (IGV)](https://igv.org) team. 
+A lightweight, embeddable genome browser with clean architecture and modern design.
 
-## Citing igv.js
+## Features
 
-James T Robinson, Helga Thorvaldsdottir, Douglass Turner, Jill P Mesirov, igv.js: an embeddable JavaScript 
-implementation of the Integrative Genomics Viewer (IGV), Bioinformatics, Volume 39, Issue 1, January 2023, 
-btac830, https://doi.org/10.1093/bioinformatics/btac830
- 
-Below are examples and a quickstart guide.  See the [developer documentation](https://igv.org/doc/igvjs) for more documentation.  
-
-# Examples
- 
-***[Alignments](https://igv.org/web/release/3.5.2/examples/cram-vcf.html)***
-
-***[Interactions](https://igv.org/web/release/3.5.2/examples/interact.html)***
-
-***[Copy number](https://igv.org/web/release/3.5.2/examples/copyNumber.html)***
-
-***[Multiple regions](https://igv.org/web/release/3.5.2/examples/multi-locus.html)***
-
-***[Mutation Annotation Format (MAF)](https://igv.org/web/release/3.5.2/examples/maf-tcga.html)***
-
-***[Variant color options](https://igv.org/web/release/3.5.2/examples/variant-colors.html)***
-
-***[More](https://igv.org/web/release/3.5.2/examples/)***
-
- 
-# Quickstart
+- Clean, modular architecture with separation of concerns
+- HiDPI/Retina display support
+- Responsive layout with resize handling
+- Gene name search (e.g., EGFR, TP53, BRCA1)
+- Ideogram track with cytoband visualization
+- Multiple track types: sequence, genes, WIG/BigWig
+- Genomic ruler with adaptive tick spacing
+- Zero build step - pure ES modules
 
 ## Installation
-igv.js consists of a single javascript file with no external dependencies.  
 
-Pre-built files for script include, AMD, or CJS module systems (igv.min.js) and an ES6 module (igv.esm.min.js)
-can be downloaded from [https://cdn.jsdelivr.net/npm/igv@3.5.2/dist/](https://cdn.jsdelivr.net/npm/igv@3.5.2/dist/). 
+### From GitHub (Recommended)
 
-To import igv as an ES6 module
+```bash
+npm install github:igvteam/igv.js#minimal-branch
+```
+
+### Usage
 
 ```javascript
-import igv from "https://cdn.jsdelivr.net/npm/igv@3.5.2/dist/igv.esm.min.js"
-``` 
+import IGV from 'igv-minimal'
 
-Or as a script include (defines the "igv" global)
-
-```html
-<script src="https://cdn.jsdelivr.net/npm/igv@3.5.2/dist/igv.min.js"></script>
-```   
- 
-Alternatively you can install with npm  
- 
- ```npm install igv```
-
-and source the appropriate file for your module system (igv.min.js or igv.esm.min.js)  in node_modules/igv/dist.
-
-
-## Usage
-
-To create an igv.js ***browser*** supply a container div 
-and an initial configuration defining the reference genome, initial tracks, and other state to the 
-function ```igv.createBrowser(div, config)```.  
-
-This function returns a promise for an igv.Browser object which can used to control the browser.  For example, to open
-a browser on a single alignment track opened at a specific locus:
-
-```
-      var igvDiv = document.getElementById("igv-div");
-      var options =
-        {
-            genome: "hg38",
-            locus: "chr8:127,736,588-127,739,371",
-            tracks: [
-                {
-                    "name": "HG00103",
-                    "url": "https://s3.amazonaws.com/1000genomes/data/HG00103/alignment/HG00103.alt_bwamem_GRCh38DH.20150718.GBR.low_coverage.cram",
-                    "indexURL": "https://s3.amazonaws.com/1000genomes/data/HG00103/alignment/HG00103.alt_bwamem_GRCh38DH.20150718.GBR.low_coverage.cram.crai",
-                    "format": "cram"
-                }
-            ]
-        };
-
-        igv.createBrowser(igvDiv, options)
-                .then(function (browser) {
-                    console.log("Created IGV browser");
-                })
+const browser = await IGV.create(
+  document.getElementById('container'),
+  {
+    genome: "hg19",
+    locus: "EGFR",
+    showIdeogram: true,
+    includeDefaultTracks: true,
+    tracks: [
+      {
+        name: "Custom Signal",
+        url: "https://example.com/data.bigWig",
+        type: "wig",
+        format: "bigwig",
+        height: 128,
+        color: "rgb(255, 41, 135)"
+      }
+    ]
+  }
+)
 ```
 
-## Documentation
+## API
 
-Full documentation of the igv.js API is available at [https://igv.org/doc/igvjs/](https://igv.org/doc/igvjs/).
+### Create Browser
+```javascript
+const browser = await IGV.create(container, config)
+```
+
+### Navigate to Locus
+```javascript
+await browser.setLocus('chr1:1000000-2000000')
+// or
+await browser.setLocus('TP53')
+```
+
+### Cleanup
+```javascript
+browser.destroy()
+```
+
+## Configuration
+
+### Genome
+```javascript
+{
+  genome: "hg19",  // Genome ID or full config object
+  locus: "chr1:1-100000",  // Initial locus
+  showIdeogram: true,  // Show chromosome ideogram
+  includeDefaultTracks: true  // Load sequence + RefSeq tracks
+}
+```
+
+### Track Types
+
+#### WIG/BigWig Track
+```javascript
+{
+  type: "wig",
+  format: "bigwig",  // or "bedgraph"
+  url: "https://example.com/signal.bigWig",
+  name: "Signal Track",
+  color: "rgb(0, 150, 0)",
+  height: 100
+}
+```
+
+#### Gene/RefSeq Track
+```javascript
+{
+  type: "refseq",
+  url: "https://example.com/genes.bed",
+  name: "Genes",
+  color: "rgb(0, 100, 150)",
+  height: 150
+}
+```
+
+#### Sequence Track
+```javascript
+{
+  type: "sequence",
+  height: 50
+  // URL comes from genome config
+}
+```
+
+## Architecture
+
+```
+Configuration
+    ↓
+Browser (Orchestrator)
+    ├─→ DataLoader → DataSources → Domain Models
+    ├─→ ViewModelBuilder → TrackViewModels
+    ├─→ UIManager → DOM + Canvas (HiDPI)
+    └─→ Renderers → Pure rendering functions
+```
+
+### Key Principles
+1. Unidirectional data flow
+2. Immutable data structures
+3. Pure rendering functions
+4. Single responsibility per module
+5. Explicit dependencies
+
+## Project Structure
+
+```
+minimal/
+  index.js              - Public API
+  core/
+    browser.js          - Main orchestrator
+  data/
+    dataLoader.js       - Data fetching coordination
+    wigSource.js        - WIG/BigWig data source
+    bigwigSource.js     - BigWig reader
+    featureSource.js    - Gene/feature data source
+    sequenceSource.js   - DNA sequence data source
+    cytobandSource.js   - Cytoband data source
+  genome/
+    genomeResolver.js   - Genome configuration
+    chromosomeInfo.js   - Chromosome metadata
+    search.js           - Gene name search
+    loadSequence.js     - Sequence loading
+  models/
+    genomicRegion.js    - Genomic region model
+    track.js            - Track configuration
+    genome.js           - Genome configuration
+    cytoband.js         - Cytoband model
+  viewmodel/
+    viewModelBuilder.js - ViewModel factory
+    wigViewModel.js     - WIG track ViewModel
+    geneViewModel.js    - Gene track ViewModel
+    sequenceViewModel.js - Sequence ViewModel
+    ideogramViewModel.js - Ideogram ViewModel
+    rulerViewModel.js   - Ruler ViewModel
+  render/
+    rendererRegistry.js - Renderer lookup
+    wigRenderer.js      - WIG rendering
+    geneRenderer.js     - Gene rendering
+    sequenceRenderer.js - Sequence rendering
+    ideogramRenderer.js - Ideogram rendering
+    rulerRenderer.js    - Ruler rendering
+  ui/
+    uiManager.js        - DOM management
+    canvas.js           - HiDPI canvas utilities
+  util/
+    colors.js           - Color utilities
+    scale.js            - Scaling functions
+    igvUtils.js         - Utility functions
+  bigwig/
+    bwReader.js         - BigWig file reader
+    [...]               - BigWig support files
+```
+
+## Browser Support
+
+- Chrome/Edge: Full support
+- Firefox: Full support
+- Safari: Full support
+
+Requires ES6 modules support (all modern browsers).
 
 ## Development
 
-### Requirements
-
-Building igv.js and running the examples require Linux or MacOS.  Other Unix environments will probably
-work but have not been tested.  
-
-Windows users can use [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
-
-### Building
-
-Building igv.js and running the examples requires [node.js](https://nodejs.org/).  
-
-Development can be done directly from the source files by importing igv.js from ```js/index.js```.  
-See the html files in the ```dev``` folder for examples of how to import igv.js from the source
-directory. The ```dist```files are not required for development, however you must build at least 
-once to compile the CSS and create the required file  ```js/embedCss.js```.  
-
-
-```  
-git clone https://github.com/igvteam/igv.js.git
-cd igv.js
-npm install
-npm run build
-```
-
-This creates a dist folder with the following files
-
-* igv.js - UMDS file for script include, AMD, or CJS modules.  A script include will define an "igv" global.
-* igv.min.js - minified version of igv.js
-* igv.esm.js --  ES6 module 
-* igv.esm.min.js --  minified version of igv.esm.js
-
-Additionally the file ```embedCSS.js``` is created in the ```js``` folder.  This contains the CSS required for igv.js,
-which is injected into a shadow root containing igv.js.
-
-
-### Tests
-
-To run the tests from the command line
-
-```
-npm run test
-```
-
-
-### Examples
-
-To run the examples install [http-server](https://www.npmjs.com/package/http-server).
-
-Start  http-server from the project root directory
+### Running the Demo
 
 ```bash
-npx http-server 
+python -m http.server 8000
+# Open: http://localhost:8000/minimal.html
 ```
 
-Then open [http://localhost:8080/examples](http://localhost:8080/examples) in a web browser.
+### Adding Custom Track Types
 
+1. Create data source in `data/`
+2. Create ViewModel in `viewmodel/`
+3. Create renderer in `render/`
+4. Register in `rendererRegistry.js`
 
-# Supported Browsers
+## Performance
 
-igv.js require a modern web browser with support for Javascript ECMAScript 2015 (ES6). 
+- No build step required
+- Lazy-loads data on demand
+- HiDPI canvas rendering
+- Efficient resize handling with debouncing
 
-# License
+## License
 
-igv.js is [MIT](/LICENSE) licensed.
+MIT - see LICENSE file
 
+## Legacy IGV.js
 
-
-### [Release Notes](https://github.com/igvteam/igv.js/releases)
-
- 
+The full-featured IGV.js library has been archived to `legacy/`. This minimal browser focuses on core functionality with modern architecture.
