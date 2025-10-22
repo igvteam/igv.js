@@ -1,3 +1,5 @@
+import { BGZip } from '../../node_modules/igv-utils/src/index.js'
+
 /**
  * Data source for RefSeq gene annotation tracks
  */
@@ -200,13 +202,11 @@ export class RefSeqSource {
     }
 
     /**
-     * Decompress gzipped data using pako library
+     * Decompress gzipped data using BGZip from igv-utils
      * @param {ArrayBuffer} arrayBuffer - Gzipped data
      * @returns {Uint8Array} Decompressed data
      */
     async decompressGzip(arrayBuffer) {
-        // Import pako dynamically since it's already loaded by igv-utils
-        const pako = await import('/node_modules/igv-utils/src/pako.esm.js')
-        return pako.inflate(new Uint8Array(arrayBuffer))
+        return BGZip.ungzip(arrayBuffer)
     }
 }

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IGV Minimal - Host App Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 8px 8px 0 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .controls {
+            background: #f8f9fa;
+            padding: 15px 30px;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .controls button {
+            padding: 8px 16px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        .controls button:hover {
+            background: #5568d3;
+        }
+
+        .controls input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        #igv-container {
+            background: white;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .status {
+            margin-top: 15px;
+            padding: 12px;
+            background: rgba(255,255,255,0.9);
+            border-radius: 6px;
+            font-size: 13px;
+            color: #333;
+        }
+
+        .status.error {
+            background: #fee;
+            color: #c33;
+        }
+
+        .status.success {
+            background: #efe;
+            color: #3c3;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <h1>🧬 My Genomics App</h1>
+            <p>Powered by igv-minimal imported as an npm dependency</p>
+        </div>
+
+        <div class="controls">
+            <input
+                type="text"
+                id="locus-input"
+                placeholder="Enter gene name (e.g., EGFR, TP53, MYC) or locus (e.g., chr7:55,086,725-55,275,031)"
+                 value="EGFR"
+            >
+            <button onclick="navigate()">Go</button>
+            <button onclick="loadExample('TP53')">TP53</button>
+            <button onclick="loadExample('BRCA1')">BRCA1</button>
+            <button onclick="loadExample('chr1:1-1000000')">Chr1 Start</button>
+        </div>
+
+        <div id="igv-container"></div>
+
+        <div id="status" class="status" style="display: none;"></div>
+    </div>
+
+    <script type="module">
+        // Import igv-minimal as if it were installed via npm
+        // In a real app with npm, this would be: import IGV from 'igv-minimal'
+        // For this test, we'll import from the local minimal/index.js
+        const cacheBuster = '?v=' + Date.now()
+        const moduleUrl = './minimal/index.js' + cacheBuster
+        const IGV = await import(moduleUrl).then(m => m.default)
+
+        let browser = null
+
+        // Initialize the browser
+        async function initBrowser() {
+            showStatus('Initializing genome browser...', 'info')
+
+            try {
+                browser = await IGV.create(
+                    document.getElementById('igv-container'),
+                    {
+                        genome: "hg19",
+                        locus: "myc",
+                        showIdeogram: true,
+                        tracks: [
+                            {
+                                type: "wig",
+                                name: "ENCODE Signal",
+                                url: "https://www.encodeproject.org/files/ENCFF059CKF/@@download/ENCFF059CKF.bigWig",
+                                format: "bigwig",
+                                height: 128,
+                                color: "rgb(255, 41, 135)"
+                            }
+                        ]
+                    }
+                )
+
+                showStatus('✓ Browser initialized successfully!', 'success')
+                setTimeout(() => hideStatus(), 3000)
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error')
+                console.error('Browser initialization error:', error)
+            }
+        }
+
+        // Navigate to a locus
+        window.navigate = async function() {
+            const locus = document.getElementById('locus-input').value.trim()
+            if (!locus || !browser) return
+
+            showStatus(`Navigating to ${locus}...`, 'info')
+
+            try {
+                await browser.setLocus(locus)
+                showStatus(`✓ Navigated to ${locus}`, 'success')
+                setTimeout(() => hideStatus(), 2000)
+            } catch (error) {
+                showStatus(`Navigation error: ${error.message}`, 'error')
+                console.error('Navigation error:', error)
+            }
+        }
+
+        // Load example
+        window.loadExample = async function(locus) {
+            document.getElementById('locus-input').value = locus
+            await navigate()
+        }
+
+        // Status management
+        function showStatus(message, type = 'info') {
+            const status = document.getElementById('status')
+            status.textContent = message
+            status.className = `status ${type}`
+            status.style.display = 'block'
+        }
+
+        function hideStatus() {
+            document.getElementById('status').style.display = 'none'
+        }
+
+        // Allow Enter key in input
+        document.getElementById('locus-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') navigate()
+        })
+
+        // Initialize on load
+        initBrowser()
+    </script>
+</body>
+</html>
+
