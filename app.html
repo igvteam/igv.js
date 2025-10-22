@@ -4,6 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IGV Minimal - Host App Test</title>
+    
+    <!-- Import map to simulate npm package loading from local files -->
+    <script type="importmap">
+    {
+        "imports": {
+            "igv-minimal": "./minimal/index.js"
+        }
+    }
+    </script>
+    
     <style>
         * {
             margin: 0;
@@ -129,9 +139,11 @@
         // Import igv-minimal as if it were installed via npm
         // In a real app with npm, this would be: import IGV from 'igv-minimal'
         // For this test, we'll import from the local minimal/index.js
-        const cacheBuster = '?v=' + Date.now()
-        const moduleUrl = './minimal/index.js' + cacheBuster
-        const IGV = await import(moduleUrl).then(m => m.default)
+        // const cacheBuster = '?v=' + Date.now()
+        // const moduleUrl = './minimal/index.js' + cacheBuster
+        // const IGV = await import(moduleUrl).then(m => m.default)
+
+        import IGV from 'igv-minimal'
 
         let browser = null
 
