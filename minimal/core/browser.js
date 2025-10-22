@@ -57,6 +57,7 @@ export class MinimalBrowser {
                 // Create a genome object that provides access to both
                 this.genome = genomeConfig
                 
+                // Load chromosome info
                 this.chromosomeInfo = await ChromosomeInfo.load(genomeConfig.chromSizesURL)
                 console.log('Browser: Loaded genome:', genomeConfig.name, 'with', this.chromosomeInfo.chromosomes.length, 'chromosomes')
 
@@ -69,22 +70,20 @@ export class MinimalBrowser {
                 }
                 this.config.tracks = [rulerTrack, ...this.config.tracks]
 
-                // Optionally add default tracks
-                if (this.config.includeDefaultTracks) {
-                    console.log('Browser: Getting default tracks...')
-                    const defaultTracks = this.genome.getDefaultTracks(this.config)
-                    console.log('Browser: Default tracks:', defaultTracks)
+                // Always add default tracks (cytoband, sequence, genes from genome registry)
+                console.log('Browser: Getting default tracks...')
+                const defaultTracks = this.genome.getDefaultTracks(this.config)
+                console.log('Browser: Default tracks:', defaultTracks)
 
-                    // Add default tracks with proper configuration
-                    const configuredDefaultTracks = defaultTracks.map(track => ({
-                        ...track,
-                        height: track.height || 50,
-                        color: track.color || '#666666'
-                    }))
+                // Add default tracks with proper configuration
+                const configuredDefaultTracks = defaultTracks.map(track => ({
+                    ...track,
+                    height: track.height || 50,
+                    color: track.color || '#666666'
+                }))
 
-                    this.config.tracks = [...this.config.tracks, ...configuredDefaultTracks]
-                    console.log('Browser: Added', configuredDefaultTracks.length, 'default tracks')
-                }
+                this.config.tracks = [...this.config.tracks, ...configuredDefaultTracks]
+                console.log('Browser: Added', configuredDefaultTracks.length, 'default tracks')
             }
 
             // 2. Parse locus into genomic region (supports both coordinates and gene names)
