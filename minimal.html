@@ -48,6 +48,16 @@
             opacity: 0.9;
         }
 
+        .dpr-badge {
+            display: inline-block;
+            margin-left: 12px;
+            padding: 4px 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
         .controls {
             padding: 20px 32px;
             border-bottom: 1px solid #e5e7eb;
@@ -172,8 +182,8 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🧬 IGV Minimal Browser</h1>
-            <p>Interactive genome browser with ideogram, sequence, and annotation tracks</p>
+            <h1>🧬 IGV Minimal Browser<span class="dpr-badge" id="dpr-badge"></span></h1>
+            <p>Interactive genome browser with ideogram, sequence, and annotation tracks • HiDPI rendering enabled</p>
         </div>
 
         <div class="controls">
@@ -222,9 +232,22 @@
             console.log(`[${type.toUpperCase()}] ${message}`)
         }
 
+        // Display device pixel ratio badge
+        function updateDPRBadge() {
+            const dpr = window.devicePixelRatio || 1
+            const badge = document.getElementById('dpr-badge')
+            badge.textContent = `${dpr}x Display`
+            if (dpr >= 2) {
+                badge.style.background = 'rgba(34, 197, 94, 0.3)' // Green for Retina
+            }
+        }
+
         // Initialize the browser
         async function initializeBrowser(locus) {
             try {
+                // Update DPR badge
+                updateDPRBadge()
+                
                 // updateStatus('Loading genome browser...', 'info')
 
                 const IGV = await import(moduleUrl).then(m => m.default)

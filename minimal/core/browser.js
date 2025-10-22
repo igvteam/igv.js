@@ -9,6 +9,7 @@ import { ChromosomeInfo } from '../genome/chromosomeInfo.js'
 import { GenomeConfig } from '../models/genome.js'
 import { search } from '../genome/search.js'
 import { loadSequence } from '../../js/genome/loadSequence.js'
+import { getCanvasDimensions } from '../ui/canvas.js'
 
 /**
  * Minimal genome browser - orchestrates data loading, view model creation, and rendering
@@ -148,11 +149,11 @@ export class MinimalBrowser {
             const { canvas } = this.ui.createTrackUI(viewModel)
             const ctx = canvas.getContext('2d')
 
+            // Get CSS pixel dimensions (handles HiDPI scaling)
+            const dimensions = getCanvasDimensions(canvas)
+
             const renderer = RendererRegistry.get(viewModel.type)
-            renderer.render(ctx, viewModel, {
-                width: canvas.width / (window.devicePixelRatio || 1),
-                height: canvas.height / (window.devicePixelRatio || 1)
-            })
+            renderer.render(ctx, viewModel, dimensions)
         }
     }
 
