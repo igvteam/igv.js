@@ -4,6 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IGV Minimal Browser - Demo</title>
+    
+    <!-- Import map for module resolution -->
+    <script type="importmap">
+    {
+        "imports": {
+            "igv-utils": "./node_modules/igv-utils/src/index.js"
+        }
+    }
+    </script>
+    
     <style>
         * {
             margin: 0;
@@ -222,7 +232,7 @@
 
         // Aggressive cache buster for development
         const cacheBuster = '?v=' + Date.now() + '&r=' + Math.random() + '&force=' + Math.random()
-        const moduleUrl = './minimal/index.js' + cacheBuster
+        const moduleUrl = './index.js' + cacheBuster
 
         // Update status message
         function updateStatus(message, type = 'info') {

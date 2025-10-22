@@ -1,4 +1,4 @@
-import { BGZip } from '../../node_modules/igv-utils/src/index.js'
+import { BGZip } from 'igv-utils'
 
 /**
  * Data source for RefSeq gene annotation tracks
