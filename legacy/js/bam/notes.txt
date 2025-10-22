@@ -1,0 +1,26 @@
+BAM alignment properties
+
+
+readName
+flags
+chr
+start
+strand
+matePos
+tlen
+cigar
+lengthOnRef
+seq
+qual
+mq
+mateChr
+tagBA
+blocks
+
+Block properties
+
+start
+len 
+seq 
+qual
+

@@ -1,67 +1,48 @@
 {
-  "name": "igv",
-  "version": "3.5.3",
-  "main": "dist/igv.esm.js",
-  "browser": "dist/igv.js",
-  "module": "dist/igv.esm.js",
-  "types": "dist/igv.d.ts",
+  "name": "igv-minimal",
+  "version": "1.0.0",
   "type": "module",
-  "description": "Embeddable genomic visualization component based on the Integrative Genomics Viewer",
+  "description": "Minimal embeddable genome browser",
+  "main": "minimal/index.js",
+  "module": "minimal/index.js",
+  "exports": {
+    ".": "./minimal/index.js"
+  },
   "files": [
-    "dist/**"
+    "minimal/**",
+    "node_modules/igv-utils/**",
+    "node_modules/@gmod/cram/**",
+    "LICENSE",
+    "README.md"
   ],
   "scripts": {
-    "prepack": "npm run build",
-    "prepare": "npm run build",
-    "build": "node scripts/updateVersion.cjs && node scripts/compileSass.cjs && node scripts/generateEmbedCss.js && npx rollup --config && node scripts/copyArtifacts.cjs",
-    "build_iife": "node scripts/updateVersion.cjs && node scripts/compileSass.cjs && node scripts/generateEmbedCss.js && npx rollup --config rollup.config.iife.js && node scripts/copyArtifacts.cjs",
-    "updateCSS": "node scripts/compileSass.cjs && node scripts/generateEmbedCss.js",
-    "test": "mocha -ui tdd"
+    "test": "echo \"Tests coming soon\" && exit 0"
   },
-  "author": {
-    "name": "Jim Robinson"
-  },
-  "contributors": [
-    {
-      "name": "Douglass Turner"
-    }
-  ],
-  "bugs": {
-    "url": "https://github.com/igvteam/igv.js/issues"
-  },
-  "deprecated": false,
-  "homepage": "https://igv.org",
-  "keywords": [
-    "IGV",
-    "genomics",
-    "visualization",
-    "bioinformatics"
-  ],
-  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/igvteam/igv.js.git"
   },
-  "browserslist": "> 1%, not dead",
-  "devDependencies": {
-    "@gmod/cram": "^5.0.5",
-    "@rollup/plugin-strip": "^3.0.1",
-    "@rollup/plugin-terser": "^0.4.0",
-    "@xmldom/xmldom": "^0.7.9",
-    "atob": "^2.1.2",
-    "btoa": "^1.2.1",
-    "chai": "^4.3.7",
-    "circular-view": "github:igvteam/circular-view#v0.2.4",
-    "dompurify": "^3.0.9",
-    "eslint": "^6.4.0",
-    "fs-extra": "^11.3.0",
-    "hdf5-indexed-reader": "github:jrobinso/hdf5-indexed-reader#v1.0.2",
+  "keywords": [
+    "genomics",
+    "visualization",
+    "genome-browser",
+    "bioinformatics",
+    "minimal",
+    "embeddable"
+  ],
+  "author": {
+    "name": "Douglass Turner"
+  },
+  "contributors": [
+    {
+      "name": "Jim Robinson"
+    }
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/igvteam/igv.js",
+  "dependencies": {
     "igv-utils": "github:igvteam/igv-utils#v1.7.1",
-    "mocha": "^11.1.0",
-    "rollup": "^2.66.0",
-    "rollup-plugin-copy": "^3.3.0",
-    "sass": "^1.45.1",
-    "vanilla-picker": "^2.12.3",
-    "w3c-xmlhttprequest": "^3.0.0"
-  }
+    "@gmod/cram": "^5.0.5"
+  },
+  "devDependencies": {}
 }

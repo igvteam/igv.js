@@ -1,0 +1,17 @@
+##fileformat=VCFv4.1
+##fileDate=20090805
+##source=myImputationProgramV3.1
+##reference=file:///seq/references/1000GenomesPilot-NCBI36.fasta
+##contig=<ID=20,length=62435964,assembly=B36,md5=f126cdf8a6e0c7f379d618ff66beb2da,species="Homo sapiens",taxonomy=x>
+##phasing=partial
+##INFO=<ID=NS,Number=1,Type=Integer,Description="Number of Samples With Data">
+##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Depth">
+##INFO=<ID=AF,Number=A,Type=Float,Description="Allele Frequency">
+##INFO=<ID=DB,Number=0,Type=Flag,Description="dbSNP membership, build 129">
+##INFO=<ID=H2,Number=0,Type=Flag,Description="HapMap2 membership">
+##INFO=<ID=VF,Number=1,Type=Integer,Description="Var_forward">
+##INFO=<ID=VR,Number=1,Type=Integer,Description="Var_reverse">
+##INFO=<ID=RF,Number=1,Type=Integer,Description="Ref_forward">
+##INFO=<ID=RR,Number=1,Type=Integer,Description="Ref_reverse">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+13	32915413	rs1234566	TTAA	.	30	PASS	NS=1;DP=1477;AF=0.4;DB;VF=252;VR=525;RF=467;RR=1010

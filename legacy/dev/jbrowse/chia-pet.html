@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Circular View</title>
+    <script src="https://unpkg.com/react@16.14.0/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@16.14.0/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@jbrowse/react-circular-genome-view@1.6.9/dist/react-circular-genome-view.umd.production.min.js"></script>
+
+
+    <style>
+        button[data-testid='circular_track_select'] {
+            display: none;
+        }
+    </style>
+
+</head>
+<body>
+
+<p>
+
+<h1>ChIA-Pet example</h1>
+
+<h2>Data from the <a target="_blank" href="https://www.jax.org/research-and-faculty/faculty/chia-lin-wei">Wei lab</a>.
+    See <a href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSM3553630" target="_blank">GEO GSM3553630</a>.</h2>
+
+<p>
+    <button id="bookmarkButton">Bookmark</button>
+    <button id="sessionButton">Session JSON</button>
+    <button id="svgButton">Save SVG</button>
+</p>
+
+<button id="button-open">Open</button>
+<div id="jbrowse_circular_genome_view"
+     style="z-index: 2048; position: absolute; top:200px; left:20px; width: 450px; height: 450px;"></div>
+<div id="igvDiv">
+
+</div>
+<script type="module">
+
+    import igv from "../../js/index.js"
+    import makeDraggable from "../../js/ui/utils/draggable.js"
+
+    const options =
+        {
+            "version": "2.10.5",
+            "showSampleNames": false,
+            "genome": "hg19",
+            "locus": [
+                "chr7:55,202,455-55,336,909",
+                "chr8:128,718,692-128,773,416",
+                "chr12:58,126,892-58,168,226"
+            ],
+            "tracks": [
+                {
+                    "url": "https://s3.amazonaws.com/igv.org.demo/GSM3553630_HF-3177_chiapet.trans.chiasig.itx.ge2.bedpe.gz",
+                    "name": "GSM3553630 HF-3177 CP Trans",
+                    "derivedName": true,
+                    "format": "bedpe",
+                    "type": "interact",
+                    "color": "rgb(180,25,137)",
+                    "arcType": "chiapet",
+                    "arcOrientation": true,
+                    "showBlocks": false,
+                    "blockHeight": 3,
+                    "thickness": 1,
+                    "alpha": 0.02,
+                    "order": 5,
+                    "min": 0,
+                    "max": 459
+                },
+                {
+                    "url": "https://s3.amazonaws.com/igv.org.demo/GSM3553630_HF-3177_chiapet.cis.chiasig.sigf.itx.bedpe.gz",
+                    "name": "GSM3553630 HF-3177 CP Cis",
+                    "derivedName": true,
+                    "format": "bedpe",
+                    "type": "interact",
+                    "color": "#ff2987",
+                    "arcType": "chiapetoutbound",
+                    "arcOrientation": false,
+                    "showBlocks": false,
+                    "blockHeight": 3,
+                    "thickness": 1,
+                    "alpha": 0.02,
+                    "order": 6
+                }
+            ]
+        }
+
+    const igvDiv = document.getElementById("igvDiv")
+
+    igv.createBrowser(igvDiv, options)
+
+        .then(function (browser) {
+
+            console.log("Created IGV browser")
+
+
+            const circularViewContainer = document.getElementById('jbrowse_circular_genome_view')
+            const circView = browser.createCircularView(circularViewContainer, false)
+            makeDraggable(circularViewContainer, browser.circularView.toolbar)
+
+
+            browser.circularView.setSize(640)
+
+            document.getElementById("button-open").addEventListener("click", () => circView.show())
+
+            document.getElementById("sessionButton").addEventListener("click", () => {
+                try {
+                    const json = browser.toJSON()
+                    console.log(json)
+                    const jsonString = JSON.stringify(json, null, '\t')
+                    const data = URL.createObjectURL(new Blob([jsonString], {type: "application/octet-stream"}))
+                    download("session.json", data)
+                } catch (e) {
+                    alert(e)
+                }
+            })
+
+            document.getElementById("bookmarkButton").addEventListener("click",
+                () => window.history.pushState({}, "IGV", browser.sessionURL()))
+
+            document.getElementById("svgButton").addEventListener("click", () => {
+                let svg = browser.toSVG()
+                const path = 'arcs.svg'
+                const data = URL.createObjectURL(new Blob([svg], {type: "application/octet-stream"}))
+                download(path, data)
+            })
+        })
+
+    function download(filename, data) {
+
+        const element = document.createElement('a')
+        element.setAttribute('href', data)
+        element.setAttribute('download', filename)
+        element.style.display = 'none'
+        document.body.appendChild(element)
+        element.click()
+        document.body.removeChild(element)
+    }
+
+
+</script>
+
+</body>
+
+</html>

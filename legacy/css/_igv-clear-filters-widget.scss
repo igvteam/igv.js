@@ -1,0 +1,139 @@
+@use "variables" as *;
+
+.igv-clear-filters {
+
+    &__container {
+
+        font-family: $igv-default-font-face;
+        font-size: medium;
+        font-weight: 400;
+
+        display: flex;
+        flex-direction: column;
+        max-width: 300px;
+        background-color: white;
+        padding: 12px;
+        gap: 8px;
+
+        border-color: $igv-trackgear-grey-color;
+        border-radius: $igv-trackgear-popover-border-radius;
+        border-style: solid;
+        border-width: thin;
+
+    }
+
+    &__row {
+        display: flex;
+        align-items: flex-start;
+        padding: 12px;
+
+        gap: 12px;
+        cursor: pointer;
+
+        &:last-of-type {
+            border-bottom: none;
+        }
+    }
+
+    &__track-container {
+        border-bottom: 1px solid $igv-trackgear-grey-color;
+        padding-bottom: 8px;
+        margin-bottom: 8px;
+
+        &:last-of-type {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+    }
+
+    &__track-header {
+        display: flex;
+        align-items: center;
+        padding: 8px 12px;
+        gap: 12px;
+        background-color: #f5f5f5;
+        border-radius: 4px;
+        margin-bottom: 4px;
+        font-weight: 500;
+        font-size: 14px;
+    }
+
+    &__track-name {
+        color: #333;
+        font-weight: 600;
+    }
+
+    &__filter-checkbox {
+        flex: 0 0 16px;
+        width: 16px;
+        height: 16px;
+        margin-top: 2px;
+        cursor: pointer;
+    }
+
+    &__checkbox {
+        flex: 0 0 16px;
+        width: 16px;
+        height: 16px;
+        margin-top: 2px;
+        cursor: pointer;
+    }
+
+    &__content {
+        display: flex;
+        flex-direction: row;
+        flex: 1;
+        gap: 4px;
+    }
+
+    &__description {
+        color: #333;
+        font-size: 14px;
+        line-height: 1.4;
+    }
+
+    &__region {
+        color: #666;
+        font-family: monospace;
+        font-size: 12px;
+        line-height: 1.4;
+    }
+
+    &__button-container {
+        display: flex;
+        gap: 8px;
+        margin-top: 8px;
+    }
+
+    &__button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 1;
+        padding: 10px;
+        background-color: $igv-button-ok-color;
+        color: white;
+
+        border-color: transparent;
+        border-style: solid;
+        border-width: thin;
+        border-radius: $igv-button-border-radius;
+
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 400;
+        transition: background-color 0.2s ease;
+
+        &:hover {
+            background-color: $igv-button-ok-hover-color;
+        }
+
+        &--cancel {
+            background-color: $igv-button-cancel-color;
+
+            &:hover {
+                background-color: $igv-button-cancel-hover-color;
+            }
+        }
+    }
+}

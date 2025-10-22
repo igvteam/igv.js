@@ -1,4 +1,0 @@
-track name="Hawkeye_DNA_v3.6_Designed" description="Amplicon_Insert_Hawkeye_DNA_v3.6" db=hg19 ionVersion=4.0 type=bedDetail reference=hg19 fileVersion=20221114 workflow=ampliseqhd
-chr1	11174374	11174403	SP_1.6732	.	GENE_ID=MTOR;CNV_ID=MTOR;CNV_HS=0;HS_ONLY=0
-chr1	11184544	11184609	SP_4.22429	.	GENE_ID=MTOR;CNV_ID=MTOR;CNV_HS=0;HS_ONLY=0
-chr1	11187071	11187102	SP_5.11097	.	GENE_ID=MTOR;CNV_ID=MTOR;CNV_HS=0;HS_ONLY=0

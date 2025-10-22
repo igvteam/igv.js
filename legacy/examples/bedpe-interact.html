@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="Jim Robinson" name="author">
+    <link href=img/favicon.ico rel="shortcut icon">
+    <title>Interact</title>
+
+
+</head>
+
+<body>
+
+<h1>Interact (arc) track examples</h1>
+
+<h2>Interact tracks from bedpe files.</h2>
+
+<div id="igvDiv" style="padding-top: 20px;padding-bottom: 20px; height: auto"></div>
+
+<h2>Interact tracks from UCSC interact and bigInteract files.</h2>
+
+<div id="igvDiv2" style="padding-top: 20px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../dist/igv.esm.js"
+
+    // BEDPE examples
+    const options =
+        {
+            genome: "hg19",
+            locus: "chr2:65,222,853-65,826,902",
+            tracks: [
+                {
+                    url: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/bedpe/GSM1872886_GM12878_CTCF_PET.bedpe.txt",
+                    type: "interact",
+                    format: "bedpe",
+                    name: "bedpe - proportional",
+                    arcType: "proportional",
+                    color: "rgb(0,200,0)",
+                    alpha: "0.05",
+                    logScale: true,
+                    showBlocks: true,
+                    max: 80,
+                    visibilityWindow: 10000000,
+                    height: 100
+                },
+                {
+                    "name": "GM12878 CTCF ",
+                    "url": "https://www.encodeproject.org/files/ENCFF000ARJ/@@download/ENCFF000ARJ.bigWig",
+                    "format": "bigwig",
+                    "type": "wig",
+                    "color": "black",
+                    "height": 50,
+                },
+                {
+                    url: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/bedpe/GSM1872886_GM12878_CTCF_PET.bedpe.txt",
+                    type: "interact",
+                    format: "bedpe",
+                    name: "bedpe - nested",
+                    arcType: "nested",
+                    arcOrientation: false,
+                    color: "blue",
+                    showBlocks: true,
+                    visibilityWindow: 10000000,
+                    height: 100
+                }
+            ]
+        }
+
+    igv.createBrowser(document.getElementById("igvDiv"), options)
+
+    // UCSC interact format examples
+    const options2 =
+        {
+            genome: "hg19",
+            locus: "chr3:63,712,533-64,693,448",
+            tracks: [
+                {
+                    url: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/bedpe/interactExample2.txt",
+                    type: "interact",
+                    format: "interact",
+                    name: "UCSC Example 2 - nested arcs, useScore",
+                    arcType: "nested",
+                    useScore: true,
+                    showBlocks: true,
+                    height: 75
+                },
+                {
+                    url: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/bedpe/interactExample2.txt",
+                    type: "interaction",
+                    format: "interact",
+                    name: "UCSC Example 2 - proportional arcs",
+                    arcType: "proportional",
+                    showBlocks: true,
+                    height: 75
+                },
+                {
+                    url: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/bedpe/interactExample3.inter.bb",
+                    type: "interact",
+                    format: "bb",
+                    name: "UCSC Example 3 - bigInteract",
+                    arcType: "nested",
+                    useScore: true,
+                    showBlocks: true,
+                    height: 100
+                }
+            ]
+        }
+
+    igv.createBrowser(document.getElementById("igvDiv2"), options2)
+
+
+</script>
+
+</body>
+
+</html>

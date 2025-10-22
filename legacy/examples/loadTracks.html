@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="Jim Robinson" name="author">
+    <link href="img/favicon.ico" rel="shortcut icon">
+    <title>igv.js</title>
+
+    <!-- Bootstrap 5.3 - CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+    <a class="navbar-brand" href="#">API Example</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse"
+            aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarCollapse">
+        <ul class="navbar-nav me-auto mb-2 mb-md-0">
+            <li class="nav-item dropdown">
+                <a id="igv-example-api-dropdown" href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"
+                   aria-expanded="false">Tracks</a>
+                <ul id="track-menu" class="dropdown-menu" style="width:350px">
+                    <!-- Menu items will be appended here -->
+                </ul>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<main role="main" class="container-fluid">
+    <div style="padding-top: 64px">
+        This example illustrates use of the igv.js API to dynamically add tracks from a dropdown
+        menu. Selecting 'GBM Copy # (TCGA Broad GDAC)' in the menu above results in the following call.
+        <p>
+        <pre>
+                browser.loadTrack({
+                    url: 'https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz',
+                    name: 'GBM Copy # (TCGA Broad GDAC)'})
+                </pre>
+        </p>
+        See the <a href="https://igv.org/doc/igvjs">developer documentation for more details.</a>
+    </div>
+
+    <div id='igvDiv' style="padding-top: 64px"></div>
+</main>
+
+<!-- Bootstrap 5.3 - JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+
+<script type="module">
+    import igv from "../dist/igv.esm.min.js"
+
+    const options = {
+        locus: "chr1:155,160,475-155,184,282",
+        genome: "hg19"
+    }
+
+    const igvDiv = document.getElementById('igvDiv')
+    const browser = await igv.createBrowser(igvDiv, options)
+
+    // Add the menu items
+    const tracks = [
+        {
+            url: 'https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz',
+            name: 'GBM Copy # (TCGA Broad GDAC)'
+        },
+        {
+            type: 'annotation',
+            format: 'bed',
+            url: 'https://data.broadinstitute.org/igvdata/annotations/hg19/dbSnp/snp137.hg19.bed.gz',
+            indexURL: 'https://data.broadinstitute.org/igvdata/annotations/hg19/dbSnp/snp137.hg19.bed.gz.tbi',
+            visibilityWindow: 200000,
+            name: 'dbSNP 137'
+        },
+        {
+            type: 'wig',
+            format: 'bigwig',
+            url: 'https://s3.amazonaws.com/igv.broadinstitute.org/data/hg19/encode/wgEncodeBroadHistoneGm12878H3k4me3StdSig.bigWig',
+            name: 'Gm12878H3k4me3'
+        },
+        {
+            type: 'alignment',
+            format: 'bam',
+            url: 'https://1000genomes.s3.amazonaws.com/phase3/data/HG02450/alignment/HG02450.mapped.ILLUMINA.bwa.ACB.low_coverage.20120522.bam',
+            indexURL: 'https://1000genomes.s3.amazonaws.com/phase3/data/HG02450/alignment/HG02450.mapped.ILLUMINA.bwa.ACB.low_coverage.20120522.bam.bai',
+            name: 'HG02450'
+        }
+    ]
+
+    const menu = document.getElementById("track-menu")
+    for (let config of tracks) {
+        const a = document.createElement("a")
+        a.setAttribute("href", "#")
+        a.classList.add("dropdown-item")
+        a.addEventListener('click', () => browser.loadTrack(config))
+        a.innerText = config.name
+        menu.appendChild(a)
+    }
+</script>
+
+</body>
+</html>

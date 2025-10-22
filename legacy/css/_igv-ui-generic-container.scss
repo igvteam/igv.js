@@ -1,0 +1,47 @@
+@use "variables" as *;
+
+.igv-ui-generic-container {
+
+  position: fixed;
+  cursor: pointer;
+  background-color: white;
+  z-index: 2048;
+  box-sizing: content-box;
+  width:300px;
+  height:200px;
+
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: center;
+
+  // header bar
+  >div:nth-child(1) {
+
+    cursor: move;
+
+    display: flex;
+    flex-flow: row;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+    align-items: center;
+
+    height: 24px;
+    width: 100%;
+
+    background-color: #dddddd;
+
+    >div {
+      display: block;
+      color: #5f5f5f;
+      cursor: pointer;
+      width: 14px;
+      height: 14px;
+      margin-right: 8px;
+      margin-bottom: 4px;
+    }
+
+  }
+
+}

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>twobit</title>
+</head>
+
+<body>
+
+Minimal example of a minimal reference genome with a 2bit file.
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js"
+
+    const config =
+        {
+            reference: {
+                "id": "hg38",
+                "name": "Human (hg38)",
+                "twoBitURL": "https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/hg38.2bit",
+            }
+        }
+
+    igv.createBrowser(document.getElementById('igvDiv'), config)
+
+
+</script>
+
+</body>
+
+</html>

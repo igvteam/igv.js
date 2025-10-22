@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Whole Lota WIGs</title>
+    <style>
+        #igv-container {
+            padding-top: 10px;
+            margin: 0 auto;
+            width: 100%;
+            height: 600px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="igv-container"></div>
+
+<script type="module">
+
+
+    import igv from "../../js/index.js"
+
+    document.addEventListener("DOMContentLoaded", () => {
+
+        const config = {
+            "genome": "hg19",
+            "locus": "chr10:1-120,250,001",
+            "tracks": [
+                {
+                    "name": "Homo sapiens HepG2 PRPF4 ",
+                    "url": "https://www.encodeproject.org/files/ENCFF059CKF/@@download/ENCFF059CKF.bigWig",
+                    "metadata": {
+                        "Biosample": "Homo sapiens HepG2",
+                        "AssayType": "ChIP-seq",
+                        "Target": "PRPF4 ",
+                        "BioRep": "1,2",
+                        "TechRep": "1_1,2_1",
+                        "OutputType": "fold change over control",
+                        "Format": "bigWig",
+                        "Lab": "Xiang-Dong Fu, UCSD",
+                        "Accession": "ENCFF059CKF",
+                        "Experiment": "ENCSR243LNQ"
+                    },
+                    "order": 0,
+                    "format": "bigwig",
+                    "type": "wig",
+                    "height": 128,
+                    "windowFunction": "mean",
+                    "color": "rgb(255, 41, 135)"
+                },
+                {
+                    "name": "Homo sapiens GM13977 CTCF ",
+                    "url": "https://www.encodeproject.org/files/ENCFF000RQI/@@download/ENCFF000RQI.bigWig",
+                    "metadata": {
+                        "Biosample": "Homo sapiens GM13977",
+                        "AssayType": "ChIP-seq",
+                        "Target": "CTCF ",
+                        "BioRep": "1",
+                        "TechRep": "1_1",
+                        "OutputType": "base overlap signal",
+                        "Format": "bigWig",
+                        "Lab": "Vishwanath Iyer, UTA",
+                        "Accession": "ENCFF000RQI",
+                        "Experiment": "ENCSR000DLB"
+                    },
+                    "order": 1,
+                    "format": "bigwig",
+                    "type": "wig",
+                    "height": 128,
+                    "windowFunction": "mean",
+                    "color": "rgb(5, 248, 2)"
+                },
+                {
+                    "name": "Homo sapiens GM12878 BCLAF1 ",
+                    "url": "https://www.encodeproject.org/files/ENCFF036IRJ/@@download/ENCFF036IRJ.bigWig",
+                    "metadata": {
+                        "Biosample": "Homo sapiens GM12878",
+                        "AssayType": "ChIP-seq",
+                        "Target": "BCLAF1 ",
+                        "BioRep": "2",
+                        "TechRep": "2_1",
+                        "OutputType": "fold change over control",
+                        "Format": "bigWig",
+                        "Lab": "Richard Myers, HAIB",
+                        "Accession": "ENCFF036IRJ",
+                        "Experiment": "ENCSR000BJZ"
+                    },
+                    "order": 2,
+                    "format": "bigwig",
+                    "type": "wig",
+                    "height": 128,
+                    "windowFunction": "mean",
+                    "color": "rgb(0, 46, 255)"
+                },
+                {
+                    "name": "Homo sapiens K562 ZNF274 ",
+                    "url": "https://www.encodeproject.org/files/ENCFF555CQE/@@download/ENCFF555CQE.bigWig",
+                    "metadata": {
+                        "Biosample": "Homo sapiens K562",
+                        "AssayType": "ChIP-seq",
+                        "Target": "ZNF274 ",
+                        "BioRep": "2",
+                        "TechRep": "2_1",
+                        "OutputType": "fold change over control",
+                        "Format": "bigWig",
+                        "Lab": "Peggy Farnham, USC",
+                        "Accession": "ENCFF555CQE",
+                        "Experiment": "ENCSR000EWE"
+                    },
+                    "order": 3,
+                    "format": "bigwig",
+                    "type": "wig",
+                    "height": 128,
+                    "windowFunction": "mean",
+                    "color": "rgb(106, 207, 255)"
+                },
+                {
+                    "name": "Homo sapiens 22Rv1 ZFX ",
+                    "url": "https://www.encodeproject.org/files/ENCFF420XMW/@@download/ENCFF420XMW.bigWig",
+                    "metadata": {
+                        "Biosample": "Homo sapiens 22Rv1",
+                        "AssayType": "ChIP-seq",
+                        "Target": "ZFX ",
+                        "BioRep": "2",
+                        "TechRep": "2_1",
+                        "OutputType": "signal p-value",
+                        "Format": "bigWig",
+                        "Lab": "Michael Snyder, Stanford",
+                        "Accession": "ENCFF420XMW",
+                        "Experiment": "ENCSR246MLJ"
+                    },
+                    "order": 4,
+                    "format": "bigwig",
+                    "type": "wig",
+                    "height": 128,
+                    "windowFunction": "mean",
+                    "color": "rgb(137, 30, 136)"
+                },
+                {
+                    "name": "Homo sapiens A549 CHD4 ",
+                    "url": "https://www.encodeproject.org/files/ENCFF725AXM/@@download/ENCFF725AXM.bigWig",
+                    "metadata": {
+                        "Biosample": "Homo sapiens A549",
+                        "AssayType": "ChIP-seq",
+                        "Target": "CHD4 ",
+                        "BioRep": "1",
+                        "TechRep": "1_1",
+                        "OutputType": "fold change over control",
+                        "Format": "bigWig",
+                        "Lab": "Bradley Bernstein, Broad",
+                        "Accession": "ENCFF725AXM",
+                        "Experiment": "ENCSR550SCU"
+                    },
+                    "order": 5,
+                    "format": "bigwig",
+                    "type": "wig",
+                    "height": 128,
+                    "windowFunction": "mean",
+                    "color": "rgb(255, 114, 110)"
+                },
+                {
+                    "name": "Homo sapiens aorta tissue male adult (34 years) H3K27ac ",
+                    "url": "https://www.encodeproject.org/files/ENCFF162CIW/@@download/ENCFF162CIW.bigWig",
+                    "color": "rgb(200,0,0)",
+                    "metadata": {
+                        "Biosample": "Homo sapiens aorta tissue male adult (34 years)",
+                        "AssayType": "ChIP-seq",
+                        "Target": "H3K27ac ",
+                        "BioRep": "2",
+                        "TechRep": "2_1",
+                        "OutputType": "signal p-value",
+                        "Format": "bigWig",
+                        "Lab": "Bing Ren, UCSD",
+                        "Accession": "ENCFF162CIW",
+                        "Experiment": "ENCSR519CFV"
+                    },
+                    "order": 6,
+                    "format": "bigwig",
+                    "type": "wig",
+                    "height": 128,
+                    "windowFunction": "mean"
+                },
+                {
+                    "name": "Homo sapiens with nonobstructive coronary artery disease; liver tissue male adult (32 years) H3K9me3 ",
+                    "url": "https://www.encodeproject.org/files/ENCFF566FON/@@download/ENCFF566FON.bigWig",
+                    "color": "rgb(100,0,0)",
+                    "metadata": {
+                        "Biosample": "Homo sapiens with nonobstructive coronary artery disease; liver tissue male adult (32 years)",
+                        "AssayType": "ChIP-seq",
+                        "Target": "H3K9me3 ",
+                        "BioRep": "1",
+                        "TechRep": "1_1",
+                        "OutputType": "fold change over control",
+                        "Format": "bigWig",
+                        "Lab": "Bing Ren, UCSD",
+                        "Accession": "ENCFF566FON",
+                        "Experiment": "ENCSR563YGF"
+                    },
+                    "order": 8,
+                    "format": "bigwig",
+                    "type": "wig",
+                    "height": 128,
+                    "windowFunction": "mean"
+                }
+            ]
+        }
+
+        igv.createBrowser(document.getElementById('igv-container'), config)
+            .then(browser => {
+                console.log("IGV browser initialized")
+            })
+            .catch(function (error) {
+                console.error("Error initializing IGV browser:", error)
+            })
+    })
+</script>
+
+</body>
+</html>

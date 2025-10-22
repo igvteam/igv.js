@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="https://igv.org/web/img/favicon.ico">
+    <title>IGV - Custom Track Click - Popover</title>
+
+    <!-- Bootstrap 5.3 - CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+
+    <!-- Examples CSS -->
+    <link rel="stylesheet" href="css/custom-track-click.css">
+
+    <!-- Bootstrap 5.3 - JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+
+    <style>
+        .styled-table {
+            font-size: 0.9em;
+            font-family: sans-serif;
+        }
+        .styled-table th,
+        .styled-table td {
+            padding: 12px 15px;
+        }
+        .styled-table tbody tr {
+            border-bottom: 1px solid #dddddd;
+        }
+
+        .styled-table tbody tr:nth-of-type(even) {
+            background-color: #f3f3f3;
+        }
+
+        .styled-table tbody tr:last-of-type {
+            border-bottom: 2px solid #009879;
+        }
+    </style>
+
+</head>
+
+<body>
+
+<main role="main" class="container">
+
+    <div class="igv-custom-track-click-container">
+        <h2>
+            IGV.js <code>trackclick</code> Event Example
+        </h2>
+        <p class="lead">
+            In this example we show how to use the <code>trackclick</code> event to customize the contents of the gene
+            track pop-over. To do this, we subscribe to the <code>trackclick</code> event and return custom pop-over
+            HTML to
+            override the default appearance.
+        </p>
+
+        <h3>Try it out:</h3>
+        <ol>
+            <li>Click on any feature on the gene track.</li>
+            <li>Notice that the pop-over text has been customized to include a link.</li>
+        </ol>
+
+    </div>
+
+    <div class="row">
+        <div id="igv-custom-track-popover" class="col-sm-12"></div>
+    </div>
+
+</main>
+
+<script type="module">
+    import igv from "../../dist/igv.esm.min.js"
+
+    const options =
+        {
+            showNavigation: true,
+            locus: "chr1:155,160,475-155,184,282",
+            genome: "hg19",
+        };
+
+    igv.createBrowser(document.getElementById('igv-custom-track-popover'), options)
+        .then(function (browser) {
+            browser.on('trackclick', (track, popoverData) => {
+
+                let markup = '<table class="styled-table">'
+
+                // Don't show a pop-over when there's no data.
+                if (!popoverData || !popoverData.length) {
+                    return false;
+                }
+
+                for (const nameValue of popoverData) {
+                    if (nameValue.name) {
+
+                        var value = nameValue.name.toLowerCase() === 'name'
+                            ? '<a href="https://uswest.ensembl.org/Multi/Search/Results?q=' + nameValue.value + '">' + nameValue.value + '</a>'
+                            : nameValue.value;
+
+                        markup += "<tr><td>" + nameValue.name + "</td><td>" + value + "</td></tr>";
+                    }
+                    else {
+                        // not a name/value pair
+                        markup += "<tr><td>" + nameValue.toString() + "</td></tr>";
+                    }
+
+                }
+
+                markup += "</table>";
+
+                // By returning a string from the trackclick handler we're asking IGV to use our custom HTML in its pop-over.
+                return markup;
+            });
+        });
+
+
+</script>
+
+</body>
+
+</html>

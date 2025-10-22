@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>IGV</title>
+
+</head>
+
+<body>
+
+<h1>MAF file example</h1>
+
+Example mutation track from a Mutation Annotation Format (MAF) file.
+See <a href="https://docs.gdc.cancer.gov/Data/File_Formats/MAF_Format/" target="_blank">https://docs.gdc.cancer.gov/Data/File_Formats/MAF_Format/</a>
+for details.
+
+<p>This is a large file and can some time to load.</p>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../dist/igv.esm.js"
+
+    (async function () {
+
+        const options =
+            {
+                showSampleNames: true,
+                sampleNameViewportWidth: 200,
+                genome: 'hg38',
+                tracks: [
+                    {
+                        format: 'maf',
+                        type: 'mut',
+                        url: 'https://github.com/igvteam/igv-data/raw/refs/heads/main/data/test/maf/TCGA.BRCA.mutect.somatic.maf.gz',
+                        height: 700,
+                        displayMode: "EXPANDED",
+                    }
+                ]
+            }
+
+        const igvDiv = document.getElementById("igvDiv")
+
+        igv.createBrowser(igvDiv, options)
+            .then(function (browser) {
+                console.log("Created IGV browser")
+            })
+    })()
+
+</script>
+
+</body>
+
+</html>

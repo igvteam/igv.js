@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="utf-8">
+<head>
+    <meta content="Jim Robinson" name="author">
+    <link href=img/favicon.ico rel="shortcut icon">
+    <title>Multi Locus Example</title>
+</head>
+
+<body>
+
+<h1>Multiple Genome Regions</h1>
+
+<div id="igv-div" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+</body>
+
+<script type="module">
+
+    import igv from '../dist/igv.esm.js'
+
+    const options =
+        {
+            genome: "hg19",
+            locus: ['myc', 'chr1:155,157,300-155,163,706', 'myc'],
+            tracks: [
+                {
+                    type: 'alignment',
+                    format: 'bam',
+                    url: 'https://1000genomes.s3.amazonaws.com/phase3/data/HG01879/exome_alignment/HG01879.mapped.ILLUMINA.bwa.ACB.exome.20120522.bam',
+                    indexURL: 'https://1000genomes.s3.amazonaws.com/phase3/data/HG01879/exome_alignment/HG01879.mapped.ILLUMINA.bwa.ACB.exome.20120522.bam.bai',
+                    name: 'HG01879'
+                }
+
+            ]
+        }
+
+    const browser = await igv.createBrowser(document.getElementById('igv-div'), options)
+
+
+</script>
+
+</html>

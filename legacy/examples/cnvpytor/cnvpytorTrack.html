@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href=https://igv.org/web/img/favicon.ico rel="shortcut icon">
+    <title>igv</title>
+
+</head>
+
+<body>
+
+<h2>CNVpytor Track</h2>
+
+<h4>
+    A track for viewing output from <a target="_blank" href="https://github.com/abyzovlab/CNVpytor">CNVpytor</a>,
+    a tool for copy number analysis from read depth and B-allele frequency (BAF) of inherited variants.
+    See <a target="_blank" href="https://github.com/igvteam/igv.js/wiki/cnvpytor">wiki</a> for track details.
+
+
+    <br/><br/><b>Note: this track can take several minutes to load.</b>
+</h4>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../dist/igv.esm.js"
+
+    const options =
+        {
+            genome: "hg19",
+            locus: "chr16",
+            tracks: [
+                {
+                    type: "cnvpytor",
+                    format: "pytor",
+                    name: "HepG2 Pytor",
+                    url: "https://storage.googleapis.com/cnvpytor_data/HepG2_WGS.pytor",
+                }
+            ]
+        }
+
+    igv.createBrowser(document.getElementById('igvDiv'), options)
+
+</script>
+
+</body>
+
+</html>

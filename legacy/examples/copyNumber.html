@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>igv.js</title>
+</head>
+
+<body>
+
+<h1>Segmented Copy Number</h1>
+
+<div style="padding-top: 10px;padding-bottom: 10px;">
+
+    Segmented copy number ("seg" format) with
+    <ul>
+        <li>Explicit sample list - TCGA-06-0168-01A-02D-0236-01, TCGA-02-0115-01A-01D-0193-01,
+            TCGA-02-2485-01A-01D-0784-01, TCGA-06-0151-01A-01D-0236-01
+        </li>
+        <li>No index</li>
+        <li>Index with no visibiliy window (loads by whole chromosome)</li>
+        <li>Index with visibility window of 100 MB</li>
+    </ul>
+
+</div>
+
+
+<div id="igv-div" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+<script type="module">
+
+    import igv from "../dist/igv.esm.min.js"
+
+    const version = igv.version()
+    console.log("Using IGV version: " + version)
+
+    const igvDiv = document.getElementById("igv-div")
+    const options =
+        {
+            genome: "hg19",
+            showSampleNames: true,
+            tracks: [
+                {
+                    name: "Segmented Copy Number",
+                    type: "seg",
+                    format: "seg",
+                    url: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/gbm/GBM-TP.seg.gz",
+                },                {
+                    name: "Segmented Copy Number - Explicit Samples",
+                    type: "seg",
+                    format: "seg",
+                    samples: [
+                        "TCGA-06-0168-01A-02D-0236-01",
+                        "TCGA-02-0115-01A-01D-0193-01",
+                        "TCGA-02-2485-01A-01D-0784-01",
+                        "TCGA-06-0151-01A-01D-0236-01"],
+                    url: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/gbm/GBM-TP.seg.gz",
+                    height: 100
+                },
+
+                {
+                    name: "Segmented Copy Number - Indexed",
+                    type: "seg",
+                    format: "seg",
+                    url: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/gbm/GBM-TP.seg.gz",
+                    indexURL: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/gbm/GBM-TP.seg.gz.tbi"
+                },
+                {
+                    name: "Segmented Copy Number - Indexed with visibility window",
+                    type: "seg",
+                    format: "seg",
+                    url: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/gbm/GBM-TP.seg.gz",
+                    indexURL: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/gbm/GBM-TP.seg.gz.tbi",
+                    visibilityWindow: "100000000"
+                },
+            ]
+        }
+
+
+    const browser = await igv.createBrowser(igvDiv, options)
+
+
+</script>
+
+</body>
+
+</html>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Splice Junctions</title>
+</head>
+
+<body>
+
+<h1>Splice junctions</h1>
+
+<div id="igv-div" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../dist/igv.esm.min.js"
+
+    const options = {
+        locus: 'chr15:92835700-93031800',
+        genome: 'hg38',
+        tracks:  [
+            {
+                type: 'junction',
+                name: 'Junctions',
+                format: 'bed',
+                url: `https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/splice_junctions/splice_junction_track_test_cases_sampleA.chr15-92835700-93031800.SJ.out.bed`,
+                displayMode: 'COLLAPSED',
+                minUniquelyMappedReads: 1,
+                minTotalReads: 1,
+                maxFractionMultiMappedReads: 1,
+                minSplicedAlignmentOverhang: 0,
+                thicknessBasedOn: 'numUniqueReads', //options: numUniqueReads (default), numReads, isAnnotatedJunction
+                bounceHeightBasedOn: 'random', //options: random (default), distance, thickness
+                colorBy: 'isAnnotatedJunction', //options: numUniqueReads (default), numReads, isAnnotatedJunction, strand, motif
+                labelUniqueReadCount: true,
+                labelMultiMappedReadCount: true,
+                labelTotalReadCount: false,
+                labelMotif: false,
+                labelIsAnnotatedJunction: " [A]",
+                hideAnnotatedJunctions: false,
+                hideUnannotatedJunctions: false,
+                hideMotifs: ['GT/AT', 'non-canonical'], //options: 'GT/AG', 'CT/AC', 'GC/AG', 'CT/GC', 'AT/AC', 'GT/AT', 'non-canonical'
+            },
+            {
+                type: 'wig',
+                name: 'Coverage',
+                format: "bigwig",
+                url: 'https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/splice_junctions//splice_junction_track_test_cases_sampleA.chr15-92835700-93031800.bigWig',
+            },
+            {
+                type: 'merged',
+                name: 'Junctions + Coverage',
+                height: 150,
+                tracks: [
+                    {
+                        type: 'junction',
+                        name: 'Junctions',
+                        format: 'bed',
+                        url: `https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/splice_junctions/splice_junction_track_test_cases_sampleA.chr15-92835700-93031800.SJ.out.bed`,
+                        displayMode: 'COLLAPSED',
+                        minUniquelyMappedReads: 1,
+                        minTotalReads: 1,
+                        maxFractionMultiMappedReads: 1,
+                        minSplicedAlignmentOverhang: 0,
+                        thicknessBasedOn: 'numUniqueReads', //options: numUniqueReads (default), numReads, isAnnotatedJunction
+                        bounceHeightBasedOn: 'random', //options: random (default), distance, thickness
+                        colorBy: 'isAnnotatedJunction', //options: numUniqueReads (default), numReads, isAnnotatedJunction, strand, motif
+                        labelUniqueReadCount: true,
+                        labelMultiMappedReadCount: true,
+                        labelTotalReadCount: false,
+                        labelMotif: false,
+                        labelIsAnnotatedJunction: " [A]",
+                        hideAnnotatedJunctions: false,
+                        hideUnannotatedJunctions: false,
+                        hideMotifs: ['GT/AT', 'non-canonical'], //options: 'GT/AG', 'CT/AC', 'GC/AG', 'CT/GC', 'AT/AC', 'GT/AT', 'non-canonical'
+                        height: 150
+                    },
+                    {
+                        type: 'wig',
+                        name: 'Coverage',
+                        format: "bigwig",
+                        url: 'https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/splice_junctions//splice_junction_track_test_cases_sampleA.chr15-92835700-93031800.bigWig',
+                        height: 150
+                    }
+                ]
+            }
+        ]
+    };
+
+    var igvDiv = document.getElementById("igv-div");
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser");
+        })
+
+</script>
+
+</body>
+
+</html>

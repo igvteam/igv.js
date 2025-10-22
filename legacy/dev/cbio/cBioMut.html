@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href=https://igv.org/web/img/favicon.ico rel="shortcut icon">
+    <title>IGV - Dev</title>
+
+    <style>
+        #trackList {
+
+            border-color: rgb(127, 127, 127);
+            border-style: solid;
+            border-width: thin;
+
+            width: 480px;
+            height: 256px;
+            overflow-y: auto;
+        }
+
+        div#trackList > div, div#myDiv > h3 {
+
+            font-family: 'PT Sans', sans-serif;
+            font-size: small;
+            font-weight: 400;
+
+            color: #444;
+            margin-left: 16px;
+            margin-top: 4px;
+            margin-bottom: 4px;
+
+            padding-left: 32px;
+        }
+
+        div#myDiv > h3 {
+            font-size: large;
+        }
+
+        div#trackList > div:hover,
+        div#trackList > div:focus,
+        div#trackList > div:active {
+            cursor: pointer;
+            color: white;
+            background-color: rgba(49, 106, 246, 1);
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js"
+
+    //https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta.fai
+    igv.createBrowser(igvDiv, {genome: "hg19", showSampleNames: true})
+
+        .then(async function (browser) {
+
+            const sampleIds = ["TCGA-04-1331-01", "TCGA-04-1332-01", "TCGA-04-1336-01", "TCGA-04-1337-01", "TCGA-04-1338-01", "TCGA-04-1342-01"]
+
+            const features = await fetchMutationData(sampleIds)
+
+            browser.loadTrack({
+                name: "cBIO mut example",
+                type: "mut",
+                features: features,
+                height: 50,
+                // color: function(f) {
+                //     const type = f.mutationType
+                //     if("Missense_Mutation" === type) {
+                //         return "red"
+                //     } else {
+                //         return "blue"
+                //     }
+                // }
+
+            })
+
+        })
+
+    async function fetchMutationData(sampleIds) {
+
+        const url = "https://www.cbioportal.org/api/molecular-profiles/ov_tcga_pub_mutations/mutations/fetch?projection=DETAILED"
+        const body = JSON.stringify({"sampleIds": sampleIds})
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: body
+        })
+        const json = await response.json()
+
+        // Map to igv.js required attributes.
+        for (let j of json) {
+            j.start = j["startPosition"] - 1
+            j.end = j["endPosition"]
+            j.sampleKey = j["uniqueSampleKey"]
+            j.sample = j["sampleId"]
+            j.value = j["mutationType"]  // This is somewhat arbitrary, "value" is used to set color
+        }
+
+        return json
+    }
+
+
+</script>
+
+</body>
+
+</html>

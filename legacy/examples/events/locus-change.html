@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="shortcut icon" href="//igv.org/web/img/favicon.ico">
+    <title>IGV Examples - Locus Change</title>
+
+    <!-- Bootstrap 5.3 - CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+
+    <!-- Examples CSS -->
+    <link rel="stylesheet" href="css/custom-track-click.css">
+
+    <!-- Bootstrap 5.3 - JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+
+</head>
+
+<body>
+
+<main>
+
+    <div class="container-fluid">
+
+        <div class="row">
+            <div class="col-sm-12">
+                <h2>IGV.js <code>locuschange</code> Event Example</h2>
+                <p> In this example we want to update the page URL whenever the IGV viewer locus changes.
+                    To do this, we subscribe to the <code>locuschange</code> event.
+                </p>
+                <h3>Try it out:</h3>
+                <ol>
+                    <li>Zoom or pan the canvas in the IGV viewer.</li>
+                    <li>Notice that the page URL updates to match the new locus.</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-12" id="igvDiv"></div>
+        </div>
+    </div>
+
+</main>
+
+<script type="module">
+
+    import igv from "../../dist/igv.esm.min.js"
+
+    const config = {
+        genome: 'hg19',
+        queryParametersSupported: true
+    }
+
+    // If not specified in the URL, add an initial locus
+    if(window.location.href.indexOf("locus=") < 0) {
+        config.locus = "chr1:155,160,475-155,184,282"
+    }
+
+    const browser = await igv.createBrowser(document.getElementById('igvDiv'), config)
+
+    browser.on('locuschange', referenceFrameList => {
+        let loc = referenceFrameList.map(rf => rf.getLocusString()).join('%20')
+
+        let updatedURL
+        const idx = window.location.href.indexOf("locus=")
+        if(idx > 0) {
+            updatedURL = window.location.href.substring(0, idx+6) + loc
+        } else {
+            const hasParameters = window.location.href.indexOf("?") > 0
+            updatedURL = `${window.location.href}${hasParameters ? "&" : "?"}locus=${loc}`
+        }
+
+        window.history.replaceState({}, "IGV Examples - Locus Change", updatedURL)
+    })
+
+
+</script>
+
+</body>
+
+</html>

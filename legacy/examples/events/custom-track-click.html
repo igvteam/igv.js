@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="https://igv.org/web/img/favicon.ico">
+    <title>IGV - Custom Track Click</title>
+
+    <!-- Bootstrap 5.3 - CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+
+    <!-- Examples CSS -->
+    <link rel="stylesheet" href="css/custom-track-click.css">
+
+    <!-- Bootstrap 5.3 - JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+
+</head>
+
+<body>
+
+<main role="main" class="container">
+
+    <div class="igv-custom-track-click-container">
+        <h2>IGV.js <code>trackclick</code> Event Example 2</h2>
+        <p class="lead">In this example we show how to use the <code>trackclick</code> event to disable the default
+            pop-over. Instead
+            we're going to use it as a hook to implement custom click behavior.</p>
+
+        <h3>Try it out:</h3>
+
+        <ol>
+            <li>Click on any features on the gene track.</li>
+            <li>Notice the genes you've clicked get added to the list on the right.</li>
+        </ol>
+
+    </div>
+
+    <div class="row">
+        <div id="igv-custom-track-click" class="col-sm-9"></div>
+        <div id="igv-custom-track-click-selected-genes" class="col-sm-3">
+            <h4>Selected Genes</h4>
+            <ul id="geneList">
+
+            </ul>
+        </div>
+    </div>
+
+</main>
+
+<script type="module">
+
+    import igv from "../../dist/igv.esm.min.js"
+
+    const options = {
+        showNavigation: true,
+        locus: "chr1:155,160,475-155,184,282",
+        genome: "hg19"
+    }
+
+    igv.createBrowser(document.getElementById('igv-custom-track-click'), options)
+        .then(browser => {
+            const genesInList = {}
+
+            browser.on('trackclick', (track, popoverData) => {
+                let symbol = null
+                for (const nameValue of popoverData) {
+                    if (nameValue.name && nameValue.name.toLowerCase() === 'name') {
+                        symbol = nameValue.value
+                    }
+                }
+
+                if (symbol && !genesInList[symbol]) {
+                    genesInList[symbol] = true
+                    const el = document.getElementById('geneList')
+                    el.innerHTML += `<li><a href="https://uswest.ensembl.org/Multi/Search/Results?q=${symbol}">${symbol}</a></li>`
+                }
+
+                // Prevent default pop-over behavior
+                return false
+            })
+        })
+</script>
+
+</body>
+
+</html>

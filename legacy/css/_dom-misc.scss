@@ -1,0 +1,361 @@
+@use "variables" as *;
+@use "apple_crayon_color" as *;
+
+$igv-multi-locus-ruler-label-height: 12px;
+
+.igv-zoom-in-notice-container {
+
+  //z-index: 1024;
+  z-index: 256;
+
+  position: absolute;
+  top: 8px;
+  left: 50%;
+
+  transform: translate(-50%, 0%);
+
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
+  background-color: white;
+
+  >div {
+
+    padding-left: 4px;
+    padding-right: 4px;
+
+    padding-top: 2px;
+    padding-bottom: 2px;
+
+    width: 100%;
+    height: 100%;
+
+    font-family: $igv-default-font-face;
+    font-size: 14px;
+    font-weight: 400;
+    color: #3f3f3f;
+  }
+}
+
+.igv-zoom-in-notice {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+
+  div {
+    position: relative;
+    left: -50%;
+    font-family: $igv-default-font-face;
+    font-size: medium;
+    font-weight: 400;
+    color: #3f3f3f;
+    background-color: rgba(255, 255, 255, 0.51);
+    z-index: 64;
+  }
+
+}
+
+.igv-container-spinner {
+
+  position: absolute;
+  top: 90%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1024;
+
+  width: 24px;
+  height: 24px;
+
+  pointer-events:none;
+  color: $igv-navbar-toggle-dark-dark;
+}
+
+.igv-multi-locus-close-button {
+  position: absolute;
+  top: 2px;
+  right: 0;
+
+  padding-left: 2px;
+  padding-right: 2px;
+
+  width: $igv-multi-locus-ruler-label-height;
+  height: $igv-multi-locus-ruler-label-height;
+
+  color: #666666;
+  background-color: white;
+
+  z-index: 1000;
+
+  > svg {
+    vertical-align: top;
+  }
+
+}
+
+.igv-multi-locus-close-button:hover {
+  cursor: pointer;
+  color: #434343;
+}
+
+.igv-multi-locus-ruler-label {
+
+  z-index:64;
+
+  position: absolute;
+  top: 2px;
+  left: 0;
+
+  width: 100%;
+  height: $igv-multi-locus-ruler-label-height;
+
+  display: flex;
+  flex-flow: row;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
+
+  >div {
+    font-family: $igv-default-font-face;
+    font-size: $igv-multi-locus-ruler-label-height;
+    color: rgb(16, 16, 16);
+    background-color: white;
+  }
+
+  >div {
+    cursor: pointer;
+  }
+}
+
+// Use in conjunction with RulerViewport.presentLocusLabel_Dot_Square()
+.igv-multi-locus-ruler-label-square-dot {
+
+  z-index:64;
+
+  position: absolute;
+
+  left:50%;
+  top:5%;
+  transform: translate(-50%, 0%);
+
+  background-color: white;
+
+  display: flex;
+  flex-flow: row;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: center;
+
+  >div:first-child {
+    width: 14px;
+    height: 14px;
+  }
+
+  >div:last-child {
+    margin-left: 16px;
+    font-family: $igv-default-font-face;
+    font-size: 14px;
+    font-weight: 400;
+    color: rgb(16, 16, 16);
+  }
+
+
+}
+
+.igv-ruler-sweeper {
+
+  display: none;
+
+  pointer-events: none;
+
+  position: absolute;
+  top: 26px;
+  bottom: 0;
+  left: 0;
+
+  width: 0;
+
+  z-index:99999;
+
+  background-color: $igv-ruler-sweeper-color;
+}
+
+.igv-ruler-tooltip {
+  pointer-events: none;
+  z-index: 128;
+
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  width: 1px;
+  height: 32px;
+
+  background-color: transparent;
+
+  display: flex;
+  flex-flow: row;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: center;
+
+  > div {
+    pointer-events: none;
+
+    width: 128px;
+    height: auto;
+
+    padding: 1px;
+
+    color: $igv-dark-grey-color;
+    font-size: 10px;
+    font-family: $igv-default-font-face;
+    font-weight: 400;
+
+    background-color: white;
+
+    border-style: solid;
+    border-width: thin;
+    border-color: $igv-dark-grey-color;
+  }
+
+}
+
+.igv-track-label {
+
+  position: absolute;
+
+  left: 8px;
+  top: 8px;
+
+  width: auto;
+  height:auto;
+  max-width: 50%;
+
+  padding-left: 4px;
+  padding-right: 4px;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  font-family: $igv-default-font-face;
+  font-size: small;
+  font-weight: 400;
+
+  text-align: center;
+
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+
+  border-color: #444;
+  border-radius: 2px;
+  border-style: solid;
+  border-width: thin;
+
+  background-color: white;
+
+  z-index: 128;
+
+  cursor: pointer;
+}
+
+.igv-track-label:hover,
+.igv-track-label:focus,
+.igv-track-label:active  {
+  background-color: $igv_apple_crayon_mercury;
+}
+
+.igv-track-label-popup {
+
+}
+
+.igv-track-label-popup-shim {
+
+  position: absolute;
+
+  right: 8px;
+  top: 8px;
+
+  width: auto;
+  height:auto;
+  max-width: 50%;
+
+  padding-left: 4px;
+  padding-right: 4px;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  font-family: $igv-default-font-face;
+  font-size: small;
+  font-weight: 400;
+
+  text-align: center;
+
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+
+  border-color: #444;
+  border-radius: 2px;
+  border-style: solid;
+  border-width: thin;
+
+  background-color: white;
+
+  z-index: 128;
+
+}
+
+.igv-attribute-group-label {
+
+  position: absolute;
+
+  right: 5px;
+
+  z-index: 128;
+
+  width: auto;
+  height:auto;
+  max-width: 50%;
+
+  padding-left: 4px;
+  padding-right: 4px;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  font-family: $igv-default-font-face;
+  font-size: small;
+  font-weight: 400;
+
+  text-align: center;
+
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+
+  border-color: #444;
+  border-radius: 2px;
+  border-style: solid;
+  border-width: thin;
+
+  background-color: white;
+}
+
+.igv-attribute-group-line {
+
+  position: absolute;
+  left: 0px;
+  width: 100%;
+  height: 1px;
+  background-color: transparent;
+  border-top: 1px dotted #666;
+  pointer-events: none;
+  z-index: 127;
+}

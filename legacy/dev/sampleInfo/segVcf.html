@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <link href=https://igv.org/web/img/favicon.ico rel="shortcut icon">
+    <title>IGV - Dev</title>
+
+</head>
+
+<body>
+<p>
+    Test multiple tracks with multiple sample info files
+</p>
+
+<button id="bookmark">Bookmark session</button>
+<button id="log-session">Log session</button>
+
+<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from '../../js/index.js'
+
+    const config =
+        {
+            "showSampleNames": false,
+            "genome": "hg19",
+            "locus": "all",
+            "tracks": [
+                {
+                    "id": "vcf",
+                    "name": "Phase 3 integrated variant calls",
+                    "format": "vcf",
+                    "url": "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/tutorials/vcf/ALL.apol1.sample.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf",
+                    "order": 5,
+                    "type": "variant",
+                    "color": "rgb(0,0,150)"
+                },
+                {
+                    "id": "bed",
+                    "name": "SNPs",
+                    "format": "bed",
+                    "url": "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/tutorials/vcf/apol1_snp131.bed",
+                    "order": 6,
+                    "type": "annotation",
+                    "height": 70
+                },
+                {
+                    "id": "refseqAll",
+                    "name": "Refseq All",
+                    "url": "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/ncbiRefSeq.txt.gz",
+                    "format": "refgene",
+                    "html": "https://www.ncbi.nlm.nih.gov/refseq/",
+                    "order": 100000,
+                    "type": "annotation",
+                    "height": 70
+                }
+            ],
+            "sampleinfo": [
+                {
+                    "id": "sampleInfo",
+                    "name": "Sample Information",
+                    "format": "sampleinfo",
+                    "url": "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/tutorials/vcf/integrated_call_samples_v3.20130502.ALL.panel",
+                    "_id": "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/tutorials/vcf/integrated_call_samples_v3.20130502.ALL.panel-Sample Information",
+                    "_checked": false
+                }
+            ]
+        }
+
+    const browser = await igv.createBrowser(document.getElementById('myDiv'), config)
+
+    document.getElementById('bookmark').addEventListener('click', () => {
+        const path = window.location.href.slice()
+        const idx = path.indexOf("?")
+        const url = (idx > 0 ? path.substring(0, idx) : path) + "?sessionURL=blob:" + browser.compressedSession()
+        window.location = url
+        //window.history.pushState({}, "IGV", url)
+    })
+
+    document.getElementById("log-session").addEventListener('click', () => console.log(browser.toJSON()))
+
+
+</script>
+
+</body>
+
+</html>
+

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>igv.js</title>
+</head>
+
+<body>
+
+<h1>BAM file with CSI index</h1>
+
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js"
+
+    var options =
+        {
+            genome: "hg19",
+            locus: "chr22:24,376,171-24,376,467",
+            tracks: [
+                {
+                    type: "alignment",
+                    url: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/bam/csi/gstt1_sample.bam",
+                    indexURL: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/bam/csi/gstt1_sample.bam.csi",
+                    name: "CSI BAM",
+                    onclick: (features) => {
+                        for (let f of features) {
+                            console.log(f)
+                        }
+                        return false
+                    }
+                }
+            ]
+        }
+
+    var igvDiv = document.getElementById("igvDiv")
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser")
+        })
+
+
+</script>
+
+</body>
+
+</html>
