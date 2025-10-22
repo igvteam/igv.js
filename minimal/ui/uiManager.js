@@ -21,7 +21,6 @@ export class UIManager {
      */
     createTrackUI(viewModel) {
         const trackDiv = document.createElement('div')
-        trackDiv.className = 'igv-minimal-track'
         trackDiv.style.display = 'block'
         trackDiv.style.borderBottom = '1px solid #ccc'
         trackDiv.style.marginBottom = '2px'
