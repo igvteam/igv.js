@@ -6,7 +6,7 @@
 // A copy of the license for the GMOD trix-js distribution on which this is based may be downloaded
 // from:  https://raw.githubusercontent.com/GMOD/trix-js/ma
 
-import {igvxhr} from "../../node_modules/igv-utils/src/index.js"
+import {igvxhr} from "igv-utils"
 
 
 // this is the number of hex characters to use for the address in ixixx, see
