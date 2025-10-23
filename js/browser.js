@@ -138,15 +138,11 @@ class Browser {
             // Clean up all popovers from all tracks when layout changes
             for (const trackView of this.trackViews) {
                 for (const viewport of trackView.viewports) {
-                    if (viewport.popover) {
-                        viewport.popover.dispose()
-                        viewport.popover = null
-                    }
-                    if (viewport.shiftClickPopovers && viewport.shiftClickPopovers.length > 0) {
-                        for (const po of viewport.shiftClickPopovers) {
+                    if (viewport.popoverList && viewport.popoverList.length > 0) {
+                        for (const po of viewport.popoverList) {
                             po.dispose()
                         }
-                        viewport.shiftClickPopovers = []
+                        viewport.popoverList = []
                     }
                 }
             }
@@ -1143,22 +1139,6 @@ class Browser {
                 return aOrder1 - bOrder1
             }
         })
-
-        // Clean up all popovers before reordering DOM elements
-        // for (const trackView of this.trackViews) {
-        //     for (const viewport of trackView.viewports) {
-        //         if (viewport.popover) {
-        //             viewport.popover.dispose()
-        //             viewport.popover = null
-        //         }
-        //         if (viewport.shiftClickPopovers && viewport.shiftClickPopovers.length > 0) {
-        //             for (const po of viewport.shiftClickPopovers) {
-        //                 po.dispose()
-        //             }
-        //             viewport.shiftClickPopovers = []
-        //         }
-        //     }
-        // }
 
         // discard current track order
         for (let {

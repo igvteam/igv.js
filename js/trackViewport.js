@@ -23,8 +23,7 @@ class TrackViewport extends Viewport {
 
     constructor(trackView, viewportColumn, referenceFrame, width) {
         super(trackView, viewportColumn, referenceFrame, width)
-        this.popover = null
-        this.shiftClickPopovers = []
+        this.popoverList = []
     }
 
     initializationHelper() {
@@ -840,38 +839,24 @@ class TrackViewport extends Viewport {
                                 if (content) {
 
                                     if (false === event.shiftKey) {
-                                        // Dispose this track's existing popover only
-                                        if (this.popover) {
-                                            this.popover.dispose()
-                                        }
-                                        
-                                        // Dispose this track's shift-click popovers
-                                        if (this.shiftClickPopovers.length > 0) {
-                                            for (const gp of this.shiftClickPopovers) {
+                                        // Dispose all existing popovers for this track
+                                        if (this.popoverList.length > 0) {
+                                            for (const gp of this.popoverList) {
                                                 gp.dispose()
                                             }
-                                            this.shiftClickPopovers.length = 0
+                                            this.popoverList.length = 0
                                         }
-                                        
-                                        // Create new popover for this track
-                                        this.popover = new Popover(this.viewportElement.parentElement, true, undefined, () => {
-                                            this.popover.dispose()
-                                            this.popover = null
-                                        })
-                                        
-                                        this.popover.presentContentWithEvent(event, content)
-                                    } else {
-
-                                        let po = new Popover(this.viewportElement.parentElement, true, undefined, () => {
-                                            const index = this.shiftClickPopovers.indexOf(po)
-                                            this.shiftClickPopovers.splice(index, 1)
-                                            po.dispose()
-                                        })
-
-                                        this.shiftClickPopovers.push(po)
-
-                                        po.presentContentWithEvent(event, content)
                                     }
+
+                                    // Create new popover and add to list
+                                    let po = new Popover(this.viewportElement.parentElement, true, undefined, () => {
+                                        const index = this.popoverList.indexOf(po)
+                                        this.popoverList.splice(index, 1)
+                                        po.dispose()
+                                    })
+
+                                    this.popoverList.push(po)
+                                    po.presentContentWithEvent(event, content)
 
                                 }
                                 window.clearTimeout(popupTimerID)
@@ -1033,16 +1018,11 @@ class TrackViewport extends Viewport {
 
     dispose() {
 
-        if (this.popover) {
-            this.popover.dispose()
-            this.popover = null
-        }
-        
-        if (this.shiftClickPopovers && this.shiftClickPopovers.length > 0) {
-            for (const po of this.shiftClickPopovers) {
+        if (this.popoverList && this.popoverList.length > 0) {
+            for (const po of this.popoverList) {
                 po.dispose()
             }
-            this.shiftClickPopovers = []
+            this.popoverList = []
         }
 
         super.dispose()
