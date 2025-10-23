@@ -18,14 +18,13 @@ let mouseDownCoords
 let lastClickTime = 0
 let lastHoverUpdateTime = 0
 let popupTimerID
-let trackViewportPopoverList = []
-
-let popover
 
 class TrackViewport extends Viewport {
 
     constructor(trackView, viewportColumn, referenceFrame, width) {
         super(trackView, viewportColumn, referenceFrame, width)
+        this.popover = null
+        this.shiftClickPopovers = []
     }
 
     initializationHelper() {
@@ -841,32 +840,35 @@ class TrackViewport extends Viewport {
                                 if (content) {
 
                                     if (false === event.shiftKey) {
-
-                                        if (popover) {
-                                            popover.dispose()
+                                        // Dispose this track's existing popover only
+                                        if (this.popover) {
+                                            this.popover.dispose()
                                         }
-
-                                        if (trackViewportPopoverList.length > 0) {
-                                            for (const gp of trackViewportPopoverList) {
+                                        
+                                        // Dispose this track's shift-click popovers
+                                        if (this.shiftClickPopovers.length > 0) {
+                                            for (const gp of this.shiftClickPopovers) {
                                                 gp.dispose()
                                             }
-                                            trackViewportPopoverList.length = 0
+                                            this.shiftClickPopovers.length = 0
                                         }
-
-                                        popover = new Popover(this.viewportElement.parentElement, true, undefined, () => {
-                                            popover.dispose()
+                                        
+                                        // Create new popover for this track
+                                        this.popover = new Popover(this.viewportElement.parentElement, true, undefined, () => {
+                                            this.popover.dispose()
+                                            this.popover = null
                                         })
-
-                                        popover.presentContentWithEvent(event, content)
+                                        
+                                        this.popover.presentContentWithEvent(event, content)
                                     } else {
 
                                         let po = new Popover(this.viewportElement.parentElement, true, undefined, () => {
-                                            const index = trackViewportPopoverList.indexOf(po)
-                                            trackViewportPopoverList.splice(index, 1)
+                                            const index = this.shiftClickPopovers.indexOf(po)
+                                            this.shiftClickPopovers.splice(index, 1)
                                             po.dispose()
                                         })
 
-                                        trackViewportPopoverList.push(po)
+                                        this.shiftClickPopovers.push(po)
 
                                         po.presentContentWithEvent(event, content)
                                     }
@@ -1033,6 +1035,14 @@ class TrackViewport extends Viewport {
 
         if (this.popover) {
             this.popover.dispose()
+            this.popover = null
+        }
+        
+        if (this.shiftClickPopovers && this.shiftClickPopovers.length > 0) {
+            for (const po of this.shiftClickPopovers) {
+                po.dispose()
+            }
+            this.shiftClickPopovers = []
         }
 
         super.dispose()
@@ -1088,5 +1098,4 @@ class FeatureCache {
     }
 }
 
-export {trackViewportPopoverList}
 export default TrackViewport

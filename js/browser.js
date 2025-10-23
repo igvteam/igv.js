@@ -35,7 +35,6 @@ import {translateSession} from "./hic/shoeboxUtils.js"
 import MenuUtils from "./ui/menuUtils.js"
 import Genome from "./genome/genome.js"
 import {setDefaults} from "./igv-create.js"
-import {trackViewportPopoverList} from './trackViewport.js'
 import TrackBase from "./trackBase.js"
 import {loadGenbank} from "./gbk/genbankParser.js"
 import igvCss from "./embedCss.js"
@@ -136,12 +135,20 @@ class Browser {
         })
 
         this.on('columnlayoutchange', () => {
-            if (trackViewportPopoverList.length > 0) {
-                const len = trackViewportPopoverList.length
-                for (let i = 0; i < len; i++) {
-                    trackViewportPopoverList[i].dispose()
+            // Clean up all popovers from all tracks when layout changes
+            for (const trackView of this.trackViews) {
+                for (const viewport of trackView.viewports) {
+                    if (viewport.popover) {
+                        viewport.popover.dispose()
+                        viewport.popover = null
+                    }
+                    if (viewport.shiftClickPopovers && viewport.shiftClickPopovers.length > 0) {
+                        for (const po of viewport.shiftClickPopovers) {
+                            po.dispose()
+                        }
+                        viewport.shiftClickPopovers = []
+                    }
                 }
-                trackViewportPopoverList.length = 0
             }
         })
 
@@ -1136,6 +1143,22 @@ class Browser {
                 return aOrder1 - bOrder1
             }
         })
+
+        // Clean up all popovers before reordering DOM elements
+        // for (const trackView of this.trackViews) {
+        //     for (const viewport of trackView.viewports) {
+        //         if (viewport.popover) {
+        //             viewport.popover.dispose()
+        //             viewport.popover = null
+        //         }
+        //         if (viewport.shiftClickPopovers && viewport.shiftClickPopovers.length > 0) {
+        //             for (const po of viewport.shiftClickPopovers) {
+        //                 po.dispose()
+        //             }
+        //             viewport.shiftClickPopovers = []
+        //         }
+        //     }
+        // }
 
         // discard current track order
         for (let {
