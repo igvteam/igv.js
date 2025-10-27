@@ -90,6 +90,11 @@ class Browser {
 
         this.alert = new Alert(this.root)
 
+        this.spinnerElement = document.createElement('div')
+        this.spinnerElement.className = 'igv-loading-spinner-container'
+        this.root.appendChild(this.spinnerElement)
+        this.spinnerElement.appendChild(document.createElement('div'))
+
         this.columnContainer = DOMUtils.div({class: 'igv-column-container'})
         this.root.appendChild(this.columnContainer)
 
@@ -948,10 +953,10 @@ class Browser {
         if (typeof track.postInit === 'function') {
             const rulerTrackView = this.getRulerTrackView()
             try {
-                rulerTrackView.startSpinner()   // TODO this.startSpinner() when we have one
+                this.startSpinner()   // TODO this.startSpinner() when we have one
                 await track.postInit()
             } finally {
-                rulerTrackView.stopSpinner()   // TODO  this.stopSpinner()
+                this.stopSpinner()   // TODO  this.stopSpinner()
             }
         }
 
@@ -2256,6 +2261,19 @@ class Browser {
     async blat(sequence) {
         return createBlatTrack({sequence, browser: this, name: 'Blat', title: 'Blat'})
     }
+
+    startSpinner() {
+        if (this.spinnerElement) {
+            this.spinnerElement.style.display = 'flex'
+        }
+    }
+
+    stopSpinner() {
+        if (this.spinnerElement) {
+            this.spinnerElement.style.display = 'none'
+        }
+    }
+
 }
 
 function
