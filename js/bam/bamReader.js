@@ -25,6 +25,10 @@ class BamReader {
         this._blockLoader = new BGZBlockLoader(config)
     }
 
+    async postInit() {
+        await this.getHeader()   // Called for side effects, and to ensure file is loadable
+    }
+
     async readAlignments(chr, bpStart, bpEnd) {
 
         const chrId = await this.#getRefId(chr)

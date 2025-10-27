@@ -104,6 +104,15 @@ class TrackBase {
         }
     }
 
+    /**
+     * Perform any async initialization steps.  This method is typically overriden in subclasses, which will call
+     * this implementation as super.postInit().
+     *
+     * NOTE: postInit is called before the trackView is added to the browser track list.  If postInit throws an error
+     * the track will not be added to the browser.  This is important for error handling during track loading.
+     *
+     * @returns {Promise<TrackBase>}
+     */
     async postInit() {
 
         this._initialColor = this.color || this.constructor.defaultColor
