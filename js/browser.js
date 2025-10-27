@@ -946,11 +946,12 @@ class Browser {
         }
 
         if (typeof track.postInit === 'function') {
+            const rulerTrackView = this.getRulerTrackView()
             try {
-                // TODO this.startSpinner() when we have one
+                rulerTrackView.startSpinner()   // TODO this.startSpinner() when we have one
                 await track.postInit()
             } finally {
-                // TODO  this.stopSpinner()
+                rulerTrackView.stopSpinner()   // TODO  this.stopSpinner()
             }
         }
 
