@@ -432,7 +432,7 @@ class Browser {
                 config = {
                     reference: genomeConfig
                 }
-            } else  {
+            } else {
                 config = await igvxhr.loadJson(urlOrFile)
             }
         }
@@ -901,13 +901,14 @@ class Browser {
             config = JSON.parse(config)
         }
 
-        if(config.format && config.format.toLowerCase() === 'sampleinfo') {
+        if (config.format && config.format.toLowerCase() === 'sampleinfo') {
             return this.loadSampleInfo(config)
         }
 
         let track
         try {
             track = await this.createTrack(config)
+
         } catch (error) {
 
             let msg = error.message || error.error || error.toString()
@@ -929,12 +930,12 @@ class Browser {
             throw err
         }
 
+
         if (track) {
             return await this.addTrack(track)
         } else {
             return undefined
         }
-
     }
 
     async addTrack(track) {
@@ -944,19 +945,20 @@ class Browser {
             track.order = this.trackViews.length
         }
 
+        if (typeof track.postInit === 'function') {
+            try {
+                // TODO this.startSpinner() when we have one
+                await track.postInit()
+            } finally {
+                // TODO  this.stopSpinner()
+            }
+        }
+
+        // Add track view AFTER postInit, to avoid adding a track that fails during postInit
         const trackView = new TrackView(this, this.columnContainer, track)
         this.trackViews.push(trackView)
         toggleTrackLabels(this.trackViews, this.doShowTrackLabels)
 
-        if (typeof track.postInit === 'function') {
-
-            try {
-                trackView.startSpinner()
-                await track.postInit()
-            } finally {
-                trackView.stopSpinner()
-            }
-        }
 
         if (typeof track.hasSamples === 'function' && track.hasSamples()) {
 
