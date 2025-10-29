@@ -9,6 +9,7 @@ import {makeBedPEChords, sendChords} from "../jbrowse/circularViewUtils.js"
 
 import {getChrColor} from "../util/getChrColor.js"
 import {ColorTable, PaletteColorTable} from "../util/colorPalletes.js"
+import * as DOMUtils from "../ui/utils/dom-utils.js"
 
 function getArcType(config) {
     if (!config.arcType) {
@@ -37,7 +38,8 @@ class InteractionTrack extends TrackBase {
         thickness: 1,
         alpha: 0.02,
         logScale: true,
-        colorBy: undefined
+        colorBy: undefined,
+        transparency: 1
     }
 
     constructor(config, browser) {
@@ -63,6 +65,11 @@ class InteractionTrack extends TrackBase {
         this.cosTheta = Math.cos(this.theta)
         this.arcType = getArcType(config)   // nested | proportional | inView | partialInView
         this.painter = {flipAxis: "DOWN" === this.arcOrientation, dataRange: this.dataRange, paintAxis: paintAxis}
+
+        if("hic" === config.format) {
+            config.useScore = config.useScore?? true
+            this.alphaModifier = config.alphaModifier || .1
+        }
 
         if (config.valueColumn) {
             this.valueColumn = config.valueColumn
@@ -128,9 +135,13 @@ class InteractionTrack extends TrackBase {
         return typeof this.featureSource.supportsWholeGenome === 'function' ? this.featureSource.supportsWholeGenome() : true
     }
 
-    async getFeatures(chr, start, end) {
+    get resolutionAware() {
+        return this.config.format === 'hic'
+    }
+
+    async getFeatures(chr, start, end, bpPerPixel) {
         const visibilityWindow = this.visibilityWindow
-        const features = await this.featureSource.getFeatures({chr, start, end, visibilityWindow})
+        const features = await this.featureSource.getFeatures({chr, start, end, bpPerPixel, visibilityWindow})
 
         // Check for score or value
         if (this.hasValue === undefined && features && features.length > 0) {
@@ -434,7 +445,7 @@ class InteractionTrack extends TrackBase {
             color = this.color || feature.color || DEFAULT_ARC_COLOR
         }
         if (this.config.useScore && Number.isFinite(feature.score)) {
-            color = getAlphaColor(color, scoreShade(feature.score))
+            color = getAlphaColor(color, this.transparency * scoreShade(feature.score))
         }
         return color
     }
@@ -558,6 +569,10 @@ class InteractionTrack extends TrackBase {
             })
         }
 
+        if("hic" === this.config.format) {
+            items.push(this.transparencyMenuItem())
+        }
+
 
         if (this.arcType === "proportional" || this.arcType === "inView" || this.arcType === "partialInView") {
             items = items.concat(this.numericDataMenuItems())
@@ -576,6 +591,34 @@ class InteractionTrack extends TrackBase {
         }
 
         return items
+    }
+
+    transparencyMenuItem() {
+
+        const element = DOMUtils.div()
+        element.innerText = 'Set transparency'
+
+        function dialogPresentationHandler(e) {
+            const callback = alpha => {
+                this.transparency = Math.max(0.001, alpha)
+                this.repaintViews()
+            }
+
+            const config =
+                {
+                    label: 'Transparency',
+                    value: this.transparency,
+                    min: 0.0,
+                    max: 1.0,
+                    scaleFactor: 1000,
+                    color: this.color,
+                    callback
+                }
+
+            this.browser.sliderDialog.present(config, e)
+        }
+
+        return {element, dialog: dialogPresentationHandler}
     }
 
     contextMenuItemList(clickState) {
