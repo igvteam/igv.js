@@ -166,8 +166,10 @@
             <div class="info-box">
                 <h3>Test URLs:</h3>
                 <ul>
-                    <li><strong>Normal URL:</strong> https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz</li>
-                    <li><strong>UCSC:</strong> https://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/ncbiRefSeq.txt.gz</li>
+                    <li><strong>SEG:</strong> https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz</li>
+                    <li><strong>SEG:</strong> https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/gbm/Broad.080528.subtypes.seg.gz</li>
+                    <li><strong>BigWig:</strong> https://www.encodeproject.org/files/ENCFF000ATR/@@download/ENCFF000ATR.bigWig</li>
+                    <li><strong>BigWig:</strong> https://s3.amazonaws.com/igv.org.genomes/mm10/gc5Base.bw</li>
                 </ul>
             </div>
         </div>
@@ -367,9 +369,16 @@
         document.getElementById("clearTracksBtn").addEventListener("click", () => {
             const trackViews = [...browser.trackViews]
             for (const trackView of trackViews) {
-                if (trackView.track.id !== 'ruler' && trackView.track.type !== 'sequence') {
+                const track = trackView.track
+                // Use same filter as updateTrackList to avoid removing built-in tracks
+                const shouldRemove = track.id !== 'ruler' && 
+                                     track.type !== 'sequence' && 
+                                     track.type !== 'ideogram' &&
+                                     track.id !== 'refseqAll'
+                
+                if (shouldRemove) {
                     // Check if this is a mock track (has no properly initialized viewports)
-                    if (trackView.track.id && trackView.track.id.startsWith('mock-google-drive-')) {
+                    if (track.id && track.id.startsWith('mock-google-drive-')) {
                         // Remove mock tracks directly from the array
                         const index = browser.trackViews.indexOf(trackView)
                         if (index > -1) {
@@ -377,7 +386,16 @@
                         }
                     } else {
                         // Use normal removal for real tracks
-                        browser.removeTrack(trackView.track)
+                        try {
+                            browser.removeTrack(track)
+                        } catch (err) {
+                            console.warn("Error removing track:", track.name, err)
+                            // If normal removal fails, try direct removal
+                            const index = browser.trackViews.indexOf(trackView)
+                            if (index > -1) {
+                                browser.trackViews.splice(index, 1)
+                            }
+                        }
                     }
                 }
             }
