@@ -2,6 +2,7 @@ import {isSimpleType} from "./util/igvUtils.js"
 import {FeatureUtils, FileUtils, StringUtils} from "../node_modules/igv-utils/src/index.js"
 import {createCheckbox} from "./igv-icons.js"
 import {findFeatureAfterCenter} from "./feature/featureUtils.js"
+import {isLocalFile, isGoogleDriveURL} from "./util/sessionResourceValidator.js"
 
 const fixColor = (colorString) => {
     if (StringUtils.isString(colorString)) {
@@ -627,7 +628,20 @@ class TrackBase {
         }
     }
 
-    static localFileInspection(config) {
+    /**
+     * Prepare a track configuration for session serialization by identifying and marking
+     * problematic resources (local files, Google Drive URLs).
+     * 
+     * Local files are converted to {file: filename} or {indexFile: filename}
+     * Google Drive URLs are marked with {googleDriveURL: url} or {googleDriveIndexURL: url}
+     * 
+     * This allows the configuration to be serialized while preserving information
+     * about resources that cannot be automatically loaded when the session is restored.
+     * 
+     * @param {Object} config - Track configuration to prepare
+     * @returns {Object} Cleaned configuration with problematic resources marked
+     */
+    static prepareConfigForSession(config) {
 
         const cooked = Object.assign({}, config)
         const lut =
@@ -636,14 +650,31 @@ class TrackBase {
                 indexURL: 'indexFile'
             }
 
+        // Check for local File objects and convert to filename strings
         for (const key of ['url', 'indexURL']) {
-            if (cooked[key] && cooked[key] instanceof File) {
+            if (cooked[key] && isLocalFile(cooked[key])) {
                 cooked[lut[key]] = cooked[key].name
                 delete cooked[key]
             }
         }
 
+        // Check for Google Drive URLs and mark them
+        if (cooked.url && isGoogleDriveURL(cooked.url)) {
+            cooked.googleDriveURL = cooked.url
+        }
+        if (cooked.indexURL && isGoogleDriveURL(cooked.indexURL)) {
+            cooked.googleDriveIndexURL = cooked.indexURL
+        }
+
         return cooked
+    }
+
+    /**
+     * @deprecated Use prepareConfigForSession() instead. This method name is misleading
+     * as it now handles both local files and Google Drive URLs.
+     */
+    static localFileInspection(config) {
+        return TrackBase.prepareConfigForSession(config)
     }
 
     // Methods to support filtering api
