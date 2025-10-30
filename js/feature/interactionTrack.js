@@ -66,9 +66,9 @@ class InteractionTrack extends TrackBase {
         this.arcType = getArcType(config)   // nested | proportional | inView | partialInView
         this.painter = {flipAxis: "DOWN" === this.arcOrientation, dataRange: this.dataRange, paintAxis: paintAxis}
 
-        if("hic" === config.format) {
-            config.useScore = config.useScore?? true
-            this.alphaModifier = config.alphaModifier || .1
+        if ("hic" === config.format) {
+            config.useScore = true
+            this.transparency = config.transparency?? 0.1
         }
 
         if (config.valueColumn) {
@@ -569,7 +569,7 @@ class InteractionTrack extends TrackBase {
             })
         }
 
-        if("hic" === this.config.format) {
+        if ("hic" === this.config.format) {
             items.push(this.transparencyMenuItem())
         }
 
@@ -937,7 +937,6 @@ function getWGFeatures(allFeatures) {
         wgFeatures.sort(function (a, b) {
             return a.start - b.start
         })
-        console.log(wgFeatures.length)
     }
 
 

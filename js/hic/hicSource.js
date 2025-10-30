@@ -8,9 +8,8 @@ class HicSource {
         this.hicFile = config._hicFile ? config._hicFile : new HicFile(config)
         config._hicFile = undefined
 
-        this.diagonalBinThreshold = config.diagonalBinThreshold || 10
-        this.percentileThreshold = config.percentileThreshold || 10
-        this.alphaModifier = config.alphaModifier || 1  //0.1
+        this.minPixelWidth = config.minPixelWidth || 10
+        this.percentileThreshold = config.percentileThreshold || 5
     }
 
     async postInit() {
@@ -40,7 +39,6 @@ class HicSource {
         const selectedIndex = index !== -1 ? index : 0
         const binSize = resolutions[selectedIndex]
 
-        // TODO -- we need to account for chromosome aliases here
         const alias = this.hicFile.getFileChrName(chr)
         const records = await this.hicFile.getContactRecords(
             undefined,
@@ -50,54 +48,61 @@ class HicSource {
             binSize
         )
 
+        // Not interested in interactions < 10 pixels apart
+        const binThreshold = Math.max(1, (bpPerPixel / binSize) * this.minPixelWidth)
+
         let max = 0
         const counts = []
         for (let rec of records) {
-            if (Math.abs(rec.bin1 - rec.bin2) > this.diagonalBinThreshold) {
+            if (Math.abs(rec.bin1 - rec.bin2) > binThreshold) {
                 counts.push(rec.counts)
                 if (rec.counts > max) {
                     max = rec.counts
                 }
             }
         }
-        const threshold = percentile(counts, 100 - this.percentileThreshold)
+
+        // If the # of features is > 1,000, set a threshold on counts to limit the number of features returned.
+        const threshold = counts.length < 1000 ? 0 : percentile(counts, 100 - this.percentileThreshold)
 
         const features = []
         for (let rec of records) {
 
             const {bin1, bin2, counts} = rec
             // Skip diagonal
-            if (Math.abs(bin1 - bin2) <= this.diagonalBinThreshold) continue
+            if (Math.abs(bin1 - bin2) <= binThreshold) continue
 
             if (counts < threshold) continue
 
-            const alpha = Math.min(1.0, counts / max)
-            const color = {red: 255, green: 0, blue: 0}
-            const rgba = `rgba(${color.red},${color.green},${color.blue},${this.alphaModifier * alpha})`
-
             const c = this.genome.getChromosomeName(chr)
+            const start1 = bin1 * binSize
+            const end1 = bin1 * binSize + binSize
+            const start2 = bin2 * binSize
+            const end2 = bin2 * binSize + binSize
             features.push({
+                chr: c,
                 chr1: c,
-                start1: bin1 * binSize,
-                end1: bin1 * binSize + binSize,
                 chr2: c,
-                start2: bin2 * binSize,
-                end2: bin2 * binSize + binSize,
+                start: Math.min(start1, start2),
+                end: Math.max(end1, end2),
+                start1,
+                end1,
+                start2,
+                end2,
                 value: counts,
                 score: 1000 * (counts / max),
             })
-
-            for (let feature of features) {
-                feature.chr = feature.chr1
-                feature.start = Math.min(feature.start1, feature.start2)
-                feature.end = Math.max(feature.end1, feature.end2)
-            }
+        }
+        for (let feature of features) {
+            feature.chr = feature.chr1
+            feature.start = Math.min(feature.start1, feature.start2)
+            feature.end = Math.max(feature.end1, feature.end2)
         }
 
+        features.sort((a, b) => a.start - b.start)
         return features
 
     }
-
 
     supportsWholeGenome() {
         return false
@@ -105,15 +110,24 @@ class HicSource {
 
 }
 
+/**
+ * Calculate the pth percentile of an array.
+ *
+ * @param array
+ * @param p
+ * @param maxSize
+ * @returns {*|number}
+ */
+function percentile(array, p, maxSize = 100000) {
 
-function percentile(array, p) {
-
-    if (array.length === 0) return undefined
-    const k = Math.floor(array.length * ((100 - p) / 100))
+    if (array.length === 0) return 0
 
     array.sort(function (a, b) {
-        return b - a
+        return a - b
     })
+
+    const k = Math.max(array.length - maxSize, Math.floor(array.length * (p / 100)))
+
     return array[k]
 
 }
