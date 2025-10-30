@@ -1950,17 +1950,17 @@ class Browser {
 
     /**
      * Validate reference genome and warn about problematic resources in the session.
-     * 
+     *
      * Reference genome: Throws error if local files or Google Drive URLs are detected
      * Tracks/Sample Info: Shows warning if local files or Google Drive URLs are detected
-     * 
+     *
      * @param {Object} json - The session JSON object
      * @private
      */
     _validateAndWarnResources(json) {
         // 1. Validate reference genome (blocking errors)
         const refErrors = []
-        
+
         if (json.reference.fastaURL) {
             if (isLocalFile(json.reference.fastaURL)) {
                 refErrors.push(`Local file: ${json.reference.fastaURL.name}`)
@@ -1968,7 +1968,7 @@ class Browser {
                 refErrors.push(`Google Drive URL: ${json.reference.fastaURL}`)
             }
         }
-        
+
         if (json.reference.indexURL) {
             if (isLocalFile(json.reference.indexURL)) {
                 refErrors.push(`Local file: ${json.reference.indexURL.name}`)
@@ -1976,7 +1976,7 @@ class Browser {
                 refErrors.push(`Google Drive URL: ${json.reference.indexURL}`)
             }
         }
-        
+
         if (refErrors.length > 0) {
             throw new Error(
                 `Error: Sessions cannot include the following resources in the reference genome:\n` +
@@ -1998,7 +1998,7 @@ class Browser {
             if (trackConfig.indexFile) {
                 localFileWarnings.push(trackConfig.indexFile)
             }
-            
+
             // Google Drive URLs
             if (trackConfig.googleDriveURL) {
                 googleDriveWarnings.push(trackConfig.googleDriveURL)
@@ -2024,19 +2024,19 @@ class Browser {
         // 3. Display consolidated warning if any issues found
         if (localFileWarnings.length > 0 || googleDriveWarnings.length > 0) {
             let message = 'Warning: This session includes resources that may not load when shared:\n'
-            
+
             if (localFileWarnings.length > 0) {
                 message += '\nLocal files:\n'
                 message += localFileWarnings.map(file => `  - ${file}`).join('\n')
             }
-            
+
             if (googleDriveWarnings.length > 0) {
                 message += '\n\nGoogle Drive URLs:\n'
                 message += googleDriveWarnings.map(url => `  - ${url}`).join('\n')
             }
-            
-            message += '\n\nThese resources require local access or authentication. Consider using publicly accessible URLs instead.'
-            
+
+            message += '\n\nThese resources require local access or authentication.'
+
             alert(message)
         }
     }
