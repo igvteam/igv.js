@@ -556,6 +556,7 @@ class Browser {
 
         // Sample info
         const localSampleInfoFiles = []
+        const googleDriveSampleInfoFiles = []
         if (session.sampleinfo) {
             const sampleInfoArray = Array.isArray(session.sampleinfo) ? session.sampleinfo : [session.sampleinfo]
             for (const sampleInfoConfig of sampleInfoArray) {
@@ -564,6 +565,8 @@ class Browser {
                 // to prompt the user to load the file manually, but we don't currently do that.
                 if (sampleInfoConfig.file) {
                     localSampleInfoFiles.push(sampleInfoConfig.file)
+                } else if (sampleInfoConfig.googleDriveURL) {
+                    googleDriveSampleInfoFiles.push(sampleInfoConfig.googleDriveURL)
                 } else {
                     await this.sampleInfo.loadSampleInfo(sampleInfoConfig)
                 }
@@ -580,22 +583,46 @@ class Browser {
             trackConfigurations.push({type: "sequence", order: defaultSequenceTrackOrder, removable: false})
         }
 
+        // Collect local files
         const localTrackFileNames = trackConfigurations.filter((config) => undefined !== config.file).map(({file}) => file)
-
         const localIndexFileNames = trackConfigurations.filter((config) => undefined !== config.indexFile).map(({indexFile}) => indexFile)
         if (localIndexFileNames.length > 0) {
             localTrackFileNames.push(...localIndexFileNames)
         }
-
         if (localSampleInfoFiles.length > 0) {
             localTrackFileNames.push(...localSampleInfoFiles)
         }
 
-        if (localTrackFileNames.length > 0) {
-            alert(`Local files cannot be loaded automatically.\nThis session contains references to these local files:\n${localTrackFileNames.map(str => `    ${str}`).join('\n')}`)
+        // Collect Google Drive URLs
+        const googleDriveTrackURLs = trackConfigurations.filter((config) => undefined !== config.googleDriveURL).map(({googleDriveURL}) => googleDriveURL)
+        const googleDriveIndexURLs = trackConfigurations.filter((config) => undefined !== config.googleDriveIndexURL).map(({googleDriveIndexURL}) => googleDriveIndexURL)
+        if (googleDriveIndexURLs.length > 0) {
+            googleDriveTrackURLs.push(...googleDriveIndexURLs)
+        }
+        if (googleDriveSampleInfoFiles.length > 0) {
+            googleDriveTrackURLs.push(...googleDriveSampleInfoFiles)
         }
 
-        const nonLocalTrackConfigurations = trackConfigurations.filter((config) => undefined === config.file)
+        // Display warning if problematic resources are found
+        if (localTrackFileNames.length > 0 || googleDriveTrackURLs.length > 0) {
+            let message = 'Warning: This session includes resources that cannot be loaded:\n'
+            
+            if (localTrackFileNames.length > 0) {
+                message += '\nLocal files:\n'
+                message += localTrackFileNames.map(file => `  - ${file}`).join('\n')
+            }
+            
+            if (googleDriveTrackURLs.length > 0) {
+                message += '\n\nGoogle Drive URLs:\n'
+                message += googleDriveTrackURLs.map(url => `  - ${url}`).join('\n')
+            }
+            
+            message += '\n\nThese resources require local access or authentication and have been skipped.'
+            
+            alert(message)
+        }
+
+        const nonLocalTrackConfigurations = trackConfigurations.filter((config) => undefined === config.file && undefined === config.googleDriveURL)
 
         // Maintain track order unless explicitly set
         let trackOrder = 1
