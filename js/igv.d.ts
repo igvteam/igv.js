@@ -531,7 +531,9 @@ export namespace BrowserEvents {
                         genomicLocation?: number
                     ) => EventReturn<T> :
                     T extends "trackorderchanged" ? (trackNames: string[]) => EventReturn<T> :
-                        (payload: any) => EventReturn<T>;
+                        T extends "roiadded" ? (roi: { chr: string; start: number; end: number; name?: string }) => EventReturn<T> :
+                            T extends "roiremoved" ? (roi: { chr: string; start: number; end: number; name?: string }) => EventReturn<T> :
+                                (payload: any) => EventReturn<T>;
 
     export type EventReturn<T extends EventType> =
         T extends "trackclick" ? string | boolean | undefined :
