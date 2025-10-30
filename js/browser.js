@@ -48,6 +48,7 @@ import {createBlatTrack} from "./blat/blatTrack.js"
 import {loadHub} from "./ucsc/hub/hubParser.js"
 import {EventEmitter} from "./events.js"
 import Locus from "./locus.js"
+import {isLocalFile, isGoogleDriveURL} from "./util/sessionResourceValidator.js"
 
 
 // css - $igv-scrollbar-outer-width: 14px;
@@ -1863,11 +1864,6 @@ class Browser {
         }
 
         json["reference"] = this.genome.toJSON()
-        if (json.reference.fastaURL instanceof File) {   // Test specifically for File.  Other types of File-like objects might be savable) {
-            throw new Error(`Error. Sessions cannot include local file references ${json.reference.fastaURL.name}.`)
-        } else if (json.reference.indexURL instanceof File) {   // Test specifically for File.  Other types of File-like objects might be savable) {
-            throw new Error(`Error. Sessions cannot include local file references ${json.reference.indexURL.name}.`)
-        }
 
         // Build locus array (multi-locus view).  Use the first track to extract the loci, any track could be used.
         const locus = []
@@ -1908,9 +1904,9 @@ class Browser {
 
                 let config
                 if (typeof track.getState === "function") {
-                    config = TrackBase.localFileInspection(track.getState())
+                    config = TrackBase.prepareConfigForSession(track.getState())
                 } else if (track.config) {
-                    config = TrackBase.localFileInspection(track.config)
+                    config = TrackBase.prepareConfigForSession(track.config)
                 }
 
                 if (config) {
@@ -1941,37 +1937,108 @@ class Browser {
 
         json["tracks"] = trackJson
 
-        const localFileDetections = []
-        for (const json of trackJson) {
-            for (const key of Object.keys(json)) {
-                if ('file' === key || 'indexFile' === key) {
-                    localFileDetections.push(json[key])
-                }
-            }
-        }
-
         // Sample info
-        const localSampleInfoFileDetections = []
         if (this.config.sampleinfo) {
-
             json["sampleinfo"] = this.config.sampleinfo
-
-            for (const path of this.sampleInfo.sampleInfoFiles) {
-                const config = TrackBase.localFileInspection({url: path})
-                if (config.file) {
-                    localSampleInfoFileDetections.push(config.file)
-                }
-            }
-            if (localSampleInfoFileDetections.length > 0) {
-                localFileDetections.push(...localSampleInfoFileDetections)
-            }
         }
 
-        if (localFileDetections.length > 0) {
-            alert(`This session includes reference(s) to local file(s):\n${localFileDetections.map(str => `    ${str}`).join('\n')}\nLocal files cannot be loaded automatically when a saved session is restored.`)
-        }
+        // Validate reference genome and warn about problematic resources
+        this._validateAndWarnResources(json)
 
         return json
+    }
+
+    /**
+     * Validate reference genome and warn about problematic resources in the session.
+     * 
+     * Reference genome: Throws error if local files or Google Drive URLs are detected
+     * Tracks/Sample Info: Shows warning if local files or Google Drive URLs are detected
+     * 
+     * @param {Object} json - The session JSON object
+     * @private
+     */
+    _validateAndWarnResources(json) {
+        // 1. Validate reference genome (blocking errors)
+        const refErrors = []
+        
+        if (json.reference.fastaURL) {
+            if (isLocalFile(json.reference.fastaURL)) {
+                refErrors.push(`Local file: ${json.reference.fastaURL.name}`)
+            } else if (isGoogleDriveURL(json.reference.fastaURL)) {
+                refErrors.push(`Google Drive URL: ${json.reference.fastaURL}`)
+            }
+        }
+        
+        if (json.reference.indexURL) {
+            if (isLocalFile(json.reference.indexURL)) {
+                refErrors.push(`Local file: ${json.reference.indexURL.name}`)
+            } else if (isGoogleDriveURL(json.reference.indexURL)) {
+                refErrors.push(`Google Drive URL: ${json.reference.indexURL}`)
+            }
+        }
+        
+        if (refErrors.length > 0) {
+            throw new Error(
+                `Error: Sessions cannot include the following resources in the reference genome:\n` +
+                refErrors.map(err => `  - ${err}`).join('\n') + '\n' +
+                `These resources require local access or authentication and will not work when the session is shared.`
+            )
+        }
+
+        // 2. Collect warnings from tracks and sample info
+        const localFileWarnings = []
+        const googleDriveWarnings = []
+
+        // Check tracks
+        for (const trackConfig of json.tracks) {
+            // Local files
+            if (trackConfig.file) {
+                localFileWarnings.push(trackConfig.file)
+            }
+            if (trackConfig.indexFile) {
+                localFileWarnings.push(trackConfig.indexFile)
+            }
+            
+            // Google Drive URLs
+            if (trackConfig.googleDriveURL) {
+                googleDriveWarnings.push(trackConfig.googleDriveURL)
+            }
+            if (trackConfig.googleDriveIndexURL) {
+                googleDriveWarnings.push(trackConfig.googleDriveIndexURL)
+            }
+        }
+
+        // Check sample info
+        if (this.config.sampleinfo) {
+            for (const path of this.sampleInfo.sampleInfoFiles) {
+                const config = TrackBase.prepareConfigForSession({url: path})
+                if (config.file) {
+                    localFileWarnings.push(config.file)
+                }
+                if (config.googleDriveURL) {
+                    googleDriveWarnings.push(config.googleDriveURL)
+                }
+            }
+        }
+
+        // 3. Display consolidated warning if any issues found
+        if (localFileWarnings.length > 0 || googleDriveWarnings.length > 0) {
+            let message = 'Warning: This session includes resources that may not load when shared:\n'
+            
+            if (localFileWarnings.length > 0) {
+                message += '\nLocal files:\n'
+                message += localFileWarnings.map(file => `  - ${file}`).join('\n')
+            }
+            
+            if (googleDriveWarnings.length > 0) {
+                message += '\n\nGoogle Drive URLs:\n'
+                message += googleDriveWarnings.map(url => `  - ${url}`).join('\n')
+            }
+            
+            message += '\n\nThese resources require local access or authentication. Consider using publicly accessible URLs instead.'
+            
+            alert(message)
+        }
     }
 
     compressedSession() {
