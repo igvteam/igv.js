@@ -150,7 +150,8 @@ class VariantTrack extends TrackBase {
     }
 
     get supportsWholeGenome() {
-        return !this.config.indexURL || this.config.supportsWholeGenome === true
+        const sourceSupportsWG = typeof this.featureSource.supportsWholeGenome === 'function' && this.featureSource.supportsWholeGenome()
+        return sourceSupportsWG || this.config.supportsWholeGenome === true
     }
 
     get color() {
@@ -223,7 +224,7 @@ class VariantTrack extends TrackBase {
         const yOffset = TOP_MARGIN + nVariantRows * (variantHeight + vGap)
 
         return {
-            names: this.sampleKeys,
+            names: this.sampleKeys || [],
             yOffset,
             height,
             // groups: this.groups,

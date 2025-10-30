@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Browser mockup</title>
+
+    <script type='text/javascript' src='https://genome.ucsc.edu/js/jquery.js?v=1754951223'></script>
+    <script type='text/javascript' src='https://genome.ucsc.edu/js/jquery-ui.js?v=1754951223'></script>
+<!--    <script type="text/javascript" src="../../../dist/igv.js"></script>-->
+    <script type="text/javascript" src="https://igv.org/web/snapshot/dist/igv.min.js"></script>
+    <script type="text/javascript" src="./igvFileHelper.js"></script>
+    <script type="text/javascript" src="./trackJS_additions.js"></script>
+    <link rel='stylesheet' href='https://genome.ucsc.edu/style/jquery-ui.css?v=1754951222' type='text/css'>
+    <style>
+        td {
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .positionDisplay {
+            display: inline-block;
+            padding: 3px;
+            /* border-radius: 3px; */
+            border: lightgray 1px solid;
+            font-size: 90%;
+        }
+    </style>
+
+</head>
+
+
+<body>
+<p>
+    <button id="clearTracks">Clear IGV Tracks</button>
+</p>
+
+<center>
+
+    <div id="myAlertDialog" title="Alert!"></div>
+
+
+    <div style="white-space:nowrap;">
+        <span id="assemblyName"
+              style="font-size:large;"><b>UCSC Genome Browser on Human (GRCh37/hg19)</b></span><br>
+        Move
+        <input type="button" id="hgt.left3" value="&lt;&lt;&lt;" title="Move 95% to the left">
+        <input type="button" id="hgt.left2" value=" &lt;&lt;" title="Move 47.5% to the left">
+        <input type="submit" id="hgt.left1" value=" &lt; " title="Move 10% to the left">
+        <input type="button" id="hgt.right1" value=" &gt; " title="Move 10% to the right">
+        <input type="submit" id="hgt.right2" value="&gt;&gt; " title="Move 47.5% to the right">
+        <input type="button" id="hgt.right3" value="&gt;&gt;&gt;" title="Move 95% to the right">
+        Zoom in
+        <input type="button" id="hgt.in1" value="1.5x">
+        <input type="button" id="hgt.in2" value=" 3x ">
+        <input type="button" id="hgt.in3" value="10x">
+        <input type="button" id="hgt.inBase" value="Base">
+        Zoom out
+        <input type="button" id="hgt.out1" value="1.5x">
+        <input type="button" id="hgt.out2" value=" 3x ">
+        <input type="button" id="hgt.out3" value="10x">
+        <input type="button" id="hgt.out4" value="100x">
+    </div>
+</center>
+
+
+<center>
+    <span class="positionDisplay " id="positionDisplay">chr1:155,140,000-155,160,000</span>
+</center>
+
+<img src="ideogram.png" border="1" width="100%" height="27" style="display: inline;">
+
+
+<table id="imgTbl">
+    <tbody>
+    <tr id="tr_dbSnp155Common">
+        <td>
+            <div style="width:13px;height:100px;background: grey"></div>
+        </td>
+        <td>
+            <div style="width: 140px;height: 100px; background: #24d6ff">UCSC label</div>
+        </td>
+        <td>
+            <div style="width:1200px;height: 100px; background: lavender  ">UCSC track image</div>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<table id="trackCtrlTable" style="width: 100%" border="0" cellspacing="1" cellpadding="1">
+    <tbody>
+    <tr style="height:5px">
+        <td></td>
+    </tr>
+    <tr>
+        <td align="left">
+            <input type="submit" value="Collapse all"></td>
+        <td colspan="6" class="controlButtons" align="CENTER" nowrap="">
+            <input type="submit" value="Track search">
+            <input type="button" value="Highlight">
+            <input type="submit" value="Hide all">
+            <input type="button" id="ct_add" value="Add custom tracks">
+            <input type="button" id="igv_track_add" value="Add IGV track" style="background: cyan">
+            <input type="submit" value="Resize"
+            ></td>
+        <td align="right"><input type="submit" value="Expand all" title=""></td>
+    </tr>
+
+    </tbody>
+</table>
+
+</body>
+</html>

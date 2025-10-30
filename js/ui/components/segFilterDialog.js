@@ -2,6 +2,7 @@ import * as UIUtils from "../utils/ui-utils.js"
 import * as DOMUtils from "../utils/dom-utils.js"
 import makeDraggable from "../utils/draggable.js"
 import DOMPurify from "../../../node_modules/dompurify/dist/purify.es.mjs"
+import InputDialog from "./inputDialog.js"
 
 class SEGFilterDialog {
 
@@ -69,6 +70,11 @@ class SEGFilterDialog {
         this.input_container.appendChild(this._input)
         this._input.placeholder="Enter filter threshold (e.g., 0.5)"
         this._input.value = ''
+
+        // Prevent key event propagation
+        if(InputDialog.FORM_EMBED_MODE) {
+            InputDialog.captureKeyInput(this._input)
+        }
 
         // ok | cancel
         const buttons = DOMUtils.div({class: 'igv-roi-seg-filter-dialog__ok-cancel'})

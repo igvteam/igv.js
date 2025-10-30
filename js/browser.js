@@ -10,7 +10,7 @@ import {getTrack, knownTrackTypes} from "./trackFactory.js"
 import XMLSession from "./session/igvXmlSession.js"
 import GenomeUtils from "./genome/genomeUtils.js"
 import ReferenceFrame, {createReferenceFrameList} from "./referenceFrame.js"
-import {createColumn, doAutoscale, getFilename} from "./util/igvUtils.js"
+import {createColumn, doAutoscale} from "./util/igvUtils.js"
 import {createViewport} from "./util/viewportUtils.js"
 import {bppSequenceThreshold, defaultSequenceTrackOrder} from './sequenceTrack.js'
 import version from "./version.js"
@@ -47,6 +47,8 @@ import CursorGuide from "./ui/cursorGuide.js"
 import SliderDialog from "./ui/components/sliderDialog.js"
 import {createBlatTrack} from "./blat/blatTrack.js"
 import {loadHub} from "./ucsc/hub/hubParser.js"
+import {EventEmitter} from "./events.js"
+import Locus from "./locus.js"
 
 
 // css - $igv-scrollbar-outer-width: 14px;
@@ -71,8 +73,8 @@ class Browser {
         this.config = config
         this.guid = DOMUtils.guid()
         this.namespace = '.browser_' + this.guid
-
         this.parent = parentDiv
+        this.eventEmitter = new EventEmitter()
 
         let shadowRoot = parentDiv.shadowRoot
         if (!shadowRoot) {
@@ -87,6 +89,11 @@ class Browser {
         shadowRoot.appendChild(this.root)
 
         this.alert = new Alert(this.root)
+
+        this.spinnerElement = document.createElement('div')
+        this.spinnerElement.className = 'igv-loading-spinner-container'
+        this.root.appendChild(this.spinnerElement)
+        this.spinnerElement.appendChild(document.createElement('div'))
 
         this.columnContainer = DOMUtils.div({class: 'igv-column-container'})
         this.root.appendChild(this.columnContainer)
@@ -106,14 +113,13 @@ class Browser {
             doubleClickDelay: config.doubleClickDelay || 500
         }
 
-        // Map of event name -> [ handlerFn, ... ]
-        this.eventHandlers = {}
-
         if (config.listeners) {
             for (let evt of Object.keys(config.listeners)) {
                 this.on(evt, config.listeners[evt])
             }
         }
+
+        // Events
 
         this.on('trackremoved', () => {
 
@@ -134,7 +140,7 @@ class Browser {
             }
         })
 
-        this.on('didchangecolumnlayout', () => {
+        this.on('columnlayoutchange', () => {
             if (trackViewportPopoverList.length > 0) {
                 const len = trackViewportPopoverList.length
                 for (let i = 0; i < len; i++) {
@@ -389,7 +395,7 @@ class Browser {
 
         let session
         if (options.url || options.file) {
-            session = await Browser.loadSessionFile(options)
+            session = await Browser.loadSessionFile(options, this.config)
             // if (options.parentApp``) {
             //     session.parentApp = options.parentApp
             // }
@@ -406,7 +412,7 @@ class Browser {
      * @param options
      * @returns {Promise<*|XMLSession>}
      */
-    static async loadSessionFile(options) {
+    static async loadSessionFile(options, defaults) {
 
         const urlOrFile = options.url || options.file
 
@@ -417,7 +423,7 @@ class Browser {
         } else {
             let filename = options.filename
             if (!filename) {
-                filename = (options.url ? await getFilename(options.url) : options.file.name)
+                filename = (options.url ? FileUtils.getFilename(options.url) : options.file.name)
             }
 
             if (filename.endsWith(".xml")) {
@@ -431,14 +437,12 @@ class Browser {
                 config = {
                     reference: genomeConfig
                 }
-            } else if (filename.endsWith(".json")) {
-                config = await igvxhr.loadJson(urlOrFile)
             } else {
-                throw Error("Unrecognized session file format:" + filename)
+                config = await igvxhr.loadJson(urlOrFile)
             }
         }
-        return setDefaults(config)
-
+        setDefaults(config, defaults)
+        return config
     }
 
     /**
@@ -466,8 +470,22 @@ class Browser {
             this.sampleNameViewportWidth = session.sampleNameViewportWidth
         }
 
+        // Track gear column
+        if (this.config.gearColumnPosition === 'left') {
+            const gearcolumn = createColumn(this.columnContainer, 'igv-gear-menu-column')
+            if (false === this.config.showGearColumn) {
+                gearcolumn.style.width = '0px'  // Don't use display none, need element to attach menu
+            }
+        }
+
         // axis column
-        createColumn(this.columnContainer, 'igv-axis-column')
+        const axisColumn = createColumn(this.columnContainer, 'igv-axis-column')
+        if (false === this.config.showAxis) {
+            axisColumn.style.display = 'none'
+        }
+        if (this.config.axisWidth !== undefined) {
+            axisColumn.style.width = this.config.axisWidth + 'px'
+        }
 
         // sample info column
         createColumn(this.columnContainer, 'igv-sample-info-column')
@@ -479,10 +497,18 @@ class Browser {
         createColumn(this.columnContainer, 'igv-scrollbar-column')
 
         // Track drag/reorder column
-        createColumn(this.columnContainer, 'igv-track-drag-column')
+        const dragColumn = createColumn(this.columnContainer, 'igv-track-drag-column')
+        if (false === this.config.showTrackDragHandles) {
+            dragColumn.style.display = 'none'
+        }
 
         // Track gear column
-        createColumn(this.columnContainer, 'igv-gear-menu-column')
+        if (this.config.gearColumnPosition !== 'left') {
+            const gearcolumn = createColumn(this.columnContainer, 'igv-gear-menu-column')
+            if (false === this.config.showGearColumn) {
+                gearcolumn.style.width = '0px'
+            }
+        }
 
         const genomeOrReference = session.reference || session.genome
         if (!genomeOrReference) {
@@ -550,7 +576,7 @@ class Browser {
 
         // Ensure that we always have a sequence track with no explicit URL (=> the reference genome sequence track)
         const pushSequenceTrack = trackConfigurations.filter(track => 'sequence' === track.type && !track.url && !track.fastaURL).length === 0
-        if (pushSequenceTrack /*&& false !== this.config.showSequence*/) {
+        if (pushSequenceTrack && false !== this.config.showSequence) {
             trackConfigurations.push({type: "sequence", order: defaultSequenceTrackOrder, removable: false})
         }
 
@@ -588,6 +614,12 @@ class Browser {
 
         await this.loadTrackList(nonLocalTrackConfigurations)
 
+        // If an initial locus is defined and represents a single basedo a "search" here.  This will force micro
+        // adjustments after width of track column(s) is known.  This can be an issue when the center gide is shown
+        // Without this adjustment the single base would be off center by a few pixels.
+        if (session.locus && Locus.isSingleBaseLocusString(session.locus)) {
+            await this.search(session.locus)
+        }
     }
 
     cleanHouseForSession() {
@@ -637,15 +669,25 @@ class Browser {
         this.navbar.updateGenome(genome)
 
         let locus = initialLocus || genome.initialLocus
-        if (Array.isArray(locus)) {
-            locus = locus.join(' ')
-        }
 
-        const locusFound = await this.search(locus, true)
-        if (!locusFound) {
-            console.error(`Cannot set initial locus ${locus}`)
-            if (locus !== genome.initialLocus) {
-                await this.search(genome.initialLocus)
+        if (typeof (locus.chr) !== "undefined" && typeof (locus.start) !== "undefined") {
+
+            // Locus explicitly an object, either {chr, start, end} or {chr, start, bpPerPixel), skip search,
+            // bug must still ensure chromosome is loaded
+            await this.genome.loadChromosome(locus.chr)
+            await this.updateLoci([locus], true)
+
+        } else {
+            if (Array.isArray(locus)) {
+                locus = locus.join(' ')
+            }
+
+            const locusFound = await this.search(locus, true)
+            if (!locusFound) {
+                console.error(`Cannot set initial locus ${locus}`)
+                if (locus !== genome.initialLocus) {
+                    await this.search(genome.initialLocus)
+                }
             }
         }
 
@@ -864,9 +906,14 @@ class Browser {
             config = JSON.parse(config)
         }
 
+        if (config.format && config.format.toLowerCase() === 'sampleinfo') {
+            return this.loadSampleInfo(config)
+        }
+
         let track
         try {
             track = await this.createTrack(config)
+
         } catch (error) {
 
             let msg = error.message || error.error || error.toString()
@@ -888,12 +935,12 @@ class Browser {
             throw err
         }
 
+
         if (track) {
             return await this.addTrack(track)
         } else {
             return undefined
         }
-
     }
 
     async addTrack(track) {
@@ -903,19 +950,21 @@ class Browser {
             track.order = this.trackViews.length
         }
 
+        if (typeof track.postInit === 'function') {
+            const rulerTrackView = this.getRulerTrackView()
+            try {
+                this.startSpinner()   // TODO this.startSpinner() when we have one
+                await track.postInit()
+            } finally {
+                this.stopSpinner()   // TODO  this.stopSpinner()
+            }
+        }
+
+        // Add track view AFTER postInit, to avoid adding a track that fails during postInit
         const trackView = new TrackView(this, this.columnContainer, track)
         this.trackViews.push(trackView)
         toggleTrackLabels(this.trackViews, this.doShowTrackLabels)
 
-        if (typeof track.postInit === 'function') {
-
-            try {
-                trackView.startSpinner()
-                await track.postInit()
-            } finally {
-                trackView.stopSpinner()
-            }
-        }
 
         if (typeof track.hasSamples === 'function' && track.hasSamples()) {
 
@@ -1393,7 +1442,16 @@ class Browser {
 
         let {width} = this.columnContainer.getBoundingClientRect()
 
-        width -= igv_axis_column_width + this.getSampleInfoViewportWidth() + this.getSampleNameViewportWidth() + igv_scrollbar_outer_width + igv_track_manipulation_handle_width + igv_track_gear_menu_column_width
+        const sampleInfoViewportWidth = this.getSampleInfoViewportWidth()
+        const sampleNameViewportWidth = this.getSampleNameViewportWidth()
+
+        width -=
+            (this.config.showAxis === false ? 0 : igv_axis_column_width) +
+            sampleInfoViewportWidth +
+            sampleNameViewportWidth +
+            igv_scrollbar_outer_width +
+            (this.config.showTrackDragHandles === false ? 0 : igv_track_manipulation_handle_width) +
+            (this.config.showGearColumn === false ? 0 : igv_track_gear_menu_column_width)
 
         width -= column_multi_locus_shim_width * (columnCount - 1)
 
@@ -1447,14 +1505,18 @@ class Browser {
     // Zoom in by a factor of 2, keeping the same center location
     zoomIn() {
         this.zoomWithScaleFactor(0.5)
-    };
+    }
+
 
     // Zoom out by a factor of 2, keeping the same center location if possible
     zoomOut() {
         this.zoomWithScaleFactor(2.0)
-    };
+    }
+
 
     async zoomWithScaleFactor(scaleFactor, centerBPOrUndefined, referenceFrameOrUndefined) {
+
+        if (this.config.disableZoom === true) return   // Useful when an embedding application wants to control zooming
 
         if (!this.referenceFrameList) return
 
@@ -1465,6 +1527,8 @@ class Browser {
         for (let referenceFrame of referenceFrames) {
             referenceFrame.zoomWithScaleFactor(this, scaleFactor, viewportWidth, centerBPOrUndefined)
         }
+
+        this.fireEvent("zoom", [referenceFrames])
     }
 
     /**
@@ -1493,7 +1557,7 @@ class Browser {
         // TODO -- this is really ugly
         const {viewportElement} = this.trackViews[0].viewports[indexLeft]
         const viewportColumn = viewportColumnManager.insertAfter(viewportElement.parentElement)
-        this.fireEvent('didchangecolumnlayout')
+        this.fireEvent('columnlayoutchange')
 
         if (indexRight === this.referenceFrameList.length) {
             this.referenceFrameList.push(newReferenceFrame)
@@ -1539,7 +1603,7 @@ class Browser {
         const {viewportElement} = this.trackViews[0].viewports[index]
 
         viewportColumnManager.removeColumnAtIndex(index, viewportElement.parentElement)
-        this.fireEvent('didchangecolumnlayout')
+        this.fireEvent('columnlayoutchange')
 
         for (let {viewports} of this.trackViews) {
             viewports[index].dispose()
@@ -1665,7 +1729,7 @@ class Browser {
 
             // Insert viewport columns preceding the sample info column
             viewportColumnManager.insertBefore(this.columnContainer.querySelector('.igv-sample-info-column'), this.referenceFrameList.length)
-            this.fireEvent('didchangecolumnlayout')
+            this.fireEvent('columnlayoutchange')
 
             // Create the viewport objects -- TODO -- this is done for every search, which is insane
             for (let trackView of this.trackViews) {
@@ -1755,14 +1819,11 @@ class Browser {
     }
 
 
-// EVENTS
+    // IGV events (not DOM events)
 
     on(eventName, fn) {
-        if (!this.eventHandlers[eventName]) {
-            this.eventHandlers[eventName] = []
-        }
-        this.eventHandlers[eventName].push(fn)
-    };
+        this.eventEmitter.on(eventName, fn)
+    }
 
     /**
      * @deprecated use off()
@@ -1770,42 +1831,16 @@ class Browser {
      * @param fn
      */
     un(eventName, fn) {
-        this.off(eventName, fn)
-    };
+        this.eventEmitter.off(eventName, fn)
+    }
+
 
     off(eventName, fn) {
-
-        if (!eventName) {
-            this.eventHandlers = {}   // Remove all event handlers
-        } else if (!fn) {
-            this.eventHandlers[eventName] = [] // Remove all eventhandlers matching name
-        } else {
-            // Remove specific event handler
-            const handlers = this.eventHandlers[eventName]
-            if (!handlers || handlers.length === 0) {
-                console.warn("No handlers to remove for event: " + eventName)
-            } else {
-                const callbackIndex = handlers.indexOf(fn)
-                if (callbackIndex !== -1) {
-                    this.eventHandlers[eventName].splice(callbackIndex, 1)
-                }
-            }
-        }
+        this.eventEmitter.off(eventName, fn)
     }
 
     fireEvent(eventName, args, thisObj) {
-
-        const handlers = this.eventHandlers[eventName]
-        if (undefined === handlers || handlers.length === 0) {
-            return undefined
-        }
-
-        const scope = thisObj || window
-        const results = handlers.map(function (event) {
-            return event.apply(scope, args)
-        })
-
-        return results[0]
+        return this.eventEmitter.emit(eventName, args, thisObj)
     }
 
     dispose() {
@@ -1980,7 +2015,8 @@ class Browser {
             mouseDownY: coords.y,
             referenceFrame: viewport.referenceFrame
         }
-    };
+    }
+
 
     cancelTrackPan() {
 
@@ -2225,9 +2261,24 @@ class Browser {
     async blat(sequence) {
         return createBlatTrack({sequence, browser: this, name: 'Blat', title: 'Blat'})
     }
+
+    startSpinner() {
+        if (this.spinnerElement) {
+            this.spinnerElement.style.display = 'flex'
+        }
+    }
+
+    stopSpinner() {
+        if (this.spinnerElement) {
+            this.spinnerElement.style.display = 'none'
+        }
+    }
+
 }
 
-function getFileExtension(input) {
+function
+
+getFileExtension(input) {
     let fileName
 
     // Check if input is a File object or a URL string
@@ -2256,7 +2307,9 @@ function getFileExtension(input) {
  *
  * @returns {Promise<void>}
  */
-async function resize(event) {
+async function
+
+resize(event) {
 
     if (undefined === this.referenceFrameList || 0 === this.referenceFrameList.length) {
         return
@@ -2269,7 +2322,9 @@ async function resize(event) {
 }
 
 
-function handleMouseMove(e) {
+function
+
+handleMouseMove(e) {
 
     e.preventDefault()
 
@@ -2306,7 +2361,7 @@ function handleMouseMove(e) {
             if (viewChanged) {
                 this.updateViews()
             }
-            this.fireEvent('trackdrag')
+            this.fireEvent('trackdrag', [e])
         }
 
 
@@ -2321,7 +2376,9 @@ function handleMouseMove(e) {
     }
 }
 
-function mouseUpOrLeave(e) {
+function
+
+mouseUpOrLeave(e) {
     this.cancelTrackPan()
     this.endTrackDrag()
 }
@@ -2330,7 +2387,9 @@ function mouseUpOrLeave(e) {
  * Handle keyup event, used for navigating feature tracks with hot keys.  This will get bound to the browser object
  * @param event
  */
-async function keyUpHandler(event) {
+async function
+
+keyUpHandler(event) {
 
     // Feature jumping disabled in multi-locus view
     if (!this.referenceFrameList || this.referenceFrameList.length > 1) return
@@ -2408,7 +2467,9 @@ async function keyUpHandler(event) {
     }
 }
 
-function toggleTrackLabels(trackViews, isVisible) {
+function
+
+toggleTrackLabels(trackViews, isVisible) {
 
     for (let {viewports} of trackViews) {
         for (let viewport of viewports) {

@@ -11,19 +11,18 @@ const supportedTypes = new Set([
 const filterTracks = new Set(["cytoBandIdeo", "assembly", "gap", "gapOverlap", "allGaps",
     "cpgIslandExtUnmasked", "windowMasker"])
 
-const vizModeMap = {
-    "pack": "EXPANDED",
-    "full": "EXPANDED",
-    "squish": "SQUISHED",
-    "dense": "COLLAPSED"
-}
-
-const typeFormatMap = {
-    "vcftabix": "vcf",
-    "vcfphasedtrio": "vcf",
-    "bigdbsnp": "bigbed",
-    "genepred": "refgene"
-}
+const vizModeMap = new Map([
+    ["pack", "EXPANDED"],
+    ["full", "EXPANDED"],
+    ["squish", "SQUISHED"],
+    ["dense", "COLLAPSED"]
+])
+const typeFormatMap = new Map([
+    ["vcftabix", "vcf"],
+    ["vcfphasedtrio", "vcf"],
+    ["bigdbsnp", "bigbed"],
+    ["genepred", "refgene"]
+])
 
 class TrackDbHub {
 
@@ -170,14 +169,13 @@ class TrackDbHub {
      */
     #getTrackConfig(t) {
 
-        const format = t.format
+        const format = typeFormatMap.get(t.format) || t.format
 
         const config = {
             "id": t.getProperty("track"),
             "name": t.getProperty("shortLabel"),
             "format": format,
-            "url": t.getProperty("bigDataUrl"),
-            "displayMode": t.displayMode,
+            "url": t.getProperty("bigDataUrl")
         }
 
         if ("vcfTabix" === format) {
@@ -229,9 +227,14 @@ class TrackDbHub {
         if (t.hasProperty("itemRgb")) {
             // TODO -- this not supported yet
         }
-        if ("hide" === t.getProperty("visibility")) {
-            // TODO -- this not supported yet
-            config.visible = false
+        if(t.hasProperty("visibility")) {
+            if ("hide" === t.getProperty("visibility")) {
+                // TODO -- this not supported yet
+                config.visible = false
+            }
+            else {
+                config.displayMode = vizModeMap.get(t.getProperty("visibility")) || "COLLAPSED"
+            }
         }
         if (t.hasProperty("url")) {
             config.infoURL = t.getProperty("url")

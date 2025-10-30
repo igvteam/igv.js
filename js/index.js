@@ -13,6 +13,7 @@ import Browser from "./browser.js"
 import AlertDialog from "./ui/components/alertDialog.js"
 import {registerFileFormats} from "./util/fileFormats.js"
 import {loadHub} from "./ucsc/hub/hubParser.js"
+import {createIcon} from "./ui/utils/icons.js"
 
 const setApiKey = igvxhr.setApiKey
 
@@ -22,6 +23,10 @@ function setGoogleOauthToken(accessToken) {
 
 function setOauthToken(accessToken, host) {
     return igvxhr.setOauthToken(accessToken, host)
+}
+
+function setCORSProxy(proxyURL) {
+    igvxhr.corsProxy = proxyURL
 }
 
 // Backward compatibility
@@ -40,6 +45,7 @@ export default {
     visibilityChange,
     setGoogleOauthToken,
     setOauthToken,
+    setCORSProxy,
     oauth,
     version,
     setApiKey,
@@ -48,6 +54,8 @@ export default {
     registerTrackCreatorFunction,
     registerFileFormats,
     loadSessionFile: Browser.loadSessionFile,
-    loadHub
+    loadHub,
+    uncompressSession: Browser.uncompressSession,
+    createIcon
 }
 

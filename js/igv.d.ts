@@ -514,7 +514,7 @@ interface CreateOptExtras {
 }
 
 export namespace BrowserEvents {
-    export type EventType = "trackremoved" | "trackdrag" | "trackdragend" | "locuschange" | "trackclick" | "trackorderchanged" | "roiadded" | "roiremoved";
+    export type EventType = "trackremoved" | "trackdrag" | "trackdragend" | "locuschange" | "trackclick" | "trackorderchanged" | "zoom";
 
     // returns the type of the event handler based on the event type
     export type EventHandler<T extends EventType> =

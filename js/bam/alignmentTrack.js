@@ -1314,17 +1314,16 @@ class AlignmentTrack extends TrackBase {
                     }
                 }
             }
-        }
 
-        // If we get here check downsampled intervals
-        if (offsetY < minGroupY && features.downsampledIntervals) {
-            for (const interval of features.downsampledIntervals) {
-                if (interval.start <= genomicLocation && interval.end >= genomicLocation) {
-                    return interval
+            // If we get here check downsampled intervals
+            if (offsetY < minGroupY && features.downsampledIntervals) {
+                for (const interval of features.downsampledIntervals) {
+                    if (interval.start <= genomicLocation && interval.end >= genomicLocation) {
+                        return interval
+                    }
                 }
             }
         }
-
 
     }
 
@@ -1431,18 +1430,21 @@ class AlignmentTrack extends TrackBase {
                 const tagValue = alignment.tags()[tag]
                 if (tagValue !== undefined) {
 
-                    // If the tag value can be interpreted as a color, use it
-                    if (typeof tagValue.startsWith === 'function') {
-                        color = IGVColor.createColorStringSafe(tagValue)
+                    // If the tag value is yc can be interpreted as a color, use it
+                    if ("yc" === tag.toLowerCase()) {
+                        const ycColor = IGVColor.createColorStringSafe(tagValue)
+                        if (ycColor) {
+                            color = ycColor
+                            break
+                        }
                     }
 
                     // Tag value is not a color, use a color table
-                    if (!color) {
-                        if (!this.colorTable) {
-                            this.colorTable = new PaletteColorTable(this.tagColorPallete)
-                        }
-                        color = this.colorTable.getColor(tagValue)
+                    if (!this.colorTable) {
+                        this.colorTable = new PaletteColorTable(this.tagColorPallete)
                     }
+                    color = this.colorTable.getColor(tagValue)
+                    
                 }
                 break
         }

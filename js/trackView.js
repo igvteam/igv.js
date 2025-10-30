@@ -105,10 +105,14 @@ class TrackView {
 
     createAxis(browser, track) {
 
+        const axisColumn = browser.columnContainer.querySelector('.igv-axis-column')
+        if(!axisColumn) {
+            return;   // The axis column is optional.
+        }
+
         const axis = DOMUtils.div()
         this.axis = axis
-
-        browser.columnContainer.querySelector('.igv-axis-column').appendChild(axis)
+        axisColumn.appendChild(axis)
 
         axis.dataset.tracktype = track.type
 
@@ -287,6 +291,7 @@ class TrackView {
         this.dragHandle.style.height = `${newHeight}px`
         this.gearContainer.style.height = `${newHeight}px`
 
+        this.browser.fireEvent("trackheightchange", this)
     }
 
     updateScrollbar() {
@@ -415,7 +420,7 @@ class TrackView {
 
         if (!(this.browser && this.browser.referenceFrameList)) return
 
-        const visibleViewports = this.viewports.filter(viewport => viewport.isVisible())
+        const visibleViewports = this.viewports.filter(viewport => viewport.isVisible() && viewport.checkZoomIn())
 
         // Shift viewports left/right to current genomic state (pans canvas)
         visibleViewports.forEach(viewport => viewport.shift())
@@ -426,10 +431,10 @@ class TrackView {
         }
 
         // Filter zoomed out views.  This has the side effect or turning off or no the zoomed out notice
-        const viewportsToRepaint = visibleViewports.filter(vp => vp.needsRepaint()).filter(viewport => viewport.checkZoomIn())
+        const viewportsToRepaint = visibleViewports.filter(vp => vp.needsRepaint())
 
         // Get viewports that require a data load
-        const viewportsToReload = visibleViewports.filter(viewport => viewport.checkZoomIn()).filter(viewport => viewport.needsReload())
+        const viewportsToReload = visibleViewports.filter(viewport => viewport => viewport.needsReload())
 
         // Trigger viewport to load features needed to cover current genomic range
         // NOTE: these must be loaded synchronously, do not user Promise.all,  not all file readers are thread safe
@@ -658,7 +663,11 @@ class TrackView {
 
             this.gear = DOMUtils.div()
             this.gearContainer.appendChild(this.gear)
-            this.gear.appendChild(createIcon('cog'))
+            const cog = createIcon('cog')
+            if(false === browser.config.showGearColumn) {
+                cog.style.color = 'white'
+            }
+            this.gear.appendChild(cog)
 
             this.trackGearPopup = new MenuPopup(this.gear)
 
@@ -675,7 +684,7 @@ class TrackView {
                         otherTrackView.trackGearPopup.popover.style.display = 'none'
                     }
 
-                    this.trackGearPopup.presentMenuList(this, browser.menuUtils.trackMenuItemList(this))
+                    this.trackGearPopup.presentMenuList(this, browser.menuUtils.trackMenuItemList(this), browser.config)
                 } else {
                     this.trackGearPopup.popover.style.display = 'none'
                 }

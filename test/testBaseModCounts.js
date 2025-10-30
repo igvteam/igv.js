@@ -46,8 +46,8 @@ suite("test base-mod counts", function () {
 
         const bamReader = new BamReader({
             type: 'bam',
-            url: 'https://www.dropbox.com/s/q32hk7tvsejryjt/HG002_chr11_119076212_119102218_2.bam',
-            indexURL: 'https://www.dropbox.com/s/ax1ljny7ja5fdcu/HG002_chr11_119076212_119102218_2.bam.bai'
+            url: 'test/data/bam/HG002_chr11_119076212_119102218_2.bam',
+            indexURL: 'test/data/bam/HG002_chr11_119076212_119102218_2.bam.bai'
         })
 
         const chr = "chr11"

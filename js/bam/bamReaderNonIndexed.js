@@ -23,6 +23,10 @@ class BamReaderNonIndexed {
         BamUtils.setReaderDefaults(this, config)
     }
 
+    async postInit() {
+        await this.#loadAll()
+    }
+
     /**
      *
      * @param chr
@@ -34,16 +38,7 @@ class BamReaderNonIndexed {
 
         if (!this.alignmentCache) {
             // For a non-indexed BAM file all alignments are read at once and cached.
-            let unc
-            if (this.isDataUri) {
-                const data = decodeDataURI(this.bamPath)
-                unc = BGZip.unbgzf(data.buffer)
-            } else {
-                const arrayBuffer = await igvxhr.loadArrayBuffer(this.bamPath, buildOptions(this.config))
-                unc = BGZip.unbgzf(arrayBuffer)
-            }
-            const alignments = this.#parseAlignments(unc)
-            this.alignmentCache = new FeatureCache(alignments)
+            await this.#loadAll()
         }
 
         const queryChr = this.chromAliasManager ? await this.chromAliasManager.getAliasName(chr) : chr
@@ -54,6 +49,19 @@ class BamReaderNonIndexed {
         }
         alignmentContainer.finish()
         return alignmentContainer
+    }
+
+    async #loadAll() {
+        let unc
+        if (this.isDataUri) {
+            const data = decodeDataURI(this.bamPath)
+            unc = BGZip.unbgzf(data.buffer)
+        } else {
+            const arrayBuffer = await igvxhr.loadArrayBuffer(this.bamPath, buildOptions(this.config))
+            unc = BGZip.unbgzf(arrayBuffer)
+        }
+        const alignments = this.#parseAlignments(unc)
+        this.alignmentCache = new FeatureCache(alignments)
     }
 
     #parseAlignments(data) {

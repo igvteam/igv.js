@@ -69,6 +69,8 @@
 
 .igv-container {
 
+  all:initial;
+
   position: relative;
 
   display: flex;
@@ -165,6 +167,7 @@
 
 .igv-column {
   position: relative;
+  flex: auto;
   @include igv-column-base;
 
 }

@@ -56,6 +56,12 @@ class BamSource {
         }
     }
 
+    async postInit() {
+        if(typeof this.bamReader.postInit === 'function') {
+            await this.bamReader.postInit()
+        }
+    }
+
 
     async getAlignments(chr, bpStart, bpEnd) {
 
