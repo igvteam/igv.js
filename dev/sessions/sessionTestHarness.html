@@ -184,7 +184,7 @@
         </div>
 
         <div class="panel">
-            <h2>💾 Session Management</h2>
+            <h2>💾 Save Session</h2>
             <button id="saveSessionBtn" class="secondary">Save Session to JSON File</button>
             <button id="logSessionBtn" class="secondary">Log Session to Console</button>
             <button id="clearTracksBtn" class="danger">Clear All Tracks</button>
@@ -192,6 +192,19 @@
             <div id="trackList" class="track-list">
                 <em>No tracks loaded yet</em>
             </div>
+        </div>
+
+        <div class="panel">
+            <h2>📂 Load Session</h2>
+            <p style="color: #666; font-size: 14px; margin-bottom: 15px;">
+                Load a saved session JSON file to test how the browser handles local files and Google Drive URLs.
+            </p>
+            <div class="control-group">
+                <label for="sessionFile">Select Session JSON File:</label>
+                <input type="file" id="sessionFile" accept=".json">
+            </div>
+            <button id="loadSessionBtn">Load Session from File</button>
+            <button id="loadLastSessionBtn" class="secondary">Load Last Saved Session</button>
         </div>
 
         <div class="panel">
@@ -209,6 +222,7 @@
         import igv from "../../js/index.js"
 
         let browser
+        let lastSavedSession = null
 
         const options = {
             genome: "hg19",
@@ -330,6 +344,9 @@
                 const session = browser.toJSON()
                 const jsonString = JSON.stringify(session, null, 2)
 
+                // Save for "Load Last Session" feature
+                lastSavedSession = session
+
                 // Display in output area
                 document.getElementById("sessionOutput").textContent = jsonString
 
@@ -362,6 +379,53 @@
             } catch (err) {
                 console.error("Error getting session:", err)
                 alert("Failed to get session: " + err.message)
+            }
+        })
+
+        // Load session from file
+        document.getElementById("loadSessionBtn").addEventListener("click", async () => {
+            const fileInput = document.getElementById("sessionFile")
+            
+            if (!fileInput.files || fileInput.files.length === 0) {
+                alert("Please select a session JSON file first")
+                return
+            }
+
+            const file = fileInput.files[0]
+            
+            try {
+                const text = await file.text()
+                const session = JSON.parse(text)
+                
+                await browser.loadSessionObject(session)
+                console.log("Session loaded successfully from file:", file.name)
+                updateTrackList()
+                
+                // Display loaded session
+                document.getElementById("sessionOutput").textContent = text
+                
+                // Clear input
+                fileInput.value = ""
+            } catch (err) {
+                console.error("Error loading session:", err)
+                alert("Failed to load session: " + err.message)
+            }
+        })
+
+        // Load last saved session
+        document.getElementById("loadLastSessionBtn").addEventListener("click", async () => {
+            if (!lastSavedSession) {
+                alert("No session has been saved yet. Save a session first, then you can reload it.")
+                return
+            }
+
+            try {
+                await browser.loadSessionObject(lastSavedSession)
+                console.log("Last saved session loaded successfully")
+                updateTrackList()
+            } catch (err) {
+                console.error("Error loading last session:", err)
+                alert("Failed to load last session: " + err.message)
             }
         })
 
