@@ -66,9 +66,10 @@ class InteractionTrack extends TrackBase {
         this.arcType = getArcType(config)   // nested | proportional | inView | partialInView
         this.painter = {flipAxis: "DOWN" === this.arcOrientation, dataRange: this.dataRange, paintAxis: paintAxis}
 
-        if ("hic" === config.format) {
+        this._hic = "hic" === config.format
+        if (this._hic) {
             config.useScore = true
-            this.transparency = config.transparency?? 0.1
+            this.transparency = config.transparency ?? 0.1
         }
 
         if (config.valueColumn) {
@@ -136,7 +137,7 @@ class InteractionTrack extends TrackBase {
     }
 
     get resolutionAware() {
-        return this.config.format === 'hic'
+        return this._hic
     }
 
     async getFeatures(chr, start, end, bpPerPixel) {
@@ -186,11 +187,17 @@ class InteractionTrack extends TrackBase {
             ctx.font = "8px sans-serif"
             ctx.textAlign = "center"
 
+            let transparency = this.transparency
+            if (this._hic && bpPerPixel < 1000) {
+                // A heuristic.  Boost transparency when zooming in as arc density will get sparse and hard to see.
+                transparency *= (3 - bpPerPixel / 500)
+            }
+
             for (let feature of featureList) {
 
                 // Reset transient property drawState.  An undefined value => feature has not been drawn.
                 feature.drawState = undefined
-                let color = this.getColor(feature)
+                let color = this.getColor(feature, transparency)
                 ctx.fillStyle = color
                 ctx.strokeStyle = color
 
@@ -242,12 +249,14 @@ class InteractionTrack extends TrackBase {
                         ctx.strokeStyle = color
                         ctx.fillStyle = color
                     }
+
                     ctx.beginPath()
                     ctx.arc(xc, yc, r, startAngle, endAngle, false)
                     ctx.stroke()
                     feature.drawState = {xc, yc, r}
                 } else {
 
+                    // Inter-chromosome, we can only draw 2 end
                     let pixelStart = Math.round((feature.start - bpStart) / xScale)
                     let pixelEnd = Math.round((feature.end - bpStart) / xScale)
                     if (pixelEnd < 0 || pixelStart > pixelWidth) continue
@@ -432,7 +441,7 @@ class InteractionTrack extends TrackBase {
         }
     }
 
-    getColor(feature) {
+    getColor(feature, transparency = this.transparency) {
         let color
         if (this.colorBy) {
             const value = feature.getAttributeValue ?
@@ -445,7 +454,7 @@ class InteractionTrack extends TrackBase {
             color = this.color || feature.color || DEFAULT_ARC_COLOR
         }
         if (this.config.useScore && Number.isFinite(feature.score)) {
-            color = getAlphaColor(color, this.transparency * scoreShade(feature.score))
+            color = getAlphaColor(color, transparency * scoreShade(feature.score))
         }
         return color
     }
@@ -480,7 +489,7 @@ class InteractionTrack extends TrackBase {
 
         let items = []
 
-        if (this.hasValue) {
+        if (this.hasValue && !this._hic) {
             items.push("<hr/>")
             const lut =
                 {
@@ -539,40 +548,40 @@ class InteractionTrack extends TrackBase {
             }
         })
 
-        items.push({
-            name: 'Set alpha',
-            click: function (ev) {
-                const inputDialog = this.browser.inputDialog
-                inputDialog.present({
-                    label: "Enter alpha transparency (0-1)",
-                    value: this.alpha,
-                    callback: value => {
-                        const newAlpha = parseFloat(value)
-                        if (isNaN(newAlpha) || newAlpha < 0 || newAlpha > 1) {
-                            window.alert("Invalid alpha: " + value)
-                        } else {
-                            this.alpha = newAlpha
-                            this.trackView.repaintViews()
-                        }
-                    }
-                }, ev)
-            }
-        })
 
-        if (this.hasValue) {
+        if (this._hic) {
+            items.push(this.transparencyMenuItem())
+        } else {
             items.push({
-                element: createCheckbox("Use score", this.config.useScore), click: () => {
-                    this.config.useScore = !this.config.useScore
-                    this.valueColumn = "score"
-                    this.trackView.repaintViews()
+                name: 'Set alpha',
+                click: function (ev) {
+                    const inputDialog = this.browser.inputDialog
+                    inputDialog.present({
+                        label: "Enter alpha transparency (0-1)",
+                        value: this.alpha,
+                        callback: value => {
+                            const newAlpha = parseFloat(value)
+                            if (isNaN(newAlpha) || newAlpha < 0 || newAlpha > 1) {
+                                window.alert("Invalid alpha: " + value)
+                            } else {
+                                this.alpha = newAlpha
+                                this.trackView.repaintViews()
+                            }
+                        }
+                    }, ev)
                 }
             })
-        }
 
-        if ("hic" === this.config.format) {
-            items.push(this.transparencyMenuItem())
+            if (this.hasValue) {
+                items.push({
+                    element: createCheckbox("Use score", this.config.useScore), click: () => {
+                        this.config.useScore = !this.config.useScore
+                        this.valueColumn = "score"
+                        this.trackView.repaintViews()
+                    }
+                })
+            }
         }
-
 
         if (this.arcType === "proportional" || this.arcType === "inView" || this.arcType === "partialInView") {
             items = items.concat(this.numericDataMenuItems())

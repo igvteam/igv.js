@@ -79,6 +79,7 @@ class HicSource {
             const end1 = bin1 * binSize + binSize
             const start2 = bin2 * binSize
             const end2 = bin2 * binSize + binSize
+            const delta = Math.abs(start2 - start1)
             features.push({
                 chr: c,
                 chr1: c,
@@ -90,7 +91,7 @@ class HicSource {
                 start2,
                 end2,
                 value: counts,
-                score: 1000 * (counts / max),
+                score: Math.min(1000, 1000 * (counts / max) * Math.max(1, Math.log(delta / 1000)))  //Score is used for shading.  Boost long range interactions
             })
         }
         for (let feature of features) {
