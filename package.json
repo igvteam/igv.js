@@ -56,6 +56,7 @@
     "eslint": "^6.4.0",
     "fs-extra": "^11.3.0",
     "hdf5-indexed-reader": "github:jrobinso/hdf5-indexed-reader#v1.0.2",
+    "hic-straw": "^2.1.3",
     "igv-utils": "github:igvteam/igv-utils#v1.7.1",
     "mocha": "^11.1.0",
     "rollup": "^2.66.0",

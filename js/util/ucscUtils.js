@@ -1,4 +1,4 @@
-function scoreShade(score, color) {
+function scoreShade(score) {
     const alpha = Math.min(1, 0.11 + 0.89 * (score / 779))
     return alpha.toString()
 }

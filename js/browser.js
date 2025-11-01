@@ -30,7 +30,6 @@ import {createCircularView, makeCircViewChromosomes} from "./jbrowse/circularVie
 import ROIManager from './roi/ROIManager.js'
 import TrackROISet from "./roi/trackROISet.js"
 import SampleInfo from "./sample/sampleInfo.js"
-import HicFile from "./hic/straw/hicFile.js"
 import {translateSession} from "./hic/shoeboxUtils.js"
 import MenuUtils from "./ui/menuUtils.js"
 import Genome from "./genome/genome.js"
@@ -1072,16 +1071,7 @@ class Browser {
             // If neither format nor type are known throw an error
             if (!config.format) {
                 throw Error(`Unrecognized track:  ${JSON.stringify(config)}`)
-            } else if (config.format === "hic") {
-                const hicFile = new HicFile(config)
-                await hicFile.readHeaderAndFooter()
-                if (hicFile.chromosomeIndexMap.celltype) {
-                    type = "shoebox"
-                    config._hicFile = hicFile
-                } else {
-                    throw Error("'.hic' files not supported")
-                }
-            } else {
+            }  else {
                 type = TrackUtils.inferTrackType(config.format)
                 if ("bedtype" === type) {
                     // Bed files must be read to determine track type

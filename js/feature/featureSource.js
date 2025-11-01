@@ -4,6 +4,7 @@ import TDFSource from "../tdf/tdfSource.js"
 import StaticFeatureSource from "./staticFeatureSource.js"
 import GenbankFeatureSource from "../gbk/genbankFeatureSource.js"
 import ListFeatureSource from "./listFeatureSource.js"
+import HicSource from "../hic/hicSource.js"
 
 const bbFormats = new Set(['bigwig', 'bw', 'bigbed', 'bb', 'biginteract', 'biggenepred', 'bignarrowpeak'])
 
@@ -22,6 +23,8 @@ function FeatureSource(config, genome) {
     } else if ("vcf.list" === format) {
         // This is a text file with two columns:   <chr>  <url to vcf>
         return new ListFeatureSource(config, genome)
+    } else if ("hic" === format) {
+        return new HicSource(config, genome)
     } else {
         return new TextFeatureSource(config, genome)
     }

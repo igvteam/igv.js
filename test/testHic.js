@@ -1,7 +1,7 @@
 import { assert } from 'chai';
 import "./utils/mockObjects.js"
-import HicFile from '../js/hic/straw/hicFile.js'
-import NodeLocalFile from '../js/hic/straw/io/nodeLocalFile.mjs'
+import HicFile from '../node_modules/hic-straw/src/hicFile.js'
+import NodeLocalFile from '../node_modules/hic-straw/src/io/nodeLocalFile.mjs'
 
 suite('HicFile', function () {
 

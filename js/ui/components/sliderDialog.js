@@ -104,6 +104,10 @@ class SliderDialog {
 
         this.callback = options.callback || options.click
 
+        if(options.color) {
+            this._input.style.background = `linear-gradient(to right, #fff, ${options.color})`;
+        }
+
         DOMUtils.show(this.container)
         this.clampLocation(e.clientX, e.clientY)
 
