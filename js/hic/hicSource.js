@@ -72,6 +72,7 @@ class HicSource {
             // Skip diagonal
             if (Math.abs(bin1 - bin2) <= binThreshold) continue
 
+            // Skip bins with counts below threshold
             if (counts < threshold) continue
 
             const c = this.genome.getChromosomeName(chr)
