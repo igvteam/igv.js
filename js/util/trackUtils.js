@@ -24,6 +24,7 @@ function inferTrackType(format) {
             case "bedpe":
             case "bedpe-loop":
             case "biginteract":
+            case "hic":
                 return "interact"
             case "bp":
                 return "arc"
