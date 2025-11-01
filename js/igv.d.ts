@@ -171,7 +171,7 @@ export namespace Tracks {
 
     export type AnnotationFormat = "bed" | "gff3" | "gtf" |
         "genePred" | "genePredExt" | "peaks" |
-        "narrowPeak" | "broadPeak" | "bigBed" | "bedpe" | "rmsk" | "vcf" |
+        "narrowPeak" | "broadPeak" | "bigBed" | "rmsk" | "vcf" |
         "gtexgwas";
 
     export type AnnotationTrackDisplay = {
@@ -384,7 +384,7 @@ export namespace Tracks {
     });
 
 
-    export type InteractFormat = "interact" | "bedpe" | "bigInteract" | "bb";
+    export type InteractFormat = "interact" | "bedpe" | "bigInteract" | "bb" | "hic";
 
     export type InteractTrackOptions = {
         arcType?: "nested" | "proportional" | "inView" | "partialInView";

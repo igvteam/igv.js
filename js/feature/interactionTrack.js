@@ -69,6 +69,7 @@ class InteractionTrack extends TrackBase {
         this._hic = "hic" === config.format
         if (this._hic) {
             config.useScore = true
+            this.color = config.color ?? "rgb(255,0,0)"
             this.transparency = config.transparency ?? 0.1
         }
 
