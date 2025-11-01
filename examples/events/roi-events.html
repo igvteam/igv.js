@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href="../../dist/igv.css" rel="stylesheet" type="text/css">
+    <title>ROI Events Example</title>
+
+</head>
+
+<body>
+
+<p class="lead">
+    This example demonstrates the new <code>roiadded</code> and <code>roiremoved</code> events in IGV.js.
+    Add ROIs by sweeping on the ruler, and remove them using the context menu. 
+    Event details will be logged below.
+</p>
+
+<div id="igv-div"></div>
+
+<h3>Event Log:</h3>
+<div id="event-log" style="background-color: #f5f5f5; padding: 10px; margin-top: 20px; height: 200px; overflow-y: auto; font-family: monospace; font-size: 12px;"></div>
+
+<script src="../../dist/igv.min.js"></script>
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        var options = {
+            genome: "hg38",
+            locus: "chr8:127,736,588-127,739,371",
+            tracks: [
+                {
+                    "name": "HG00103",
+                    "url": "https://s3.amazonaws.com/1000genomes/data/HG00103/alignment/HG00103.alt_bwamem_GRCh38DH.20150718.GBR.low_coverage.cram",
+                    "indexURL": "https://s3.amazonaws.com/1000genomes/data/HG00103/alignment/HG00103.alt_bwamem_GRCh38DH.20150718.GBR.low_coverage.cram.crai",
+                    "format": "cram"
+                }
+            ]
+        }
+
+        igv.createBrowser(document.getElementById('igv-div'), options)
+
+            .then(function (browser) {
+
+                const eventLog = document.getElementById('event-log');
+
+                function logEvent(eventType, data) {
+                    const timestamp = new Date().toLocaleTimeString();
+                    const logEntry = `[${timestamp}] ${eventType}: ${JSON.stringify(data)}\n`;
+                    eventLog.textContent += logEntry;
+                    eventLog.scrollTop = eventLog.scrollHeight;
+                }
+
+                // Subscribe to ROI events
+                browser.on('roiadded', function (roi) {
+                    logEvent('roiadded', roi);
+                });
+
+                browser.on('roiremoved', function (roi) {
+                    logEvent('roiremoved', roi);
+                });
+
+                // Add initial log message
+                logEvent('info', 'Browser initialized. Sweep on the ruler to create ROIs, right-click to delete them.');
+
+            })
+    })
+
+</script>
+
+</body>
+
+</html>
