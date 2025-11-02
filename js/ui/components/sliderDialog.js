@@ -53,11 +53,11 @@ class SliderDialog {
 
         DOMUtils.hide(this.container)
 
-        this._input.addEventListener('input', () => {
+        this._input.addEventListener('input', UIUtils.throttle(() => {
             const number = parseFloat(this._input.value)/this._scaleFactor
             this.callback(number)
             this._output.value = `${number.toFixed(this._precision)}`
-        }, false)
+        }, 200))
 
         this.ok.addEventListener('click', () => {
             if (typeof this.callback === 'function') {
