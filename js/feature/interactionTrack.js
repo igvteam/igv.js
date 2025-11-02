@@ -618,7 +618,7 @@ class InteractionTrack extends TrackBase {
                 {
                     label: 'Transparency',
                     value: this.transparency,
-                    min: 0.0,
+                    min: 0.01,
                     max: 1.0,
                     scaleFactor: 1000,
                     color: this.color,
