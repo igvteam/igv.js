@@ -852,33 +852,40 @@ class Browser {
      */
     async loadTrackList(configList) {
 
-        // Impose an order if not specified
-        let order = this.trackViews.length + 1
-        for (let c of configList) {
-            if (c.order === undefined) {
-                c.order = order++
+        try {
+            this.startSpinner()   // TODO this.startSpinner() when we have one
+
+            // Impose an order if not specified
+            let order = this.trackViews.length + 1
+            for (let c of configList) {
+                if (c.order === undefined) {
+                    c.order = order++
+                }
             }
+
+            const promises = []
+            for (const config of configList) {
+                promises.push(this.#loadTrackHelper(config))
+            }
+
+            const loadedTracks = await Promise.all(promises)
+
+            // If any tracks are selected show the selection buttons
+            if (this.trackViews.some(({track}) => track.selected)) {
+                this.navbar.setEnableTrackSelection(true)
+            }
+
+            this.reorderTracks()
+
+            await resize.call(this)
+
+            this.fireEvent('trackorderchanged', [this.getTrackOrder()])
+
+            return loadedTracks
+
+        } finally {
+            this.stopSpinner()   // TODO  this.stopSpinner()
         }
-
-        const promises = []
-        for (const config of configList) {
-            promises.push(this.#loadTrackHelper(config))
-        }
-
-        const loadedTracks = await Promise.all(promises)
-
-        // If any tracks are selected show the selection buttons
-        if (this.trackViews.some(({track}) => track.selected)) {
-            this.navbar.setEnableTrackSelection(true)
-        }
-
-        this.reorderTracks()
-
-        await resize.call(this)
-
-        this.fireEvent('trackorderchanged', [this.getTrackOrder()])
-
-        return loadedTracks
     }
 
     /**
@@ -950,13 +957,7 @@ class Browser {
         }
 
         if (typeof track.postInit === 'function') {
-            const rulerTrackView = this.getRulerTrackView()
-            try {
-                this.startSpinner()   // TODO this.startSpinner() when we have one
-                await track.postInit()
-            } finally {
-                this.stopSpinner()   // TODO  this.stopSpinner()
-            }
+            await track.postInit()
         }
 
         // Add track view AFTER postInit, to avoid adding a track that fails during postInit
@@ -1071,7 +1072,7 @@ class Browser {
             // If neither format nor type are known throw an error
             if (!config.format) {
                 throw Error(`Unrecognized track:  ${JSON.stringify(config)}`)
-            }  else {
+            } else {
                 type = TrackUtils.inferTrackType(config.format)
                 if ("bedtype" === type) {
                     // Bed files must be read to determine track type
