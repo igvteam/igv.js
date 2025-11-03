@@ -39,7 +39,8 @@ class InteractionTrack extends TrackBase {
         alpha: 0.02,
         logScale: true,
         colorBy: undefined,
-        transparency: 1
+        transparency: 1,
+        normalization: "NONE"
     }
 
     constructor(config, browser) {
@@ -143,7 +144,7 @@ class InteractionTrack extends TrackBase {
 
     async getFeatures(chr, start, end, bpPerPixel) {
         const visibilityWindow = this.visibilityWindow
-        const features = await this.featureSource.getFeatures({chr, start, end, bpPerPixel, visibilityWindow})
+        const features = await this.featureSource.getFeatures({chr, start, end, bpPerPixel, visibilityWindow, normalization: this.normalization})
 
         // Check for score or value
         if (this.hasValue === undefined && features && features.length > 0) {
@@ -288,20 +289,29 @@ class InteractionTrack extends TrackBase {
         }
 
         function autoscaleNested() {
-            let max = 0
-            for (let feature of featureList) {
-                let pixelStart = (feature.start - bpStart) / xScale
-                let pixelEnd = (feature.end - bpStart) / xScale
-                if (pixelStart >= 0 && pixelEnd <= pixelWidth) {
-                    max = Math.max(max, pixelEnd - pixelStart)
-                }
-            }
-            let a = Math.min(viewportWidth, max) / 2
-            if (max > 0) {
-                let coa = (pixelHeight - 10) / a
-                this.theta = estimateTheta(coa)
+
+            if(this._hic) {
+                // No autoscaling for hic files
+                this.theta = Math.PI / 3
                 this.sinTheta = Math.sin(this.theta)
                 this.cosTheta = Math.cos(this.theta)
+            }
+            else {
+                let max = 0
+                for (let feature of featureList) {
+                    let pixelStart = (feature.start - bpStart) / xScale
+                    let pixelEnd = (feature.end - bpStart) / xScale
+                    if (pixelStart >= 0 && pixelEnd <= pixelWidth) {
+                        max = Math.max(max, pixelEnd - pixelStart)
+                    }
+                }
+                let a = Math.min(viewportWidth, max) / 2
+                if (max > 0) {
+                    let coa = (pixelHeight - 10) / a
+                    this.theta = estimateTheta(coa)
+                    this.sinTheta = Math.sin(this.theta)
+                    this.cosTheta = Math.cos(this.theta)
+                }
             }
         }
     }
@@ -551,7 +561,9 @@ class InteractionTrack extends TrackBase {
 
 
         if (this._hic) {
+
             items.push(this.transparencyMenuItem())
+
         } else {
             items.push({
                 name: 'Set alpha',
@@ -579,6 +591,21 @@ class InteractionTrack extends TrackBase {
                         this.config.useScore = !this.config.useScore
                         this.valueColumn = "score"
                         this.trackView.repaintViews()
+                    }
+                })
+            }
+        }
+
+        if (this._hic) {
+            items.push('<hr/>')
+            items.push('<b>Normalization</b>')
+            for (let option of this.featureSource.normalizationOptions) {
+                items.push({
+                    element: createCheckbox(option, this.normalization === option),
+                    click: () => {
+                        this.normalization = option
+                        this.trackView.clearCachedFeatures()
+                        this.trackView.updateViews()
                     }
                 })
             }
