@@ -394,10 +394,7 @@ class Browser {
 
         let session
         if (options.url || options.file) {
-            session = await Browser.loadSessionFile(options, this.config)
-            // if (options.parentApp``) {
-            //     session.parentApp = options.parentApp
-            // }
+            session = await Browser.loadSessionFile(options)
         } else {
             session = options
         }
@@ -411,7 +408,7 @@ class Browser {
      * @param options
      * @returns {Promise<*|XMLSession>}
      */
-    static async loadSessionFile(options, defaults) {
+    static async loadSessionFile(options) {
 
         const urlOrFile = options.url || options.file
 
@@ -440,7 +437,7 @@ class Browser {
                 config = await igvxhr.loadJson(urlOrFile)
             }
         }
-        setDefaults(config, defaults)
+
         return config
     }
 
@@ -450,6 +447,9 @@ class Browser {
      * @returns {Promise<void>}
      */
     async loadSessionObject(session) {
+
+        // Capture current configuration options that might be missing from session
+        setDefaults(session, this.config)
 
         // prepare to load a new session, discarding DOM and state
         this.cleanHouseForSession()
@@ -1490,7 +1490,7 @@ class Browser {
     }
 
     minimumBases() {
-        return this.config.minimumBases
+        return this.config.minimumBases ?? 40
     }
 
     // Zoom in by a factor of 2, keeping the same center location
