@@ -307,15 +307,17 @@
         // Mock Google Drive track (for testing session validation)
         document.getElementById("mockGoogleDriveBtn").addEventListener("click", () => {
             try {
-                // Create a mock track object with a Google Drive URL
+                // Create a mock track object with a Google Drive URL (using real config from session file)
                 const mockTrack = {
                     id: 'mock-google-drive-' + Date.now(),
-                    name: 'Mock Google Drive Track',
-                    type: 'annotation',
+                    name: 'My Google Drive File',
+                    type: 'wig',
                     config: {
-                        url: 'https://www.googleapis.com/drive/v3/files/1pO8Czk913zXRhU7MeWnXB6uSIwNpNqDV?alt=media',
-                        name: 'Mock Google Drive Track',
-                        type: 'annotation'
+                        url: 'https://www.googleapis.com/drive/v3/files/1VHkNjxyj9FaNSkqSSZBlo-hgw8FnW-sM?alt=media&supportsAllDrives=true',
+                        name: 'My Google Drive File',
+                        filename: 'test_chr4.wig',
+                        format: 'wig',
+                        type: 'wig'
                     },
                     order: 100
                 }

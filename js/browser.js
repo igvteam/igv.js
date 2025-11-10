@@ -566,10 +566,18 @@ class Browser {
                 if (sampleInfoConfig.file) {
                     localSampleInfoFiles.push(sampleInfoConfig.file)
                 } else if (sampleInfoConfig.googleDriveFileId) {
-                    googleDriveSampleInfoFiles.push(`Sample info (File ID: ${sampleInfoConfig.googleDriveFileId})`)
+                    const fileName = sampleInfoConfig.filename || sampleInfoConfig.googleDriveFileId
+                    googleDriveSampleInfoFiles.push({
+                        trackName: 'Sample info',
+                        fileName: fileName
+                    })
                 } else if (sampleInfoConfig.googleDriveURL) {
                     // Backward compatibility: old sessions may have googleDriveURL
-                    googleDriveSampleInfoFiles.push(`Sample info (Google Drive URL)`)
+                    const fileName = sampleInfoConfig.filename || 'Google Drive file'
+                    googleDriveSampleInfoFiles.push({
+                        trackName: 'Sample info',
+                        fileName: fileName
+                    })
                 } else {
                     await this.sampleInfo.loadSampleInfo(sampleInfoConfig)
                 }
@@ -586,57 +594,88 @@ class Browser {
             trackConfigurations.push({type: "sequence", order: defaultSequenceTrackOrder, removable: false})
         }
 
-        // Collect local files
-        const localTrackFileNames = trackConfigurations.filter((config) => undefined !== config.file).map(({file}) => file)
-        const localIndexFileNames = trackConfigurations.filter((config) => undefined !== config.indexFile).map(({indexFile}) => indexFile)
-        if (localIndexFileNames.length > 0) {
-            localTrackFileNames.push(...localIndexFileNames)
+        // Collect local files - track name and filename pairs
+        const localFileItems = []
+        for (const config of trackConfigurations) {
+            const trackName = config.name || 'Unnamed track'
+            if (config.file) {
+                localFileItems.push({
+                    trackName: trackName,
+                    fileName: config.file
+                })
+            }
+            if (config.indexFile) {
+                localFileItems.push({
+                    trackName: `${trackName} index`,
+                    fileName: config.indexFile
+                })
+            }
         }
-        if (localSampleInfoFiles.length > 0) {
-            localTrackFileNames.push(...localSampleInfoFiles)
+        // Add sample info files
+        for (const fileName of localSampleInfoFiles) {
+            localFileItems.push({
+                trackName: 'Sample info',
+                fileName: fileName
+            })
         }
 
         // Collect Google Drive file IDs (we now store file IDs instead of URLs)
         // Also handle backward compatibility with old sessions that have googleDriveURL
-        const googleDriveTrackItems = []
+        const googleDriveItems = []
         for (const config of trackConfigurations) {
             const trackName = config.name || 'Unnamed track'
             
             // Check main file (new format first, then old format for backward compatibility)
             if (config.googleDriveFileId) {
-                googleDriveTrackItems.push(`${trackName} (File ID: ${config.googleDriveFileId})`)
+                const fileName = config.filename || config.googleDriveFileId
+                googleDriveItems.push({
+                    trackName: trackName,
+                    fileName: fileName
+                })
             } else if (config.googleDriveURL) {
                 // Backward compatibility: old sessions may have googleDriveURL
-                googleDriveTrackItems.push(`${trackName} (Google Drive URL)`)
+                const fileName = config.filename || 'Google Drive file'
+                googleDriveItems.push({
+                    trackName: trackName,
+                    fileName: fileName
+                })
             }
             
             // Check index file independently (new format first, then old format for backward compatibility)
             if (config.googleDriveIndexFileId) {
-                googleDriveTrackItems.push(`${trackName} index (File ID: ${config.googleDriveIndexFileId})`)
+                const fileName = config.indexFilename || config.googleDriveIndexFileId
+                googleDriveItems.push({
+                    trackName: `${trackName} index`,
+                    fileName: fileName
+                })
             } else if (config.googleDriveIndexURL) {
                 // Backward compatibility: old sessions may have googleDriveIndexURL
-                googleDriveTrackItems.push(`${trackName} index (Google Drive URL)`)
+                const fileName = config.indexFilename || 'Google Drive index file'
+                googleDriveItems.push({
+                    trackName: `${trackName} index`,
+                    fileName: fileName
+                })
             }
         }
-        if (googleDriveSampleInfoFiles.length > 0) {
-            googleDriveTrackItems.push(...googleDriveSampleInfoFiles)
-        }
+        // Add sample info Google Drive files
+        googleDriveItems.push(...googleDriveSampleInfoFiles)
 
         // Display warning if problematic resources are found
-        if (localTrackFileNames.length > 0 || googleDriveTrackItems.length > 0) {
-            let message = 'Warning: This session includes resources that cannot be loaded:\n'
+        if (localFileItems.length > 0 || googleDriveItems.length > 0) {
+            let message = 'Local files and/or Google Drive files cannot be loaded automatically\n\n'
+            message += 'This session file includes references to the following:\n\n'
             
-            if (localTrackFileNames.length > 0) {
-                message += '\nLocal files:\n'
-                message += localTrackFileNames.map(file => `  - ${file}`).join('\n')
+            // Add local file items
+            for (const item of localFileItems) {
+                message += `track name: ${item.trackName}\n`
+                message += `local file name: ${item.fileName}\n\n`
             }
             
-            if (googleDriveTrackItems.length > 0) {
-                message += '\n\nGoogle Drive files:\n'
-                message += googleDriveTrackItems.map(item => `  - ${item}`).join('\n')
+            // Add Google Drive items
+            for (const item of googleDriveItems) {
+                message += `track name: ${item.trackName}\n`
+                message += `google file name: ${item.fileName}\n\n`
             }
-            
-            message += '\n\nThese resources require local access or authentication and have been skipped.'
             
             alert(message)
         }
@@ -2038,27 +2077,41 @@ class Browser {
         }
 
         // 2. Collect warnings from tracks and sample info
-        const localFileWarnings = []
-        const googleDriveWarnings = []
+        const localFileItems = []
+        const googleDriveItems = []
 
         // Check tracks
         for (const trackConfig of json.tracks) {
+            const trackName = trackConfig.name || 'Unnamed track'
+            
             // Local files
             if (trackConfig.file) {
-                localFileWarnings.push(trackConfig.file)
+                localFileItems.push({
+                    trackName: trackName,
+                    fileName: trackConfig.file
+                })
             }
             if (trackConfig.indexFile) {
-                localFileWarnings.push(trackConfig.indexFile)
+                localFileItems.push({
+                    trackName: `${trackName} index`,
+                    fileName: trackConfig.indexFile
+                })
             }
 
             // Google Drive file IDs (we now store file IDs instead of URLs)
             if (trackConfig.googleDriveFileId) {
-                const trackName = trackConfig.name || 'Unnamed track'
-                googleDriveWarnings.push(`${trackName} (File ID: ${trackConfig.googleDriveFileId})`)
+                const fileName = trackConfig.filename || trackConfig.googleDriveFileId
+                googleDriveItems.push({
+                    trackName: trackName,
+                    fileName: fileName
+                })
             }
             if (trackConfig.googleDriveIndexFileId) {
-                const trackName = trackConfig.name || 'Unnamed track'
-                googleDriveWarnings.push(`${trackName} index (File ID: ${trackConfig.googleDriveIndexFileId})`)
+                const fileName = trackConfig.indexFilename || trackConfig.googleDriveIndexFileId
+                googleDriveItems.push({
+                    trackName: `${trackName} index`,
+                    fileName: fileName
+                })
             }
         }
 
@@ -2067,29 +2120,37 @@ class Browser {
             for (const path of this.sampleInfo.sampleInfoFiles) {
                 const config = TrackBase.prepareConfigForSession({url: path})
                 if (config.file) {
-                    localFileWarnings.push(config.file)
+                    localFileItems.push({
+                        trackName: 'Sample info',
+                        fileName: config.file
+                    })
                 }
                 if (config.googleDriveFileId) {
-                    googleDriveWarnings.push(`Sample info (File ID: ${config.googleDriveFileId})`)
+                    googleDriveItems.push({
+                        trackName: 'Sample info',
+                        fileName: config.googleDriveFileId
+                    })
                 }
             }
         }
 
         // 3. Display consolidated warning if any issues found
-        if (localFileWarnings.length > 0 || googleDriveWarnings.length > 0) {
-            let message = 'Warning: This session includes resources that may not load when shared:\n'
+        if (localFileItems.length > 0 || googleDriveItems.length > 0) {
+            let message = 'This session includes reference(s) to local file(s) and/or google drive files.\n\n'
 
-            if (localFileWarnings.length > 0) {
-                message += '\nLocal files:\n'
-                message += localFileWarnings.map(file => `  - ${file}`).join('\n')
+            // Add local file items
+            for (const item of localFileItems) {
+                message += `track name: ${item.trackName}\n`
+                message += `local file name: ${item.fileName}\n\n`
             }
 
-            if (googleDriveWarnings.length > 0) {
-                message += '\n\nGoogle Drive files:\n'
-                message += googleDriveWarnings.map(item => `  - ${item}`).join('\n')
+            // Add Google Drive items
+            for (const item of googleDriveItems) {
+                message += `track name: ${item.trackName}\n`
+                message += `google file name: ${item.fileName}\n\n`
             }
 
-            message += '\n\nThese resources require local access or authentication.'
+            message += 'Local files and Google Drive files cannot be loaded automatically\nwhen a saved session is restored'
 
             alert(message)
         }
