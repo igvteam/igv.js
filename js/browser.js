@@ -565,8 +565,11 @@ class Browser {
                 // to prompt the user to load the file manually, but we don't currently do that.
                 if (sampleInfoConfig.file) {
                     localSampleInfoFiles.push(sampleInfoConfig.file)
+                } else if (sampleInfoConfig.googleDriveFileId) {
+                    googleDriveSampleInfoFiles.push(`Sample info (File ID: ${sampleInfoConfig.googleDriveFileId})`)
                 } else if (sampleInfoConfig.googleDriveURL) {
-                    googleDriveSampleInfoFiles.push(sampleInfoConfig.googleDriveURL)
+                    // Backward compatibility: old sessions may have googleDriveURL
+                    googleDriveSampleInfoFiles.push(`Sample info (Google Drive URL)`)
                 } else {
                     await this.sampleInfo.loadSampleInfo(sampleInfoConfig)
                 }
@@ -593,18 +596,34 @@ class Browser {
             localTrackFileNames.push(...localSampleInfoFiles)
         }
 
-        // Collect Google Drive URLs
-        const googleDriveTrackURLs = trackConfigurations.filter((config) => undefined !== config.googleDriveURL).map(({googleDriveURL}) => googleDriveURL)
-        const googleDriveIndexURLs = trackConfigurations.filter((config) => undefined !== config.googleDriveIndexURL).map(({googleDriveIndexURL}) => googleDriveIndexURL)
-        if (googleDriveIndexURLs.length > 0) {
-            googleDriveTrackURLs.push(...googleDriveIndexURLs)
+        // Collect Google Drive file IDs (we now store file IDs instead of URLs)
+        // Also handle backward compatibility with old sessions that have googleDriveURL
+        const googleDriveTrackItems = []
+        for (const config of trackConfigurations) {
+            const trackName = config.name || 'Unnamed track'
+            
+            // Check main file (new format first, then old format for backward compatibility)
+            if (config.googleDriveFileId) {
+                googleDriveTrackItems.push(`${trackName} (File ID: ${config.googleDriveFileId})`)
+            } else if (config.googleDriveURL) {
+                // Backward compatibility: old sessions may have googleDriveURL
+                googleDriveTrackItems.push(`${trackName} (Google Drive URL)`)
+            }
+            
+            // Check index file independently (new format first, then old format for backward compatibility)
+            if (config.googleDriveIndexFileId) {
+                googleDriveTrackItems.push(`${trackName} index (File ID: ${config.googleDriveIndexFileId})`)
+            } else if (config.googleDriveIndexURL) {
+                // Backward compatibility: old sessions may have googleDriveIndexURL
+                googleDriveTrackItems.push(`${trackName} index (Google Drive URL)`)
+            }
         }
         if (googleDriveSampleInfoFiles.length > 0) {
-            googleDriveTrackURLs.push(...googleDriveSampleInfoFiles)
+            googleDriveTrackItems.push(...googleDriveSampleInfoFiles)
         }
 
         // Display warning if problematic resources are found
-        if (localTrackFileNames.length > 0 || googleDriveTrackURLs.length > 0) {
+        if (localTrackFileNames.length > 0 || googleDriveTrackItems.length > 0) {
             let message = 'Warning: This session includes resources that cannot be loaded:\n'
             
             if (localTrackFileNames.length > 0) {
@@ -612,9 +631,9 @@ class Browser {
                 message += localTrackFileNames.map(file => `  - ${file}`).join('\n')
             }
             
-            if (googleDriveTrackURLs.length > 0) {
-                message += '\n\nGoogle Drive URLs:\n'
-                message += googleDriveTrackURLs.map(url => `  - ${url}`).join('\n')
+            if (googleDriveTrackItems.length > 0) {
+                message += '\n\nGoogle Drive files:\n'
+                message += googleDriveTrackItems.map(item => `  - ${item}`).join('\n')
             }
             
             message += '\n\nThese resources require local access or authentication and have been skipped.'
@@ -622,7 +641,13 @@ class Browser {
             alert(message)
         }
 
-        const nonLocalTrackConfigurations = trackConfigurations.filter((config) => undefined === config.file && undefined === config.googleDriveURL)
+        const nonLocalTrackConfigurations = trackConfigurations.filter((config) => 
+            undefined === config.file && 
+            undefined === config.indexFile &&
+            undefined === config.googleDriveFileId && 
+            undefined === config.googleDriveIndexFileId &&
+            undefined === config.googleDriveURL &&
+            undefined === config.googleDriveIndexURL)
 
         // Maintain track order unless explicitly set
         let trackOrder = 1
