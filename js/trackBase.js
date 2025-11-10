@@ -2,7 +2,7 @@ import {isSimpleType} from "./util/igvUtils.js"
 import {FeatureUtils, FileUtils, StringUtils} from "../node_modules/igv-utils/src/index.js"
 import {createCheckbox} from "./igv-icons.js"
 import {findFeatureAfterCenter} from "./feature/featureUtils.js"
-import {isLocalFile, isGoogleDriveURL} from "./util/sessionResourceValidator.js"
+import {isLocalFile, isGoogleDriveURL, extractGoogleDriveFileId} from "./util/sessionResourceValidator.js"
 
 const fixColor = (colorString) => {
     if (StringUtils.isString(colorString)) {
@@ -659,11 +659,29 @@ class TrackBase {
         }
 
         // Check for Google Drive URLs and mark them
+        // Extract file ID and store it similar to how local files store filename
+        // Remove the URL field, keeping only the file ID
         if (cooked.url && isGoogleDriveURL(cooked.url)) {
-            cooked.googleDriveURL = cooked.url
+            const fileId = extractGoogleDriveFileId(cooked.url)
+            if (fileId) {
+                // Store file ID (similar to how local files store filename)
+                cooked.googleDriveFileId = fileId
+                // Remove the URL field, just like we do for local files
+                delete cooked.url
+            } else {
+                // Fallback: if we can't extract ID, keep the URL (shouldn't happen with valid URLs)
+                // But this preserves backward compatibility
+            }
         }
         if (cooked.indexURL && isGoogleDriveURL(cooked.indexURL)) {
-            cooked.googleDriveIndexURL = cooked.indexURL
+            const fileId = extractGoogleDriveFileId(cooked.indexURL)
+            if (fileId) {
+                cooked.googleDriveIndexFileId = fileId
+                // Remove the indexURL field, just like we do for local files
+                delete cooked.indexURL
+            } else {
+                // Fallback: if we can't extract ID, keep the URL (shouldn't happen with valid URLs)
+            }
         }
 
         return cooked

@@ -2026,12 +2026,14 @@ class Browser {
                 localFileWarnings.push(trackConfig.indexFile)
             }
 
-            // Google Drive URLs
-            if (trackConfig.googleDriveURL) {
-                googleDriveWarnings.push(trackConfig.googleDriveURL)
+            // Google Drive file IDs (we now store file IDs instead of URLs)
+            if (trackConfig.googleDriveFileId) {
+                const trackName = trackConfig.name || 'Unnamed track'
+                googleDriveWarnings.push(`${trackName} (File ID: ${trackConfig.googleDriveFileId})`)
             }
-            if (trackConfig.googleDriveIndexURL) {
-                googleDriveWarnings.push(trackConfig.googleDriveIndexURL)
+            if (trackConfig.googleDriveIndexFileId) {
+                const trackName = trackConfig.name || 'Unnamed track'
+                googleDriveWarnings.push(`${trackName} index (File ID: ${trackConfig.googleDriveIndexFileId})`)
             }
         }
 
@@ -2042,8 +2044,8 @@ class Browser {
                 if (config.file) {
                     localFileWarnings.push(config.file)
                 }
-                if (config.googleDriveURL) {
-                    googleDriveWarnings.push(config.googleDriveURL)
+                if (config.googleDriveFileId) {
+                    googleDriveWarnings.push(`Sample info (File ID: ${config.googleDriveFileId})`)
                 }
             }
         }
@@ -2058,8 +2060,8 @@ class Browser {
             }
 
             if (googleDriveWarnings.length > 0) {
-                message += '\n\nGoogle Drive URLs:\n'
-                message += googleDriveWarnings.map(url => `  - ${url}`).join('\n')
+                message += '\n\nGoogle Drive files:\n'
+                message += googleDriveWarnings.map(item => `  - ${item}`).join('\n')
             }
 
             message += '\n\nThese resources require local access or authentication.'
