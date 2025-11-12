@@ -48,7 +48,7 @@ import {createBlatTrack} from "./blat/blatTrack.js"
 import {loadHub} from "./ucsc/hub/hubParser.js"
 import {EventEmitter} from "./events.js"
 import Locus from "./locus.js"
-import {isLocalFile, isGoogleDriveURL} from "./util/sessionResourceValidator.js"
+import {isLocalFile, isGoogleDriveURL, extractGoogleDriveFileId} from "./util/sessionResourceValidator.js"
 
 
 // css - $igv-scrollbar-outer-width: 14px;
@@ -560,20 +560,10 @@ class Browser {
         if (session.sampleinfo) {
             const sampleInfoArray = Array.isArray(session.sampleinfo) ? session.sampleinfo : [session.sampleinfo]
             for (const sampleInfoConfig of sampleInfoArray) {
-                // The "file" property is recorded in the session when a local file is referenced. It can't be used
-                // on reloading, its only purpose is to present an alert to the user.  This could also be used
-                // to prompt the user to load the file manually, but we don't currently do that.
                 if (sampleInfoConfig.file) {
                     localSampleInfoFiles.push(sampleInfoConfig.file)
-                } else if (sampleInfoConfig.googleDriveFileId) {
-                    const fileName = sampleInfoConfig.filename || sampleInfoConfig.googleDriveFileId
-                    googleDriveSampleInfoFiles.push({
-                        trackName: 'Sample info',
-                        fileName: fileName
-                    })
-                } else if (sampleInfoConfig.googleDriveURL) {
-                    // Backward compatibility: old sessions may have googleDriveURL
-                    const fileName = sampleInfoConfig.filename || 'Google Drive file'
+                } else if (sampleInfoConfig.url && isGoogleDriveURL(sampleInfoConfig.url)) {
+                    const fileName = sampleInfoConfig.filename || extractGoogleDriveFileId(sampleInfoConfig.url) || 'Google Drive file'
                     googleDriveSampleInfoFiles.push({
                         trackName: 'Sample info',
                         fileName: fileName
@@ -594,71 +584,12 @@ class Browser {
             trackConfigurations.push({type: "sequence", order: defaultSequenceTrackOrder, removable: false})
         }
 
-        // Collect local files - track name and filename pairs
-        const localFileItems = []
-        for (const config of trackConfigurations) {
-            const trackName = config.name || 'Unnamed track'
-            if (config.file) {
-                localFileItems.push({
-                    trackName: trackName,
-                    fileName: config.file
-                })
-            }
-            if (config.indexFile) {
-                localFileItems.push({
-                    trackName: `${trackName} index`,
-                    fileName: config.indexFile
-                })
-            }
-        }
-        // Add sample info files
-        for (const fileName of localSampleInfoFiles) {
-            localFileItems.push({
-                trackName: 'Sample info',
-                fileName: fileName
-            })
-        }
-
-        // Collect Google Drive file IDs (we now store file IDs instead of URLs)
-        // Also handle backward compatibility with old sessions that have googleDriveURL
-        const googleDriveItems = []
-        for (const config of trackConfigurations) {
-            const trackName = config.name || 'Unnamed track'
-
-            // Check main file (new format first, then old format for backward compatibility)
-            if (config.googleDriveFileId) {
-                const fileName = config.filename || config.googleDriveFileId
-                googleDriveItems.push({
-                    trackName: trackName,
-                    fileName: fileName
-                })
-            } else if (config.googleDriveURL) {
-                // Backward compatibility: old sessions may have googleDriveURL
-                const fileName = config.filename || 'Google Drive file'
-                googleDriveItems.push({
-                    trackName: trackName,
-                    fileName: fileName
-                })
-            }
-
-            // Check index file independently (new format first, then old format for backward compatibility)
-            if (config.googleDriveIndexFileId) {
-                const fileName = config.indexFilename || config.googleDriveIndexFileId
-                googleDriveItems.push({
-                    trackName: `${trackName} index`,
-                    fileName: fileName
-                })
-            } else if (config.googleDriveIndexURL) {
-                // Backward compatibility: old sessions may have googleDriveIndexURL
-                const fileName = config.indexFilename || 'Google Drive index file'
-                googleDriveItems.push({
-                    trackName: `${trackName} index`,
-                    fileName: fileName
-                })
-            }
-        }
-        // Add sample info Google Drive files
-        googleDriveItems.push(...googleDriveSampleInfoFiles)
+        // Extract problematic resources from track configurations
+        const { localFileItems, googleDriveItems } = this.#extractProblematicResources(
+            trackConfigurations,
+            localSampleInfoFiles,
+            googleDriveSampleInfoFiles
+        )
 
         // Display warning if problematic resources are found
         if (localFileItems.length > 0 || googleDriveItems.length > 0) {
@@ -684,10 +615,9 @@ class Browser {
         const nonLocalTrackConfigurations = trackConfigurations.filter((config) =>
             undefined === config.file &&
             undefined === config.indexFile &&
-            undefined === config.googleDriveFileId &&
-            undefined === config.googleDriveIndexFileId &&
-            undefined === config.googleDriveURL &&
-            undefined === config.googleDriveIndexURL)
+            // Filter out tracks with Google Drive URLs in url/indexURL fields
+            !(config.url && isGoogleDriveURL(config.url)) &&
+            !(config.indexURL && isGoogleDriveURL(config.indexURL)))
 
         // Maintain track order unless explicitly set
         let trackOrder = 1
@@ -2041,6 +1971,74 @@ class Browser {
     }
 
     /**
+     * Extract problematic resources (local files and Google Drive files) from track configurations.
+     * Google Drive files are detected by checking if the url/indexURL fields contain Google Drive URLs.
+     *
+     * @param {Array} trackConfigurations - Array of track configuration objects
+     * @param {Array} localSampleInfoFiles - Array of local sample info filenames
+     * @param {Array} googleDriveSampleInfoFiles - Array of Google Drive sample info items (objects with trackName and fileName)
+     * @returns {{localFileItems: Array, googleDriveItems: Array}} Object containing arrays of problematic resources
+     * @private
+     */
+    #extractProblematicResources(trackConfigurations, localSampleInfoFiles = [], googleDriveSampleInfoFiles = []) {
+        const localFileItems = []
+        const googleDriveItems = []
+
+        // Collect local files from track configurations
+        for (const config of trackConfigurations) {
+            const trackName = config.name || 'Unnamed track'
+            if (config.file) {
+                localFileItems.push({
+                    trackName: trackName,
+                    fileName: config.file
+                })
+            }
+            if (config.indexFile) {
+                localFileItems.push({
+                    trackName: `${trackName} index`,
+                    fileName: config.indexFile
+                })
+            }
+        }
+
+        // Add sample info local files
+        for (const fileName of localSampleInfoFiles) {
+            localFileItems.push({
+                trackName: 'Sample info',
+                fileName: fileName
+            })
+        }
+
+        // Collect Google Drive files by checking if url/indexURL fields contain Google Drive URLs
+        for (const config of trackConfigurations) {
+            const trackName = config.name || 'Unnamed track'
+
+            // Check if url field contains a Google Drive URL
+            if (config.url && isGoogleDriveURL(config.url)) {
+                const fileName = config.filename || extractGoogleDriveFileId(config.url) || 'Google Drive file'
+                googleDriveItems.push({
+                    trackName: trackName,
+                    fileName: fileName
+                })
+            }
+
+            // Check if indexURL field contains a Google Drive URL
+            if (config.indexURL && isGoogleDriveURL(config.indexURL)) {
+                const fileName = config.indexFilename || extractGoogleDriveFileId(config.indexURL) || 'Google Drive index file'
+                googleDriveItems.push({
+                    trackName: `${trackName} index`,
+                    fileName: fileName
+                })
+            }
+        }
+
+        // Add sample info Google Drive files
+        googleDriveItems.push(...googleDriveSampleInfoFiles)
+
+        return { localFileItems, googleDriveItems }
+    }
+
+    /**
      * Validate reference genome and warn about problematic resources in the session.
      *
      * Reference genome: Throws error if local files or Google Drive URLs are detected
@@ -2078,62 +2076,34 @@ class Browser {
         }
 
         // 2. Collect warnings from tracks and sample info
-        const localFileItems = []
-        const googleDriveItems = []
-
-        // Check tracks
-        for (const trackConfig of json.tracks) {
-            const trackName = trackConfig.name || 'Unnamed track'
-
-            // Local files
-            if (trackConfig.file) {
-                localFileItems.push({
-                    trackName: trackName,
-                    fileName: trackConfig.file
-                })
-            }
-            if (trackConfig.indexFile) {
-                localFileItems.push({
-                    trackName: `${trackName} index`,
-                    fileName: trackConfig.indexFile
-                })
-            }
-
-            // Google Drive file IDs (we now store file IDs instead of URLs)
-            if (trackConfig.googleDriveFileId) {
-                const fileName = trackConfig.filename || trackConfig.googleDriveFileId
-                googleDriveItems.push({
-                    trackName: trackName,
-                    fileName: fileName
-                })
-            }
-            if (trackConfig.googleDriveIndexFileId) {
-                const fileName = trackConfig.indexFilename || trackConfig.googleDriveIndexFileId
-                googleDriveItems.push({
-                    trackName: `${trackName} index`,
-                    fileName: fileName
-                })
-            }
-        }
+        const localSampleInfoFiles = []
+        const googleDriveSampleInfoFiles = []
 
         // Check sample info
         if (this.config.sampleinfo) {
             for (const path of this.sampleInfo.sampleInfoFiles) {
                 const config = TrackBase.prepareConfigForSession({url: path})
                 if (config.file) {
-                    localFileItems.push({
-                        trackName: 'Sample info',
-                        fileName: config.file
-                    })
+                    localSampleInfoFiles.push(config.file)
                 }
-                if (config.googleDriveFileId) {
-                    googleDriveItems.push({
+                // Check if the url field contains a Google Drive URL
+                if (config.url && isGoogleDriveURL(config.url)) {
+                    const fileName = config.filename || extractGoogleDriveFileId(config.url) || 'Google Drive file'
+                    googleDriveSampleInfoFiles.push({
                         trackName: 'Sample info',
-                        fileName: config.googleDriveFileId
+                        fileName: fileName
                     })
                 }
             }
         }
+
+        // Extract problematic resources from tracks
+        // Google Drive files are detected by checking if url/indexURL fields contain Google Drive URLs
+        const { localFileItems, googleDriveItems } = this.#extractProblematicResources(
+            json.tracks || [],
+            localSampleInfoFiles,
+            googleDriveSampleInfoFiles
+        )
 
         // 3. Display consolidated warning if any issues found
         if (localFileItems.length > 0 || googleDriveItems.length > 0) {

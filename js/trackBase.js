@@ -2,7 +2,7 @@ import {isSimpleType} from "./util/igvUtils.js"
 import {FeatureUtils, FileUtils, StringUtils} from "../node_modules/igv-utils/src/index.js"
 import {createCheckbox} from "./igv-icons.js"
 import {findFeatureAfterCenter} from "./feature/featureUtils.js"
-import {isLocalFile, isGoogleDriveURL, extractGoogleDriveFileId} from "./util/sessionResourceValidator.js"
+import {isLocalFile} from "./util/sessionResourceValidator.js"
 
 const fixColor = (colorString) => {
     if (StringUtils.isString(colorString)) {
@@ -630,14 +630,14 @@ class TrackBase {
 
     /**
      * Prepare a track configuration for session serialization by identifying and marking
-     * problematic resources (local files, Google Drive URLs).
-     * 
+     * problematic resources (local files).
+     *
      * Local files are converted to {file: filename} or {indexFile: filename}
-     * Google Drive URLs are marked with {googleDriveURL: url} or {googleDriveIndexURL: url}
-     * 
+     * Google Drive URLs are kept in the url/indexURL fields as-is and detected when loading
+     *
      * This allows the configuration to be serialized while preserving information
      * about resources that cannot be automatically loaded when the session is restored.
-     * 
+     *
      * @param {Object} config - Track configuration to prepare
      * @returns {Object} Cleaned configuration with problematic resources marked
      */
@@ -658,46 +658,10 @@ class TrackBase {
             }
         }
 
-        // Check for Google Drive URLs and mark them
-        // Extract file ID and store it similar to how local files store filename
-        // Remove the URL field, keeping only the file ID
-        if (cooked.url && isGoogleDriveURL(cooked.url)) {
-            const fileId = extractGoogleDriveFileId(cooked.url)
-            if (fileId) {
-                // Store file ID (similar to how local files store filename)
-                cooked.googleDriveFileId = fileId
-                // Remove the URL field, just like we do for local files
-                delete cooked.url
-            } else {
-                // Fallback: if we can't extract ID, keep the URL (shouldn't happen with valid URLs)
-                // But this preserves backward compatibility
-            }
-        }
-        if (cooked.indexURL && isGoogleDriveURL(cooked.indexURL)) {
-            const fileId = extractGoogleDriveFileId(cooked.indexURL)
-            if (fileId) {
-                cooked.googleDriveIndexFileId = fileId
-                // Remove the indexURL field, just like we do for local files
-                delete cooked.indexURL
-            } else {
-                // Fallback: if we can't extract ID, keep the URL (shouldn't happen with valid URLs)
-            }
-        }
-
         return cooked
     }
 
-    /**
-     * @deprecated Use prepareConfigForSession() instead. This method name is misleading
-     * as it now handles both local files and Google Drive URLs.
-     */
-    static localFileInspection(config) {
-        return TrackBase.prepareConfigForSession(config)
-    }
-
     // Methods to support filtering api
-
-
     set filter(f) {
         this._filter = f
         this.trackView.repaintViews()
