@@ -562,14 +562,13 @@ class Browser {
             for (const sampleInfoConfig of sampleInfoArray) {
                 if (sampleInfoConfig.file) {
                     localSampleInfoFiles.push(sampleInfoConfig.file)
-                } else if (sampleInfoConfig.url && isGoogleDriveURL(sampleInfoConfig.url)) {
-                    const fileName = this.#getGoogleDriveDisplayName(sampleInfoConfig.filename, 'Google Drive file')
-                    googleDriveSampleInfoFiles.push({
-                        trackName: 'Sample info',
-                        fileName: fileName
-                    })
                 } else {
-                    await this.sampleInfo.loadSampleInfo(sampleInfoConfig)
+                    const googleDriveItem = this.#createGoogleDriveItemIfPresent(sampleInfoConfig, 'Sample info', 'url', 'filename', 'Google Drive file')
+                    if (googleDriveItem) {
+                        googleDriveSampleInfoFiles.push(googleDriveItem)
+                    } else {
+                        await this.sampleInfo.loadSampleInfo(sampleInfoConfig)
+                    }
                 }
             }
         }
@@ -1986,6 +1985,55 @@ class Browser {
     }
 
     /**
+     * Check if a config has a Google Drive URL and create a Google Drive item if found.
+     *
+     * @param {Object} config - Track configuration object
+     * @param {string} trackName - Name of the track
+     * @param {string} urlField - Field name to check ('url' or 'indexURL')
+     * @param {string} filenameField - Field name for filename ('filename' or 'indexFilename')
+     * @param {string} defaultFileName - Default filename if not found
+     * @returns {Object|null} Google Drive item object or null if not a Google Drive URL
+     * @private
+     */
+    #createGoogleDriveItemIfPresent(config, trackName, urlField, filenameField, defaultFileName) {
+        const url = config[urlField]
+        if (url && isGoogleDriveURL(url)) {
+            const fileName = this.#getGoogleDriveDisplayName(config[filenameField], defaultFileName)
+            return {
+                trackName: trackName,
+                fileName: fileName
+            }
+        }
+        return null
+    }
+
+    /**
+     * Extract Google Drive items from a track configuration (checks both url and indexURL).
+     *
+     * @param {Object} config - Track configuration object
+     * @returns {Array} Array of Google Drive items found in this config
+     * @private
+     */
+    #extractGoogleDriveItemsFromConfig(config) {
+        const items = []
+        const trackName = config.name || 'Unnamed track'
+
+        // Check main file URL
+        const mainItem = this.#createGoogleDriveItemIfPresent(config, trackName, 'url', 'filename', 'Google Drive file')
+        if (mainItem) {
+            items.push(mainItem)
+        }
+
+        // Check index file URL
+        const indexItem = this.#createGoogleDriveItemIfPresent(config, `${trackName} index`, 'indexURL', 'indexFilename', 'Google Drive index file')
+        if (indexItem) {
+            items.push(indexItem)
+        }
+
+        return items
+    }
+
+    /**
      * Extract problematic resources (local files and Google Drive files) from track configurations.
      * Google Drive files are detected by checking if the url/indexURL fields contain Google Drive URLs.
      *
@@ -2026,25 +2074,8 @@ class Browser {
 
         // Collect Google Drive files by checking if url/indexURL fields contain Google Drive URLs
         for (const config of trackConfigurations) {
-            const trackName = config.name || 'Unnamed track'
-
-            // Check if url field contains a Google Drive URL
-            if (config.url && isGoogleDriveURL(config.url)) {
-                const fileName = this.#getGoogleDriveDisplayName(config.filename, 'Google Drive file')
-                googleDriveItems.push({
-                    trackName: trackName,
-                    fileName: fileName
-                })
-            }
-
-            // Check if indexURL field contains a Google Drive URL
-            if (config.indexURL && isGoogleDriveURL(config.indexURL)) {
-                const fileName = this.#getGoogleDriveDisplayName(config.indexFilename, 'Google Drive index file')
-                googleDriveItems.push({
-                    trackName: `${trackName} index`,
-                    fileName: fileName
-                })
-            }
+            const items = this.#extractGoogleDriveItemsFromConfig(config)
+            googleDriveItems.push(...items)
         }
 
         // Add sample info Google Drive files
@@ -2102,12 +2133,9 @@ class Browser {
                     localSampleInfoFiles.push(config.file)
                 }
                 // Check if the url field contains a Google Drive URL
-                if (config.url && isGoogleDriveURL(config.url)) {
-                    const fileName = this.#getGoogleDriveDisplayName(config.filename, 'Google Drive file')
-                    googleDriveSampleInfoFiles.push({
-                        trackName: 'Sample info',
-                        fileName: fileName
-                    })
+                const googleDriveItem = this.#createGoogleDriveItemIfPresent(config, 'Sample info', 'url', 'filename', 'Google Drive file')
+                if (googleDriveItem) {
+                    googleDriveSampleInfoFiles.push(googleDriveItem)
                 }
             }
         }
