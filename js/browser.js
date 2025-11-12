@@ -599,14 +599,12 @@ class Browser {
             for (const item of localFileItems) {
                 message += `Local file name: ${item.fileName}\n`
                 message += `Track name: ${item.trackName}\n\n`
-
             }
 
             // Add Google Drive items
             for (const item of googleDriveItems) {
                 message += `Google Drive file name: ${item.fileName}\n`
                 message += `Track name: ${item.trackName}\n\n`
-
             }
 
             alert(message)
