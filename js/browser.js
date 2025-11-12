@@ -624,7 +624,7 @@ class Browser {
         const googleDriveItems = []
         for (const config of trackConfigurations) {
             const trackName = config.name || 'Unnamed track'
-            
+
             // Check main file (new format first, then old format for backward compatibility)
             if (config.googleDriveFileId) {
                 const fileName = config.filename || config.googleDriveFileId
@@ -640,7 +640,7 @@ class Browser {
                     fileName: fileName
                 })
             }
-            
+
             // Check index file independently (new format first, then old format for backward compatibility)
             if (config.googleDriveIndexFileId) {
                 const fileName = config.indexFilename || config.googleDriveIndexFileId
@@ -662,28 +662,29 @@ class Browser {
 
         // Display warning if problematic resources are found
         if (localFileItems.length > 0 || googleDriveItems.length > 0) {
-            let message = 'Local files and/or Google Drive files cannot be loaded automatically\n\n'
-            message += 'This session file includes references to the following:\n\n'
-            
+            let message = 'Local and Google Drive files cannot be loaded from a saved session. The following file(s) will not be restored with this session.\n\n'
+
             // Add local file items
             for (const item of localFileItems) {
-                message += `track name: ${item.trackName}\n`
-                message += `local file name: ${item.fileName}\n\n`
+                message += `Local file name: ${item.fileName}\n`
+                message += `Track name: ${item.trackName}\n\n`
+
             }
-            
+
             // Add Google Drive items
             for (const item of googleDriveItems) {
-                message += `track name: ${item.trackName}\n`
-                message += `google file name: ${item.fileName}\n\n`
+                message += `Google Drive file name: ${item.fileName}\n`
+                message += `Track name: ${item.trackName}\n\n`
+
             }
-            
+
             alert(message)
         }
 
-        const nonLocalTrackConfigurations = trackConfigurations.filter((config) => 
-            undefined === config.file && 
+        const nonLocalTrackConfigurations = trackConfigurations.filter((config) =>
+            undefined === config.file &&
             undefined === config.indexFile &&
-            undefined === config.googleDriveFileId && 
+            undefined === config.googleDriveFileId &&
             undefined === config.googleDriveIndexFileId &&
             undefined === config.googleDriveURL &&
             undefined === config.googleDriveIndexURL)
@@ -2083,7 +2084,7 @@ class Browser {
         // Check tracks
         for (const trackConfig of json.tracks) {
             const trackName = trackConfig.name || 'Unnamed track'
-            
+
             // Local files
             if (trackConfig.file) {
                 localFileItems.push({
@@ -2136,21 +2137,21 @@ class Browser {
 
         // 3. Display consolidated warning if any issues found
         if (localFileItems.length > 0 || googleDriveItems.length > 0) {
-            let message = 'This session includes reference(s) to local file(s) and/or google drive files.\n\n'
+            let message = 'Local and Google Drive files cannot be loaded automatically when a saved session is restored. This session saves references to the following file(s) that will not be restored.\n\n'
 
             // Add local file items
             for (const item of localFileItems) {
-                message += `track name: ${item.trackName}\n`
-                message += `local file name: ${item.fileName}\n\n`
+                message += `Local file name: ${item.fileName}\n`
+                message += `Track name: ${item.trackName}\n\n`
+
             }
 
             // Add Google Drive items
             for (const item of googleDriveItems) {
-                message += `track name: ${item.trackName}\n`
-                message += `google file name: ${item.fileName}\n\n`
-            }
+                message += `Google Drive file name: ${item.fileName}\n`
+                message += `Track name: ${item.trackName}\n\n`
 
-            message += 'Local files and Google Drive files cannot be loaded automatically\nwhen a saved session is restored'
+            }
 
             alert(message)
         }
