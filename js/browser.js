@@ -2069,9 +2069,8 @@ class Browser {
 
         if (refErrors.length > 0) {
             throw new Error(
-                `Error: Sessions cannot include the following resources in the reference genome:\n` +
-                refErrors.map(err => `  - ${err}`).join('\n') + '\n' +
-                `These resources require local access or authentication and will not work when the session is shared.`
+                `Error: Sessions cannot include resources in the reference genome that require local access or authentication. The following resources cannot be included:\n` +
+                refErrors.map(err => `  - ${err}`).join('\n')
             )
         }
 
