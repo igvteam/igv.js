@@ -48,7 +48,7 @@ import {createBlatTrack} from "./blat/blatTrack.js"
 import {loadHub} from "./ucsc/hub/hubParser.js"
 import {EventEmitter} from "./events.js"
 import Locus from "./locus.js"
-import {isLocalFile, isGoogleDriveURL, extractGoogleDriveFileId} from "./util/sessionResourceValidator.js"
+import {isLocalFile, isGoogleDriveURL} from "./util/sessionResourceValidator.js"
 
 
 // css - $igv-scrollbar-outer-width: 14px;
@@ -563,7 +563,7 @@ class Browser {
                 if (sampleInfoConfig.file) {
                     localSampleInfoFiles.push(sampleInfoConfig.file)
                 } else if (sampleInfoConfig.url && isGoogleDriveURL(sampleInfoConfig.url)) {
-                    const fileName = sampleInfoConfig.filename || extractGoogleDriveFileId(sampleInfoConfig.url) || 'Google Drive file'
+                    const fileName = this.#getGoogleDriveDisplayName(sampleInfoConfig.filename, 'Google Drive file')
                     googleDriveSampleInfoFiles.push({
                         trackName: 'Sample info',
                         fileName: fileName
@@ -1971,6 +1971,21 @@ class Browser {
     }
 
     /**
+     * Get a display identifier for a Google Drive file.
+     * Returns the provided filename if available, otherwise falls back to a default string.
+     * Note: Filenames should always be present in saved sessions since Google Drive files
+     * can only be added when the user is authenticated.
+     *
+     * @param {string|undefined} filename - The filename property from the config (e.g., config.filename or config.indexFilename)
+     * @param {string} defaultFallback - Default identifier to use if filename is not provided
+     * @returns {string} A display identifier (filename or fallback string)
+     * @private
+     */
+    #getGoogleDriveDisplayName(filename, defaultFallback = 'Google Drive file') {
+        return filename || defaultFallback
+    }
+
+    /**
      * Extract problematic resources (local files and Google Drive files) from track configurations.
      * Google Drive files are detected by checking if the url/indexURL fields contain Google Drive URLs.
      *
@@ -2015,7 +2030,7 @@ class Browser {
 
             // Check if url field contains a Google Drive URL
             if (config.url && isGoogleDriveURL(config.url)) {
-                const fileName = config.filename || extractGoogleDriveFileId(config.url) || 'Google Drive file'
+                const fileName = this.#getGoogleDriveDisplayName(config.filename, 'Google Drive file')
                 googleDriveItems.push({
                     trackName: trackName,
                     fileName: fileName
@@ -2024,7 +2039,7 @@ class Browser {
 
             // Check if indexURL field contains a Google Drive URL
             if (config.indexURL && isGoogleDriveURL(config.indexURL)) {
-                const fileName = config.indexFilename || extractGoogleDriveFileId(config.indexURL) || 'Google Drive index file'
+                const fileName = this.#getGoogleDriveDisplayName(config.indexFilename, 'Google Drive index file')
                 googleDriveItems.push({
                     trackName: `${trackName} index`,
                     fileName: fileName
@@ -2088,7 +2103,7 @@ class Browser {
                 }
                 // Check if the url field contains a Google Drive URL
                 if (config.url && isGoogleDriveURL(config.url)) {
-                    const fileName = config.filename || extractGoogleDriveFileId(config.url) || 'Google Drive file'
+                    const fileName = this.#getGoogleDriveDisplayName(config.filename, 'Google Drive file')
                     googleDriveSampleInfoFiles.push({
                         trackName: 'Sample info',
                         fileName: fileName
