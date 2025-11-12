@@ -632,8 +632,8 @@ class TrackBase {
      * Prepare a track configuration for session serialization by identifying and marking
      * problematic resources (local files).
      *
-     * Local files are converted to {file: filename} or {indexFile: filename}
-     * Google Drive URLs are kept in the url/indexURL fields as-is and detected when loading
+     * Local File objects are converted to {file: filename} or {indexFile: filename}.
+     * This method does not handle Google Drive URLs; such detection occurs elsewhere.
      *
      * This allows the configuration to be serialized while preserving information
      * about resources that cannot be automatically loaded when the session is restored.
