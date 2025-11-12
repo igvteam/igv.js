@@ -23,8 +23,25 @@ function isGoogleDriveURL(url) {
     if (typeof url !== 'string') {
         return false
     }
-    // Match both googleapis.com/drive and drive.google.com URLs
-    return url.includes('googleapis.com/drive') || url.includes('drive.google.com')
+    // Use URL parsing to check the hostname and path
+    try {
+        const urlObj = new URL(url);
+        const hostname = urlObj.hostname;
+        if (
+            hostname === 'drive.google.com' ||
+            hostname === 'www.googleapis.com' ||
+            hostname === 'googleapis.com'
+        ) {
+            // For googleapis.com, ensure /drive/ is in the pathname
+            if (hostname.includes('googleapis.com')) {
+                return urlObj.pathname.includes('/drive/');
+            }
+            return true;
+        }
+        return false;
+    } catch {
+        return false;
+    }
 }
 
 /**
