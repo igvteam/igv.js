@@ -2141,7 +2141,6 @@ class Browser {
         }
 
         // Extract problematic resources from tracks
-        // Google Drive files are detected by checking if url/indexURL fields contain Google Drive URLs
         const { localFileItems, googleDriveItems } = this.#extractProblematicResources(
             json.tracks || [],
             localSampleInfoFiles,
