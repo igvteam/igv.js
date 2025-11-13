@@ -2035,7 +2035,8 @@ class Browser {
 
     /**
      * Extract problematic resources (local files and Google Drive files) from track configurations.
-     * Google Drive files are detected by checking if the url/indexURL fields contain Google Drive URLs.
+     * Google Drive files are detected by checking if the url/indexURL fields contain Google Drive URLs,
+     * using the isGoogleDriveURL helper function from sessionResourceValidator.
      *
      * @param {Array} trackConfigurations - Array of track configuration objects
      * @param {Array} localSampleInfoFiles - Array of local sample info filenames
