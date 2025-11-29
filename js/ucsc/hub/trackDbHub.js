@@ -71,7 +71,7 @@ class TrackDbHub {
 
                 const isContainer = (s.hasOwnProperty("superTrack") && !s.hasOwnProperty("bigDataUrl")) ||
                     s.hasOwnProperty("compositeTrack") || s.hasOwnProperty("view") ||
-                    (s.hasOwnProperty("container") && (s.getOwnProperty("container") == "multiWig"))
+                    (s.hasOwnProperty("container") && (s.getOwnProperty("container") === "multiWig"))
 
                 // Find parent, if any. "group" containers can be implicit, all other types should be explicitly
                 // defined before their children
