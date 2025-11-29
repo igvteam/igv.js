@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IGV Session Test Harness</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .panel {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .panel h2 {
+            margin-top: 0;
+            color: #333;
+            font-size: 18px;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        .control-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        input[type="text"],
+        input[type="file"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            margin-right: 10px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        button.secondary {
+            background: #2196F3;
+        }
+        button.secondary:hover {
+            background: #0b7dda;
+        }
+        button.danger {
+            background: #f44336;
+        }
+        button.danger:hover {
+            background: #da190b;
+        }
+        #igvDiv {
+            margin-top: 20px;
+        }
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196F3;
+            padding: 12px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        .info-box h3 {
+            margin-top: 0;
+            font-size: 14px;
+            color: #1976d2;
+        }
+        .info-box ul {
+            margin: 5px 0;
+            padding-left: 20px;
+        }
+        .track-list {
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 4px;
+            min-height: 40px;
+            margin-top: 10px;
+        }
+        .track-item {
+            background: white;
+            padding: 8px 12px;
+            margin: 5px 0;
+            border-radius: 4px;
+            border-left: 3px solid #4CAF50;
+            font-size: 13px;
+        }
+        .track-item.local {
+            border-left-color: #ff9800;
+        }
+        .track-item.google-drive {
+            border-left-color: #f44336;
+        }
+        pre {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>IGV Session Test Harness</h1>
+        <p class="subtitle">Test session saving with local files and Google Drive URLs</p>
+
+        <div class="panel">
+            <h2>📁 Load Track from Local File</h2>
+            <div class="control-group">
+                <label for="localFile">Select Local File:</label>
+                <input type="file" id="localFile" accept=".bed,.bam,.vcf,.gz,.bw,.bigwig,.bb,.bigbed">
+            </div>
+            <div class="control-group">
+                <label for="localIndex">Index File (optional, for BAM/VCF):</label>
+                <input type="file" id="localIndex" accept=".bai,.tbi,.idx">
+            </div>
+            <button id="loadLocalBtn">Load Local File as Track</button>
+        </div>
+
+        <div class="panel">
+            <h2>🌐 Load Track from URL</h2>
+            <div class="control-group">
+                <label for="urlInput">Track URL:</label>
+                <input type="text" id="urlInput" placeholder="https://example.com/track.bed">
+            </div>
+            <div class="control-group">
+                <label for="indexUrlInput">Index URL (optional):</label>
+                <input type="text" id="indexUrlInput" placeholder="https://example.com/track.bed.idx">
+            </div>
+            <button id="loadUrlBtn" class="secondary">Load URL as Track</button>
+            
+            <div class="info-box">
+                <h3>Test URLs:</h3>
+                <ul>
+                    <li><strong>SEG:</strong> https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz</li>
+                    <li><strong>SEG:</strong> https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/gbm/Broad.080528.subtypes.seg.gz</li>
+                    <li><strong>BigWig:</strong> https://www.encodeproject.org/files/ENCFF000ATR/@@download/ENCFF000ATR.bigWig</li>
+                    <li><strong>BigWig:</strong> https://s3.amazonaws.com/igv.org.genomes/mm10/gc5Base.bw</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2>🧪 Mock Google Drive Track (For Testing)</h2>
+            <p style="color: #666; font-size: 14px; margin-bottom: 15px;">
+                This creates a mock track with a Google Drive URL without actually loading data.
+                Use this to test session saving validation.
+            </p>
+            <button id="mockGoogleDriveBtn" class="secondary">Add Mock Google Drive Track</button>
+        </div>
+
+        <div class="panel">
+            <h2>💾 Save Session</h2>
+            <button id="saveSessionBtn" class="secondary">Save Session to JSON File</button>
+            <button id="logSessionBtn" class="secondary">Log Session to Console</button>
+            <button id="clearTracksBtn" class="danger">Clear All Tracks</button>
+
+            <div id="trackList" class="track-list">
+                <em>No tracks loaded yet</em>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2>📂 Load Session</h2>
+            <p style="color: #666; font-size: 14px; margin-bottom: 15px;">
+                Load a saved session JSON file to test how the browser handles local files and Google Drive URLs.
+            </p>
+            <div class="control-group">
+                <label for="sessionFile">Select Session JSON File:</label>
+                <input type="file" id="sessionFile" accept=".json">
+            </div>
+            <button id="loadSessionBtn">Load Session from File</button>
+            <button id="loadLastSessionBtn" class="secondary">Load Last Saved Session</button>
+        </div>
+
+        <div class="panel">
+            <h2>🧬 IGV Browser</h2>
+            <div id="igvDiv"></div>
+        </div>
+
+        <div class="panel">
+            <h2>📋 Last Session JSON</h2>
+            <pre id="sessionOutput">Session will appear here after saving...</pre>
+        </div>
+    </div>
+
+    <script type="module">
+        import igv from "../../js/index.js"
+
+        let browser
+        let lastSavedSession = null
+
+        const options = {
+            genome: "hg19",
+            locus: "chr8:128,747,267-128,754,546"
+        }
+
+        // Initialize IGV
+        igv.createBrowser(document.getElementById("igvDiv"), options)
+            .then(function (b) {
+                browser = b
+                console.log("IGV browser created successfully")
+                updateTrackList()
+            })
+            .catch(err => {
+                console.error("Error creating IGV browser:", err)
+                alert("Failed to create IGV browser: " + err.message)
+            })
+
+        // Load local file
+        document.getElementById("loadLocalBtn").addEventListener("click", async () => {
+            const fileInput = document.getElementById("localFile")
+            const indexInput = document.getElementById("localIndex")
+
+            if (!fileInput.files || fileInput.files.length === 0) {
+                alert("Please select a file first")
+                return
+            }
+
+            const file = fileInput.files[0]
+            const indexFile = indexInput.files && indexInput.files.length > 0 ? indexInput.files[0] : undefined
+
+            try {
+                const config = {
+                    name: file.name,
+                    url: file,
+                    indexURL: indexFile
+                }
+
+                await browser.loadTrack(config)
+                console.log("Loaded local file:", file.name)
+                updateTrackList()
+
+                // Clear inputs
+                fileInput.value = ""
+                indexInput.value = ""
+            } catch (err) {
+                console.error("Error loading local file:", err)
+                alert("Failed to load track: " + err.message)
+            }
+        })
+
+        // Load URL
+        document.getElementById("loadUrlBtn").addEventListener("click", async () => {
+            const urlInput = document.getElementById("urlInput")
+            const indexUrlInput = document.getElementById("indexUrlInput")
+            
+            const url = urlInput.value.trim()
+            if (!url) {
+                alert("Please enter a URL")
+                return
+            }
+
+            try {
+                const config = {
+                    url: url,
+                    indexURL: indexUrlInput.value.trim() || undefined
+                }
+                
+                await browser.loadTrack(config)
+                console.log("Loaded track from URL:", url)
+                updateTrackList()
+                
+                // Clear inputs
+                urlInput.value = ""
+                indexUrlInput.value = ""
+            } catch (err) {
+                console.error("Error loading URL:", err)
+                alert("Failed to load track: " + err.message)
+            }
+        })
+
+        // Mock Google Drive track (for testing session validation)
+        document.getElementById("mockGoogleDriveBtn").addEventListener("click", () => {
+            try {
+                // Create a mock track object with a Google Drive URL (using real config from session file)
+                const mockTrack = {
+                    id: 'mock-google-drive-' + Date.now(),
+                    name: 'My Google Drive File',
+                    type: 'wig',
+                    config: {
+                        url: 'https://www.googleapis.com/drive/v3/files/1VHkNjxyj9FaNSkqSSZBlo-hgw8FnW-sM?alt=media&supportsAllDrives=true',
+                        name: 'My Google Drive File',
+                        filename: 'test_chr4.wig',
+                        format: 'wig',
+                        type: 'wig'
+                    },
+                    order: 100
+                }
+                
+                // Add it directly to the browser's track views
+                // This is a hack for testing - we're not actually loading data
+                const mockTrackView = {
+                    track: mockTrack,
+                    viewports: []
+                }
+                
+                browser.trackViews.push(mockTrackView)
+                
+                console.log("Added mock Google Drive track")
+                updateTrackList()
+                alert("Mock Google Drive track added!\n\nThis track has a Google Drive URL in its config but no actual data.\nNow try saving the session to see the validation warning.")
+            } catch (err) {
+                console.error("Error adding mock track:", err)
+                alert("Failed to add mock track: " + err.message)
+            }
+        })
+
+        // Save session
+        document.getElementById("saveSessionBtn").addEventListener("click", () => {
+            try {
+                const session = browser.toJSON()
+                const jsonString = JSON.stringify(session, null, 2)
+
+                // Save for "Load Last Session" feature
+                lastSavedSession = session
+
+                // Display in output area
+                document.getElementById("sessionOutput").textContent = jsonString
+
+                // Download as file
+                const blob = new Blob([jsonString], { type: "application/json" })
+                const url = URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = 'igv-session-' + Date.now() + '.json'
+                document.body.appendChild(a)
+                a.click()
+                document.body.removeChild(a)
+                URL.revokeObjectURL(url)
+
+                console.log("Session saved successfully")
+            } catch (err) {
+                console.error("Error saving session:", err)
+                document.getElementById("sessionOutput").textContent = "ERROR: " + err.message
+                alert("Failed to save session: " + err.message)
+            }
+        })
+
+        // Log session
+        document.getElementById("logSessionBtn").addEventListener("click", () => {
+            try {
+                const session = browser.toJSON()
+                console.log("Session JSON:", session)
+                document.getElementById("sessionOutput").textContent = JSON.stringify(session, null, 2)
+                alert("Session logged to console (check browser dev tools)")
+            } catch (err) {
+                console.error("Error getting session:", err)
+                alert("Failed to get session: " + err.message)
+            }
+        })
+
+        // Load session from file
+        document.getElementById("loadSessionBtn").addEventListener("click", async () => {
+            const fileInput = document.getElementById("sessionFile")
+            
+            if (!fileInput.files || fileInput.files.length === 0) {
+                alert("Please select a session JSON file first")
+                return
+            }
+
+            const file = fileInput.files[0]
+            
+            try {
+                const text = await file.text()
+                const session = JSON.parse(text)
+                
+                await browser.loadSessionObject(session)
+                console.log("Session loaded successfully from file:", file.name)
+                updateTrackList()
+                
+                // Display loaded session
+                document.getElementById("sessionOutput").textContent = text
+                
+                // Clear input
+                fileInput.value = ""
+            } catch (err) {
+                console.error("Error loading session:", err)
+                alert("Failed to load session: " + err.message)
+            }
+        })
+
+        // Load last saved session
+        document.getElementById("loadLastSessionBtn").addEventListener("click", async () => {
+            if (!lastSavedSession) {
+                alert("No session has been saved yet. Save a session first, then you can reload it.")
+                return
+            }
+
+            try {
+                await browser.loadSessionObject(lastSavedSession)
+                console.log("Last saved session loaded successfully")
+                updateTrackList()
+            } catch (err) {
+                console.error("Error loading last session:", err)
+                alert("Failed to load last session: " + err.message)
+            }
+        })
+
+        // Clear tracks
+        document.getElementById("clearTracksBtn").addEventListener("click", () => {
+            const trackViews = [...browser.trackViews]
+            for (const trackView of trackViews) {
+                const track = trackView.track
+                // Use same filter as updateTrackList to avoid removing built-in tracks
+                const shouldRemove = track.id !== 'ruler' && 
+                                     track.type !== 'sequence' && 
+                                     track.type !== 'ideogram' &&
+                                     track.id !== 'refseqAll'
+                
+                if (shouldRemove) {
+                    // Check if this is a mock track (has no properly initialized viewports)
+                    if (track.id && track.id.startsWith('mock-google-drive-')) {
+                        // Remove mock tracks directly from the array
+                        const index = browser.trackViews.indexOf(trackView)
+                        if (index > -1) {
+                            browser.trackViews.splice(index, 1)
+                        }
+                    } else {
+                        // Use normal removal for real tracks
+                        try {
+                            browser.removeTrack(track)
+                        } catch (err) {
+                            console.warn("Error removing track:", track.name, err)
+                            // If normal removal fails, try direct removal
+                            const index = browser.trackViews.indexOf(trackView)
+                            if (index > -1) {
+                                browser.trackViews.splice(index, 1)
+                            }
+                        }
+                    }
+                }
+            }
+            updateTrackList()
+            console.log("All tracks cleared")
+        })
+
+        // Update track list display
+        function updateTrackList() {
+            const trackListDiv = document.getElementById("trackList")
+            const tracks = browser.trackViews
+                .filter(tv => {
+                    const track = tv.track
+                    // Exclude: ruler, sequence, ideogram, and default genome tracks
+                    return track.id !== 'ruler' && 
+                           track.type !== 'sequence' && 
+                           track.type !== 'ideogram' &&
+                           track.id !== 'refseqAll'
+                })
+                .map(tv => tv.track)
+
+            if (tracks.length === 0) {
+                trackListDiv.innerHTML = '<em>No tracks loaded yet</em>'
+                return
+            }
+
+            trackListDiv.innerHTML = tracks.map(track => {
+                let type = 'normal'
+                let typeLabel = 'URL'
+                let url = ''
+                
+                // Safety check for track.config
+                if (track.config && track.config.url) {
+                    url = track.config.url
+                    
+                    if (track.config.url instanceof File) {
+                        type = 'local'
+                        typeLabel = 'Local File'
+                        url = track.config.url.name
+                    } else if (typeof url === 'string' && (url.includes('googleapis.com/drive') || url.includes('drive.google.com'))) {
+                        type = 'google-drive'
+                        typeLabel = 'Google Drive'
+                    }
+                } else {
+                    typeLabel = 'Built-in'
+                    url = track.type || 'unknown'
+                }
+
+                return `<div class="track-item ${type}">
+                    <strong>${track.name || 'Unnamed Track'}</strong>
+                    <span style="color: #666;">| ${typeLabel}</span>
+                    <br><span style="font-size: 11px; color: #999;">${url}</span>
+                </div>`
+            }).join('')
+        }
+    </script>
+</body>
+</html>
+
