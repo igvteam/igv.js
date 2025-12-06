@@ -1,3 +1,6 @@
+// Lazy import to avoid circular dependency
+import {igvxhr, StringUtils} from "../node_modules/igv-utils/src/index.js"
+
 /**
  * Search for a feature by name across various data sources
  * This module is separate to avoid circular dependencies between search.js and hgvs.js
@@ -57,9 +60,6 @@ async function searchFeatures(browser, name) {
  * @returns {Promise<Object|undefined>} The search result
  */
 async function searchWebService(browser, locus, searchConfig) {
-
-    // Lazy import to avoid circular dependency
-    const {igvxhr} = await import("../node_modules/igv-utils/src/index.js")
 
     let path = searchConfig.url.replace("$FEATURE$", locus.toUpperCase())
     if (path.indexOf("$GENOME$") > -1) {
@@ -148,9 +148,6 @@ async function processSearchResult(browser, result, searchConfig) {
  * @returns {Array} Array of parsed search results
  */
 async function parseSearchResults(browser, data) {
-
-    // Lazy import to avoid circular dependency
-    const {StringUtils} = await import("../node_modules/igv-utils/src/index.js")
 
     const results = []
     const lines = StringUtils.splitLines(data)
