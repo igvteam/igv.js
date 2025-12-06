@@ -835,9 +835,9 @@ class TrackViewport extends Viewport {
 
                     if (typeof this.trackView.track.popupData === "function") {
 
-                        popupTimerID = setTimeout(() => {
+                        popupTimerID = setTimeout(async () => {
 
-                                const content = this.handleTrackClick(event)
+                                const content = await this.handleTrackClick(event)
                                 if (content) {
 
                                     if (false === event.shiftKey) {
@@ -1002,7 +1002,7 @@ class TrackViewport extends Viewport {
 
     }
 
-    handleTrackClick(event) {
+    async handleTrackClick(event) {
 
         const clickState = this.createClickState(event)
 
@@ -1011,7 +1011,7 @@ class TrackViewport extends Viewport {
         }
 
         let track = this.trackView.track
-        const dataList = track.popupData(clickState)
+        const dataList = await track.popupData(clickState)
 
         const popupClickHandlerResult = this.browser.fireEvent('trackclick', [track, dataList, clickState.genomicLocation])
 

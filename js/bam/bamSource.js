@@ -72,8 +72,8 @@ class BamSource {
         if (alignmentContainer.hasAlignments) {
             const sequence = await genome.getSequence(chr, alignmentContainer.start, alignmentContainer.end)
             if (sequence) {
-                alignmentContainer.coverageMap.refSeq = sequence    // TODO -- fix this
-                alignmentContainer.sequence = sequence           // TODO -- fix this
+                alignmentContainer.coverageMap.refSeq = sequence
+                alignmentContainer.sequence = sequence
                 return alignmentContainer
             } else {
                 console.error("No sequence for: " + chr + ":" + alignmentContainer.start + "-" + alignmentContainer.end)

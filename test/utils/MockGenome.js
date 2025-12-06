@@ -62,6 +62,10 @@ class MockGenome {
         return this.chromAlias.getChromosomeName(chr)
     }
 
+    getManeTranscript() {
+        return null
+    }
+
 
     /**
      * Return the genome coordinate in kb for the give chromosome and position.

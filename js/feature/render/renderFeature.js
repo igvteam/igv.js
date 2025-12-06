@@ -1,5 +1,5 @@
 import IGVGraphics from "../../igv-canvas.js"
-import {getEonStart, getExonEnd, getExonPhase} from "../exonUtils.js"
+import {getCodingStart, getCodingEnd, getExonPhase} from "../exonUtils.js"
 import {translationDict} from "../../sequenceTrack.js"
 import {complementSequence} from "../../util/sequenceUtils.js"
 
@@ -251,8 +251,8 @@ function renderAminoAcidSequence(ctx, strand, leftExon, exon, riteExon, bpStart,
     }
 
     const phase = getExonPhase(exon)
-    let ss = getEonStart(exon)
-    let ee = getExonEnd(exon)
+    let ss = getCodingStart(exon)
+    let ee = getCodingEnd(exon)
 
     let bpTripletStart
     let bpTripletEnd
@@ -421,7 +421,7 @@ function getAminoAcidLetterWithExonGap(strand, phase, phaseExtentStart, phaseExt
                 return undefined
             }
 
-            [ss, ee] = [getExonEnd(leftExon) - (3 - phase), getExonEnd(leftExon)]
+            [ss, ee] = [getCodingEnd(leftExon) - (3 - phase), getCodingEnd(leftExon)]
             stringA = sequenceInterval.getSequence(ss, ee)
 
             if (!stringA) {
@@ -440,7 +440,7 @@ function getAminoAcidLetterWithExonGap(strand, phase, phaseExtentStart, phaseExt
             }
 
             const ritePhase = getExonPhase(riteExon)
-            const riteStart = getEonStart(riteExon)
+            const riteStart = getCodingStart(riteExon)
             stringB = sequenceInterval.getSequence(riteStart, riteStart + ritePhase)
 
             if (!stringB) {
@@ -460,7 +460,7 @@ function getAminoAcidLetterWithExonGap(strand, phase, phaseExtentStart, phaseExt
                 return undefined
             }
 
-            [ss, ee] = [getEonStart(riteExon), getEonStart(riteExon) + (3 - phase)]
+            [ss, ee] = [getCodingStart(riteExon), getCodingStart(riteExon) + (3 - phase)]
             stringB = sequenceInterval.getSequence(ss, ee)
 
             if (!stringB) {
@@ -480,7 +480,7 @@ function getAminoAcidLetterWithExonGap(strand, phase, phaseExtentStart, phaseExt
             }
 
             const leftPhase = getExonPhase(leftExon)
-            const leftEnd = getExonEnd(leftExon)
+            const leftEnd = getCodingEnd(leftExon)
             stringA = sequenceInterval.getSequence(leftEnd - leftPhase, leftEnd)
 
             if (!stringA) {
