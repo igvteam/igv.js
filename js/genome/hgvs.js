@@ -71,11 +71,17 @@ async function search(hgvs, browser) {
 
     if (type === "g") {
         if (!positionPart) return null
-        const match = positionPart.match(/^(\d+)/)
+        // Match genomic positions including:
+        // - Simple position: 123
+        // - Range: 123_456
+        // - Uncertain positions: 123_? or ?_456 or (123_456)
+        // Extract just the numeric positions, ignoring variant notation after
+        const match = positionPart.match(/^\(?(\d+)(?:_(\d+|\?))?/)
         if (!match) return null
         const start = parseInt(match[1], 10)
         const endGroup = match[2]
-        const end = endGroup ? parseInt(endGroup, 10) : start
+        // If end is '?' or undefined, use start as end
+        const end = (endGroup && endGroup !== '?') ? parseInt(endGroup, 10) : start
         const aliasRecord = await genome.getAliasRecord(accession)
         const chr = aliasRecord ? aliasRecord.chr : accession
         return {chr, start: start - 1, end: end}
