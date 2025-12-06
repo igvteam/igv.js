@@ -1,5 +1,5 @@
 import "./utils/mockObjects.js"
-import {HGVS} from "../js/genome/HGVS.js"
+import {HGVS} from "../js/genome/hgvs.js"
 import {assert} from 'chai'
 import Genome from "../js/genome/genome.js"
 import {getTrack} from "../js/trackFactory.js"
