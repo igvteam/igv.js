@@ -79,7 +79,6 @@ class CoverageTrack {
             strokeStyle: color
         })
 
-        const wFactor = 0.99
         const w = Math.max(1, 1.0 / bpPerPixel)
         for (let i = 0, len = coverageMap.coverage.length; i < len; i++) {
 
