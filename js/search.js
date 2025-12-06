@@ -69,7 +69,7 @@ async function search(browser, string) {
     const searchForLocus = async (locus) => {
 
         if (HGVS.isValidHGVS(locus)) {
-            const hgvsResult = HGVS.search(locus, browser)
+            const hgvsResult = await HGVS.search(locus, browser)
             if (hgvsResult) {
                 return hgvsResult
             }
