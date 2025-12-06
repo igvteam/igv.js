@@ -59,7 +59,7 @@ async function searchFeatures(browser, name) {
 async function searchWebService(browser, locus, searchConfig) {
 
     // Lazy import to avoid circular dependency
-    const {igvxhr, StringUtils} = await import("../node_modules/igv-utils/src/index.js")
+    const {igvxhr} = await import("../node_modules/igv-utils/src/index.js")
 
     let path = searchConfig.url.replace("$FEATURE$", locus.toUpperCase())
     if (path.indexOf("$GENOME$") > -1) {
