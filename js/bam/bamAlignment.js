@@ -277,7 +277,7 @@ class BamAlignment {
             const readBase = this.readBaseAt(genomicLocation)
             if (readBase && readBase !== refBase && readBase !== '*') {
                 const hgvsNotation = await HGVS.createHGVSAnnotation(genome, this.chr, genomicLocation, refBase, readBase)
-                if(hgvsNotation) {
+                if (hgvsNotation) {
                     nameValues.push('<hr/>')
                     const clinVarURL = await ClinVar.getClinVarURL(hgvsNotation)
                     if (clinVarURL) {
