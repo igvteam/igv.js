@@ -14,7 +14,7 @@ function getCodingEnd(exon) {
 }
 
 function getCodingLength(exon) {
-    if(exon.utr) return 0
+    if (exon.utr) return 0
     const start = exon.cdStart || exon.start
     const end = exon.cdEnd || exon.end
     return end - start
