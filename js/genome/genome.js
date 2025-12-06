@@ -355,12 +355,6 @@ class Genome {
      * @param name
      * @return
      */
-    /**
-     * Return the Mane transcript with the given name, or null if not found.  We also check the refseq historical
-     * db if available for backward compatibility.  This is only available for hg38.
-     * @param name
-     * @return
-     */
     async getManeTranscript(name) {
 
         if (!this.maneFeatureSource && this.config.maneBbURL) {
