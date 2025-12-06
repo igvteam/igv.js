@@ -90,7 +90,7 @@ async function search(hgvs, browser) {
 
         // Protein notation not supported for search currently.  The code below is ported from Java and kept for
         // future reference.
-        return null;
+        return null
 
         // // Protein position mapping: map codon(s) to genomic span.
         // const transcript = await getTranscript(browser, accession)
