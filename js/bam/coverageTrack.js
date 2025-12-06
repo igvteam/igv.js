@@ -192,7 +192,6 @@ class CoverageTrack {
 
             // HGVS annotations for variants, and ClinVar links if available
             if (reference) {
-                let tmp
                 let first = true
                 for (let b of ['A', 'C', 'G', 'T']) {
                     let count = coverage[`pos${b}`] + coverage[`neg${b}`]
