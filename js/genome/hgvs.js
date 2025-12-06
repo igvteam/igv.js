@@ -147,7 +147,7 @@ async function search(hgvs, browser) {
         const offsetStr = matcher[3]
         if (offsetStr) {
             let offset = parseInt(offsetStr, 10)
-            if (transcript.getStrand && transcript.strand === '-') offset = -offset
+            if (transcript.strand === '-') offset = -offset
             g1 += offset
             g2 += offset
         }
