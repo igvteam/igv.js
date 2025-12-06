@@ -128,7 +128,6 @@ async function processSearchResult(browser, result, searchConfig) {
         const locusObject = {chr, start, end}
 
         // Some GTEX hacks
-        const type = result.type ? result.type : "gene"
         if (searchConfig.geneField && searchConfig.snpField) {
             const name = result[searchConfig.geneField] || result[searchConfig.snpField]  // Should never have both
             if (name) locusObject.name = name.toUpperCase()
