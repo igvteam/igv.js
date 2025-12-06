@@ -2,10 +2,12 @@ import paintAxis from "../util/paintAxis.js"
 import {IGVColor, StringUtils} from "../../node_modules/igv-utils/src/index.js"
 import IGVGraphics from "../igv-canvas.js"
 import {drawModifications} from "./mods/baseModificationCoverageRenderer.js"
+import {HGVS} from "../genome/hgvs.js"
+import {ClinVar} from "../genome/clinVar.js"
 
 const DEFAULT_COVERAGE_COLOR = "rgb(150, 150, 150)"
 
-class CoverageTrack  {
+class CoverageTrack {
 
 
     constructor(config, parent) {
@@ -17,7 +19,7 @@ class CoverageTrack  {
         this.top = 0
 
         this.autoscale = config.autoscale || config.max === undefined
-        if(config.coverageColor) {
+        if (config.coverageColor) {
             this.color = config.coverageColor
         }
 
@@ -34,11 +36,15 @@ class CoverageTrack  {
         return this.parent.coverageTrackHeight
     }
 
+    get browser() {
+        return this.parent.browser
+    }
+
     draw(options) {
 
         const pixelTop = options.pixelTop
         const pixelBottom = pixelTop + options.pixelHeight
-        const nucleotideColors = this.parent.browser.nucleotideColors
+        const nucleotideColors = this.browser.nucleotideColors
 
         if (pixelTop > this.height) {
             return //scrolled out of view
@@ -73,8 +79,7 @@ class CoverageTrack  {
             strokeStyle: color
         })
 
-        const wFactor =0.99
-        const w =  Math.max(1, 1.0 / bpPerPixel)
+        const w = Math.max(1, 1.0 / bpPerPixel)
         for (let i = 0, len = coverageMap.coverage.length; i < len; i++) {
 
             const bp = (coverageMap.bpStart + i)
@@ -143,8 +148,9 @@ class CoverageTrack  {
         const coverageMap = features.coverageMap
         const coverageMapIndex = Math.floor(genomicLocation - coverageMap.bpStart)
         const coverage = coverageMap.coverage[coverageMapIndex]
-        if(coverage) {
+        if (coverage) {
             return {
+                reference: coverageMap.refSeq ? coverageMap.refSeq.charAt(coverageMapIndex).toUpperCase() : undefined,
                 coverage: coverage,
                 baseModCounts: features.baseModCounts,
                 hoverText: () => coverageMap.coverage[coverageMapIndex].hoverText()
@@ -152,60 +158,63 @@ class CoverageTrack  {
         }
     }
 
-    popupData(clickState) {
+    async popupData(clickState) {
 
         const nameValues = []
 
-        const {coverage, baseModCounts} = this.getClickedObject(clickState)
+        const {reference, coverage, baseModCounts} = this.getClickedObject(clickState)
         if (coverage) {
             const genomicLocation = Math.floor(clickState.genomicLocation)
             const referenceFrame = clickState.viewport.referenceFrame
 
             nameValues.push(referenceFrame.chr + ":" + StringUtils.numberFormatter(1 + genomicLocation))
-
             nameValues.push({name: 'Total Count', value: coverage.total})
+            nameValues.push('<HR/>')
 
             // A
-            let tmp = coverage.posA + coverage.negA
-            if (tmp > 0) tmp = tmp.toString() + " (" + Math.round((tmp / coverage.total) * 100.0) + "%, " + coverage.posA + "+, " + coverage.negA + "- )"
-            nameValues.push({name: 'A', value: tmp})
+            for (let b of ['A', 'C', 'G', 'T', 'N']) {
+                let tmp = coverage[`pos${b}`] + coverage[`neg${b}`]
+                if (tmp > 0) {
+                    tmp = tmp.toString() + " (" + Math.round((tmp / coverage.total) * 100.0) + "%, " + coverage[`pos${b}`] + "+, " + coverage[`neg${b}`] + "- )"
+                    nameValues.push({name: b, value: tmp})
+                }
+            }
 
-            // C
-            tmp = coverage.posC + coverage.negC
-            if (tmp > 0) tmp = tmp.toString() + " (" + Math.round((tmp / coverage.total) * 100.0) + "%, " + coverage.posC + "+, " + coverage.negC + "- )"
-            nameValues.push({name: 'C', value: tmp})
+            if (coverage.del > 0) nameValues.push({name: 'DEL', value: coverage.del.toString()})
+            if (coverage.ins > 0) nameValues.push({name: 'INS', value: coverage.ins.toString()})
 
-            // G
-            tmp = coverage.posG + coverage.negG
-            if (tmp > 0) tmp = tmp.toString() + " (" + Math.round((tmp / coverage.total) * 100.0) + "%, " + coverage.posG + "+, " + coverage.negG + "- )"
-            nameValues.push({name: 'G', value: tmp})
-
-            // T
-            tmp = coverage.posT + coverage.negT
-            if (tmp > 0) tmp = tmp.toString() + " (" + Math.round((tmp / coverage.total) * 100.0) + "%, " + coverage.posT + "+, " + coverage.negT + "- )"
-            nameValues.push({name: 'T', value: tmp})
-
-            // N
-            tmp = coverage.posN + coverage.negN
-            if (tmp > 0) tmp = tmp.toString() + " (" + Math.round((tmp / coverage.total) * 100.0) + "%, " + coverage.posN + "+, " + coverage.negN + "- )"
-            nameValues.push({name: 'N', value: tmp})
-
-            nameValues.push('<HR/>')
-            nameValues.push({name: 'DEL', value: coverage.del.toString()})
-            nameValues.push({name: 'INS', value: coverage.ins.toString()})
-
-            if(baseModCounts) {
-                nameValues.push('<hr/>');
+            if (baseModCounts) {
+                nameValues.push('<hr/>')
                 nameValues.push(...baseModCounts.popupData(genomicLocation, this.parent.colorBy))
 
             }
 
+            // HGVS annotations for variants, and ClinVar links if available
+            if (reference) {
+                let first = true
+                for (let b of ['A', 'C', 'G', 'T']) {
+                    let count = coverage[`pos${b}`] + coverage[`neg${b}`]
+                    if (count > 0 && reference !== b) {
+                        if (first) {
+                            nameValues.push('<hr/>')
+                            first = false
+                        }
+                        const hgvsNotation = await HGVS.createHGVSAnnotation(this.browser.genome, referenceFrame.chr, genomicLocation, reference, b)
+                        const clinVarURL = await ClinVar.getClinVarURL(hgvsNotation)
+                        if (clinVarURL) {
+                            nameValues.push({name: 'ClinVar', value: `<a href='${clinVarURL}' target='_blank'>${hgvsNotation}</a>`})
+                        } else {
+                            nameValues.push({name: 'HGVS', value: hgvsNotation})
+                        }
+                    }
+                }
+            }
+
+
+            return nameValues
+
         }
-
-        return nameValues
-
     }
-
 }
 
 export default CoverageTrack

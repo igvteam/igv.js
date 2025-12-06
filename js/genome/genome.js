@@ -8,9 +8,8 @@ import CytobandFile from "./cytobandFile.js"
 
 import {loadChromSizes} from "./chromSizes.js"
 import ChromAliasDefaults from "./chromAliasDefaults.js"
-import {igvxhr} from "../../node_modules/igv-utils/src/index.js"
-import {loadHub} from "../ucsc/hub/hubParser.js"
 import {updateReference} from "./updateReference.js"
+import BWSource from "../bigwig/bwSource.js"
 
 const ucsdIDMap = new Map([
     ["1kg_ref", "hg18"],
@@ -58,7 +57,7 @@ class Genome {
         this.sequence = await loadSequence(config, this.browser)
 
         // Load cytobands.  This is optional but required to support the ideogram.  Only needed for whole genome view
-        if(false !== config.showIdeogram && false !== config.wholeGenomeView) {
+        if (false !== config.showIdeogram && false !== config.wholeGenomeView) {
             if (config.cytobandURL) {
                 this.cytobandSource = new CytobandFile(config.cytobandURL, Object.assign({}, config))
             } else if (config.cytobandBbURL) {
@@ -66,8 +65,8 @@ class Genome {
             }
         }
 
-            // Search for chromosomes, that is an array of chromosome objects containing name and length.  This is
-            // optional but required to support whole genome view.
+        // Search for chromosomes, that is an array of chromosome objects containing name and length.  This is
+        // optional but required to support whole genome view.
         if (this.sequence.chromosomes) {
             this.chromosomes = this.sequence.chromosomes
         } else if (config.chromSizesURL) {
@@ -103,7 +102,7 @@ class Genome {
                 // Trim to remove non-existent chromosomes
                 await this.chromAlias.preload(this.#wgChromosomeNames)
                 this.#wgChromosomeNames =
-                    this.#wgChromosomeNames.map(c =>  this.getChromosomeName(c)).filter(c => this.chromosomes.has(c))
+                    this.#wgChromosomeNames.map(c => this.getChromosomeName(c)).filter(c => this.chromosomes.has(c))
             } else {
                 this.#wgChromosomeNames = trimSmallChromosomes(this.chromosomes)
                 await this.chromAlias.preload(this.#wgChromosomeNames)
@@ -348,6 +347,75 @@ class Genome {
 
     getHubURLs() {
         return this.config.hubs
+    }
+
+    /**
+     * Return the Mane transcript with the given name, or null if not found. We also check the refseq historical
+     * db if available for backward compatibility. This is only available for hg38.
+     * @param {string} name - The name of the Mane transcript to search for.
+     * @return {Promise<Object|null>} A Promise resolving to the Mane transcript object if found, or null otherwise.
+     */
+    async getManeTranscript(name) {
+
+        if (!this.maneFeatureSource && this.config.maneBbURL) {
+            this.loadManeFeatureSource()
+        }
+        if (this.maneFeatureSource) {
+            const feature = await this.maneFeatureSource.search(name)
+            if (feature) {
+                return feature
+            }
+        }
+        if (!this.rsDBFeatureSource && this.config.rsdbURL) {
+            this.rsDBFeatureSource = new BWSource({url: this.config.rsdbURL}, this)
+        }
+        if (this.rsDBFeatureSource) {
+            const feature = await this.rsDBFeatureSource.search(name)
+            if (feature) {
+                return feature
+            }
+        }
+        return null
+    }
+
+    /**
+     * Return the Mane transcript overlapping the given position, or null if none found.
+     *
+     * @param chr      Chromosome name (e.g., "chr1", "chrX") in which to search for the transcript.
+     * @param position Genomic position (0-based coordinate) to check for overlap with a Mane transcript.
+     * @return {Promise<*|null>} The feature representing the Mane transcript overlapping the specified position, or null if none is found.
+     */
+    async getManeTranscriptAt(chr, position) {
+        if (!this.maneFeatureSource && this.config.maneBbURL) {
+            this.loadManeFeatureSource()
+        }
+        if (this.maneFeatureSource) {
+            try {
+                const start = position
+                const end = position + 1
+                const features = await this.maneFeatureSource.getFeatures({chr, start, end})
+                if (features) {
+                    for (const feature of features) {
+                        if (feature.start <= position && feature.end >= position) {
+                            return feature
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error("Error fetching MANE transcript", e)
+            }
+        }
+        return null
+    }
+
+    loadManeFeatureSource() {
+        if (this.config.maneBbURL != null) {
+            const bbConfig = {url: this.config.maneBbURL}
+            if (this.config.maneTrixURL) {
+                bbConfig.trixURL = this.config.maneTrixURL
+            }
+            this.maneFeatureSource = new BWSource(bbConfig, this)
+        }
     }
 }
 
