@@ -174,10 +174,8 @@ class CoverageTrack {
             // A
             for (let b of ['A', 'C', 'G', 'T', 'N']) {
                 let tmp = coverage[`pos${b}`] + coverage[`neg${b}`]
-                if (tmp > 0) {
-                    tmp = tmp.toString() + " (" + Math.round((tmp / coverage.total) * 100.0) + "%, " + coverage[`pos${b}`] + "+, " + coverage[`neg${b}`] + "- )"
-                    nameValues.push({name: b, value: tmp})
-                }
+                tmp = tmp.toString() + " (" + Math.round((tmp / coverage.total) * 100.0) + "%, " + coverage[`pos${b}`] + "+, " + coverage[`neg${b}`] + "- )"
+                nameValues.push({name: b, value: tmp})
             }
 
             if (coverage.del > 0) nameValues.push({name: 'DEL', value: coverage.del.toString()})
@@ -202,7 +200,10 @@ class CoverageTrack {
                         const hgvsNotation = await HGVS.createHGVSAnnotation(this.browser.genome, referenceFrame.chr, genomicLocation, reference, b)
                         const clinVarURL = await ClinVar.getClinVarURL(hgvsNotation)
                         if (clinVarURL) {
-                            nameValues.push({name: 'ClinVar', value: `<a href='${clinVarURL}' target='_blank'>${hgvsNotation}</a>`})
+                            nameValues.push({
+                                name: 'ClinVar',
+                                value: `<a href='${clinVarURL}' target='_blank'>${hgvsNotation}</a>`
+                            })
                         } else {
                             nameValues.push({name: 'HGVS', value: hgvsNotation})
                         }
