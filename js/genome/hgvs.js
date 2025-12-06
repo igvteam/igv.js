@@ -1,5 +1,5 @@
 import {getCodingLength, getCodingStart, getCodingEnd} from "../feature/exonUtils.js"
-import {searchFeatures} from "../search.js"
+import {searchFeatures} from "../searchFeatures.js"
 
 const log = console
 

@@ -1,11 +1,10 @@
 import "./utils/mockObjects.js"
 import {assert} from 'chai'
 import {createGenome} from "./utils/MockGenome.js"
+import search, {parseLocusString, searchWebService} from "../js/search.js"
+import FeatureSource from "../js/feature/featureSource.js"
 
 const genome = createGenome()
-import {parseLocusString, searchWebService} from "../js/search.js"
-import search from "../js/search.js"
-import FeatureSource from "../js/feature/featureSource.js"
 
 suite("testSearch", function () {
 
@@ -108,7 +107,7 @@ suite("testSearch", function () {
             delimiter: "\t",
             url: "test/data/bed/names_with_spaces.bed",
             indexed: false,
-            searchable: true,
+            searchable: true
         }
         const featureSource = FeatureSource(config)
         await featureSource.getFeatures({chr: "1", start: 0, end: Number.MAX_SAFE_INTEGER})
@@ -119,7 +118,12 @@ suite("testSearch", function () {
                     return "chr1" === chr ? {name: chr, bpLength: Number.MAX_SAFE_INTEGER} : undefined
                 },
                 getChromosomeName: (chr) => chr,
-                getChromosome: (chr) => {return "chr1" === chr ? {name: chr, bpLength: Number.MAX_SAFE_INTEGER} : undefined}
+                getChromosome: (chr) => {
+                    return "chr1" === chr ? {name: chr, bpLength: Number.MAX_SAFE_INTEGER} : undefined
+                },
+                getManeTranscript() {
+                    return null
+                }
             },
             tracks: [{
                 featureSource: featureSource,
