@@ -1,8 +1,9 @@
-
 import {StringUtils} from "../../node_modules/igv-utils/src/index.js"
 import {createSupplementaryAlignments} from "./supplementaryAlignment.js"
-import {byteToUnsignedInt, getBaseModificationSets, modificationName} from "./mods/baseModificationUtils.js"
+import {byteToUnsignedInt, getBaseModificationSets} from "./mods/baseModificationUtils.js"
 import orientationTypes from "./orientationTypes.js"
+import {HGVS} from "../genome/hgvs.js"
+import {ClinVar} from "../genome/clinVar.js"
 
 
 const READ_PAIRED_FLAG = 0x1
@@ -139,13 +140,22 @@ class BamAlignment {
         return (genomicLocation >= s && genomicLocation <= (s + l))
     }
 
-    popupData(genomicLocation, hiddenTags, showTags) {
+    /**
+     * Return data to show in the popup.  Elements are either strings (for raw HTML) or
+     * objects with name, value, borderTop properties.
+     *
+     * @param genomicLocation - 0-based genomic location
+     * @param hiddenTags - Set of bam tags to hide
+     * @param showTags - Set of bam tags to show (overrides hide/show rules)
+     * @returns {*[]}
+     */
+    async popupData(genomicLocation, hiddenTags, showTags, refBase, genome) {
 
         // if the user clicks on a base next to an insertion, show just the
         // inserted bases in a popup (like in desktop IGV).
         const nameValues = []
 
-        // Consert genomic location to int
+        // Convert genomic location to int
         genomicLocation = Math.floor(genomicLocation)
 
         if (this.insertions) {
@@ -239,7 +249,8 @@ class BamAlignment {
 
         nameValues.push('<hr/>')
         nameValues.push({name: 'Genomic Location: ', value: StringUtils.numberFormatter(1 + genomicLocation)})
-        nameValues.push({name: 'Read Base:', value: this.readBaseAt(genomicLocation)})
+        const readBase = this.readBaseAt(genomicLocation)
+        nameValues.push({name: 'Read Base:', value: readBase})
         nameValues.push({name: 'Base Quality:', value: this.readBaseQualityAt(genomicLocation)})
 
         const bmSets = this.getBaseModificationSets()
@@ -256,6 +267,26 @@ class BamAlignment {
                         }
                         const lh = Math.round((100 / 255) * byteToUnsignedInt(bmSet.likelihoods.get(i)))
                         nameValues.push(`${bmSet.fullName()} @ likelihood =  ${lh}%`)
+                    }
+                }
+            }
+        }
+
+        // HGVS annotations for variants, and ClinVar links if available
+        if (refBase) {
+            const readBase = this.readBaseAt(genomicLocation)
+            if (readBase && readBase !== refBase && readBase !== '*') {
+                const hgvsNotation = await HGVS.createHGVSAnnotation(genome, this.chr, genomicLocation, refBase, readBase)
+                if(hgvsNotation) {
+                    nameValues.push('<hr/>')
+                    const clinVarURL = await ClinVar.getClinVarURL(hgvsNotation)
+                    if (clinVarURL) {
+                        nameValues.push({
+                            name: 'ClinVar',
+                            value: `<a href='${clinVarURL}' target='_blank'>${hgvsNotation}</a>`
+                        })
+                    } else {
+                        nameValues.push({name: 'HGVS', value: hgvsNotation})
                     }
                 }
             }

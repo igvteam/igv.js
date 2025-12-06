@@ -62,7 +62,7 @@ class AlignmentTrack extends TrackBase {
         highlightColor: undefined,
         minTLEN: undefined,
         maxTLEN: undefined,
-        tagColorPallete: "Set1",
+        tagColorPallete: "Set1"
     }
 
     _colorTables = new Map()
@@ -412,7 +412,7 @@ class AlignmentTrack extends TrackBase {
 
                     IGVGraphics.strokeLine(ctx, sPixel, yStrokedLine, ePixel, yStrokedLine, {
                         strokeStyle: color,
-                        lineWidth: 2,
+                        lineWidth: 2
                     })
 
                     // Add gap width as text like Java IGV if it fits nicely and is a multi-base gap
@@ -421,7 +421,7 @@ class AlignmentTrack extends TrackBase {
                         IGVGraphics.fillRect(ctx, textStart - 1, y - 1, gapTextWidth + 2, 12, {fillStyle: "white"})
                         IGVGraphics.fillText(ctx, gapLenText, textStart, y + 10, {
                             'font': 'normal 10px monospace',
-                            'fillStyle': this.deletionTextColor,
+                            'fillStyle': this.deletionTextColor
                         })
                     }
                 }
@@ -464,7 +464,7 @@ class AlignmentTrack extends TrackBase {
                         if (this.showInsertionText && insertionBlock.len > 1 && basePixelWidth > textPixelWidth) {
                             IGVGraphics.fillText(ctx, insertLenText, xBlockStart + 1, y + 10, {
                                 'font': 'normal 10px monospace',
-                                'fillStyle': this.insertionTextColor,
+                                'fillStyle': this.insertionTextColor
                             })
                         }
                         lastXBlockStart = xBlockStart
@@ -634,7 +634,7 @@ class AlignmentTrack extends TrackBase {
                                     height: alignmentHeight
                                 },
                                 baseColor,
-                                readChar,
+                                readChar
                             })
                         }
 
@@ -663,13 +663,28 @@ class AlignmentTrack extends TrackBase {
                 }
             }
         }
+    }
 
-    };
-
-    popupData(clickState) {
+    async popupData(clickState) {
         const clickedObject = this.getClickedObject(clickState)
-        return clickedObject?.popupData(clickState.genomicLocation, this.hiddenTags, this.showTags)
-    };
+        if (clickedObject) {
+
+            // Determine reference base at clicked position, used for HGVS notation
+            let refBase
+            if (clickedObject.chr) {
+                const viewport = clickState.viewport
+                const alignmentContainer = viewport.cachedFeatures
+                const coverageMap = alignmentContainer?.coverageMap
+                const refseq = coverageMap?.refSeq
+                if (refseq) {
+                    const genomicLocation = Math.floor(clickState.genomicLocation)
+                    refBase = refseq.charAt(genomicLocation - coverageMap.bpStart).toUpperCase()
+                }
+            }
+
+            return clickedObject.popupData(clickState.genomicLocation, this.hiddenTags, this.showTags, refBase, this.browser.genome)
+        }
+    }
 
     /**
      * Return menu items for the AlignmentTrack
@@ -1444,7 +1459,7 @@ class AlignmentTrack extends TrackBase {
                         this.colorTable = new PaletteColorTable(this.tagColorPallete)
                     }
                     color = this.colorTable.getColor(tagValue)
-                    
+
                 }
                 break
         }

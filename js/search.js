@@ -1,4 +1,5 @@
 import {igvxhr, StringUtils} from "../node_modules/igv-utils/src/index.js"
+import {HGVS} from "./genome/hgvs.js"
 
 
 const DEFAULT_SEARCH_CONFIG = {
@@ -14,6 +15,13 @@ async function searchFeatures(browser, name) {
     let feature
 
     name = name.toUpperCase()
+
+    // Search MANE transcripts first, if available
+    feature = await browser.genome.getManeTranscript(name)
+    if (feature) {
+        return feature
+    }
+
     const searchableTracks = browser.tracks.filter(t => t.searchable)
     for (let track of searchableTracks) {
         const feature = await track.search(name)
@@ -60,6 +68,13 @@ async function search(browser, string) {
 
     const searchForLocus = async (locus) => {
 
+        if (HGVS.isValidHGVS(locus)) {
+            const hgvsResult = HGVS.search(locus, browser)
+            if (hgvsResult) {
+                return hgvsResult
+            }
+        }
+
         if (locus.trim().toLowerCase() === "all" || locus === "*") {
             if (browser.genome.wholeGenomeView) {
                 const wgChr = browser.genome.getChromosome("all")
@@ -85,12 +100,12 @@ async function search(browser, string) {
 
             // Not a locus string, search track annotations
             const feature = await searchFeatures(browser, locus)
-            if(feature) {
+            if (feature) {
                 locusObject = {
                     chr: feature.chr,
                     start: feature.start,
                     end: feature.end,
-                    name: (feature.name || locus).toUpperCase(),
+                    name: (feature.name || locus).toUpperCase()
 
                 }
             }
