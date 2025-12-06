@@ -350,10 +350,10 @@ class Genome {
     }
 
     /**
-     * Return the Mane transcript with the given name, or null if not found.  We also check the refseq historical
-     * db if available for backward compatibility.  This is only available for hg38.
-     * @param name
-     * @return
+     * Return the Mane transcript with the given name, or null if not found. We also check the refseq historical
+     * db if available for backward compatibility. This is only available for hg38.
+     * @param {string} name - The name of the Mane transcript to search for.
+     * @return {Promise<Object|null>} A Promise resolving to the Mane transcript object if found, or null otherwise.
      */
     async getManeTranscript(name) {
 
