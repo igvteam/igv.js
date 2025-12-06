@@ -174,6 +174,26 @@ class BamAlignment {
 
         nameValues.push({name: 'Read Name', value: this.readName})
 
+
+        // HGVS annotations for variants, and ClinVar links if available
+        const readBase = this.readBaseAt(genomicLocation)
+        if (refBase) {
+            if (readBase && readBase !== refBase && readBase !== '*') {
+                const hgvsNotation = await HGVS.createHGVSAnnotation(genome, this.chr, genomicLocation, refBase, readBase)
+                if (hgvsNotation) {
+                    const clinVarURL = await ClinVar.getClinVarURL(hgvsNotation)
+                    if (clinVarURL) {
+                        nameValues.push({
+                            name: 'ClinVar',
+                            value: `<a href='${clinVarURL}' target='_blank'>${hgvsNotation}</a>`
+                        })
+                    } else {
+                        nameValues.push({name: 'HGVS', value: hgvsNotation})
+                    }
+                }
+            }
+        }
+
         // Sample
         // Read group
         nameValues.push('<hr/>')
@@ -249,7 +269,6 @@ class BamAlignment {
 
         nameValues.push('<hr/>')
         nameValues.push({name: 'Genomic Location: ', value: StringUtils.numberFormatter(1 + genomicLocation)})
-        const readBase = this.readBaseAt(genomicLocation)
         nameValues.push({name: 'Read Base:', value: readBase})
         nameValues.push({name: 'Base Quality:', value: this.readBaseQualityAt(genomicLocation)})
 
@@ -267,25 +286,6 @@ class BamAlignment {
                         }
                         const lh = Math.round((100 / 255) * byteToUnsignedInt(bmSet.likelihoods.get(i)))
                         nameValues.push(`${bmSet.fullName()} @ likelihood =  ${lh}%`)
-                    }
-                }
-            }
-        }
-
-        // HGVS annotations for variants, and ClinVar links if available
-        if (refBase) {
-            if (readBase && readBase !== refBase && readBase !== '*') {
-                const hgvsNotation = await HGVS.createHGVSAnnotation(genome, this.chr, genomicLocation, refBase, readBase)
-                if (hgvsNotation) {
-                    nameValues.push('<hr/>')
-                    const clinVarURL = await ClinVar.getClinVarURL(hgvsNotation)
-                    if (clinVarURL) {
-                        nameValues.push({
-                            name: 'ClinVar',
-                            value: `<a href='${clinVarURL}' target='_blank'>${hgvsNotation}</a>`
-                        })
-                    } else {
-                        nameValues.push({name: 'HGVS', value: hgvsNotation})
                     }
                 }
             }
