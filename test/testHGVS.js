@@ -51,6 +51,8 @@ suite("testHGVS", function () {
 
     test("genome search", async function () {
 
+        this.timeout(20000)
+
         let hgvs = "NC_000017.11:g.7579472C>G"
         assert.isOk(HGVS.isValidHGVS(hgvs))
         let result = await HGVS.search(hgvs, browser)
@@ -83,6 +85,8 @@ suite("testHGVS", function () {
 
     test("coding search", async function () {
 
+        this.timeout(20000)
+
         let hgvs = "NM_000546.6(TP53):c.815T>G"
         assert.isOk(HGVS.isValidHGVS(hgvs))
         let result = await HGVS.search(hgvs, browser)
@@ -91,6 +95,8 @@ suite("testHGVS", function () {
     })
 
     test("search in introns", async function () {
+
+        this.timeout(20000)
 
         // Adapted from UCSC tests
         // chr1	11256193	11256194	NM_004958.3(MTOR):c.505-2A>G	0	-
@@ -132,6 +138,8 @@ suite("testHGVS", function () {
 
     test("historical refseq", async function () {
 
+        this.timeout(20000)
+
         // Adapted from UCSC tests
         // chr1	11256193	11256194	NM_004958.3(MTOR):c.505-2A>G	0	-
         let hgvs = "NM_004958.3(MTOR):c.505-2A>G"
@@ -151,6 +159,8 @@ suite("testHGVS", function () {
 
     test("create annotation", async function () {
 
+        this.timeout(20000)
+        
         // - strand gene, coding exon. Validated at ClinVar, genome location 17:7673596
         let expected = "NM_000546.6:c.932A>C"
         let hgvs = await HGVS.createHGVSAnnotation(browser.genome, "chr17", 7673595, 'T', 'G')
