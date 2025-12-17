@@ -59,7 +59,7 @@ export default async function handleMessage(json, browser) {
                     tracks = browser.findTracks(t => trackName ? t.name === trackName : true)
                     if (tracks) {
                         tracks.forEach(t => browser.removeTrack(t))
-                        returnMsg.message = `Removed track(s) ${color} for ${tracks.length} track(s)`
+                        returnMsg.message = `Removed track(s) ${trackName} for ${tracks.length} track(s)`
                     } else {
                         returnMsg.message = `No tracks found matching name ${trackName}`
                         returnMsg.status = 'warning'
