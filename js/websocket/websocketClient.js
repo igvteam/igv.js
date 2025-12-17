@@ -19,6 +19,7 @@ export function createWebSocketClient(host, port, browser) {
     let retryInterval = 1000    // Initial retry interval in ms
     const maxRetryInterval = 10000 // Maximum retry interval in ms
     let reconnectTimer
+    let intentionalClose = false // Flag to prevent reconnection on intentional close
 
     function connect() {
 
@@ -44,7 +45,12 @@ export function createWebSocketClient(host, port, browser) {
                 const json = JSON.parse(event.data)
 
                 if("close" === json.type) {
-                    // TODO -- close without starting the retry interval
+                    intentionalClose = true
+                    clearTimeout(reconnectTimer)
+                    if (socket && socket.readyState === WebSocket.OPEN) {
+                        socket.close()
+                    }
+                    return
                 }
 
                 const returnMsg = await handleMessage(json, browser)
@@ -69,6 +75,10 @@ export function createWebSocketClient(host, port, browser) {
         })
 
         socket.addEventListener('close', function (event) {
+            if (intentionalClose) {
+                console.log('WebSocket closed intentionally. Not reconnecting.')
+                return
+            }
             console.log('Disconnected from server. Retrying in ' + (retryInterval / 1000) + ' seconds.')
             clearTimeout(reconnectTimer)
             reconnectTimer = setTimeout(connect, retryInterval)
