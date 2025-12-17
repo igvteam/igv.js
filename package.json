@@ -1,6 +1,6 @@
 {
   "name": "igv",
-  "version": "3.6.0",
+  "version": "3.7.0",
   "main": "dist/igv.esm.js",
   "browser": "dist/igv.js",
   "module": "dist/igv.esm.js",
@@ -63,6 +63,7 @@
     "rollup-plugin-copy": "^3.3.0",
     "sass": "^1.45.1",
     "vanilla-picker": "^2.12.3",
-    "w3c-xmlhttprequest": "^3.0.0"
+    "w3c-xmlhttprequest": "^3.0.0",
+    "ws": "^8.18.3"
   }
 }

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>dev - alignment - bam</title>
+</head>
+
+<body>
+
+<h2>Test WebSocket interface</h2>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js"
+
+    const config = {
+        genome: "hg19",
+        enableWebSocket: true,
+        webSocketHost: "localhost",
+        webSocketPort: 60141
+    }
+
+    await igv.createBrowser(document.getElementById('igvDiv'), config)
+
+</script>
+
+</body>
+
+</html>
