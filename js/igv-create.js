@@ -2,6 +2,7 @@ import {GoogleAuth, igvxhr} from '../node_modules/igv-utils/src/index.js'
 import Browser from "./browser.js"
 import GenomeUtils from "./genome/genomeUtils.js"
 import InputDialog  from "./ui/components/inputDialog.js"
+import createWebSocketClient from "./websocket/websocketClient.js"
 
 let allBrowsers = []
 
@@ -60,8 +61,13 @@ async function createBrowser(parentDiv, config) {
 
     browser.navbar.navbarDidResize()
 
-    return browser
+    if(config.enableWebSockets) {
+        const host = config.webSocketHost || "localhost"
+        const port = config.webSockePort || 60141
+        createWebSocketClient(host, port, browser)
+    }
 
+    return browser
 }
 
 function removeBrowser(browser) {

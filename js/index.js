@@ -14,6 +14,7 @@ import AlertDialog from "./ui/components/alertDialog.js"
 import {registerFileFormats} from "./util/fileFormats.js"
 import {loadHub} from "./ucsc/hub/hubParser.js"
 import {createIcon} from "./ui/utils/icons.js"
+import createWebSocketClient from "./websocket/websocketClient.js"
 
 const setApiKey = igvxhr.setApiKey
 
@@ -56,6 +57,7 @@ export default {
     loadSessionFile: Browser.loadSessionFile,
     loadHub,
     uncompressSession: Browser.uncompressSession,
-    createIcon
+    createIcon,
+    createWebSocketClient
 }
 
