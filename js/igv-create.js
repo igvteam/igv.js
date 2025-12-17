@@ -61,9 +61,9 @@ async function createBrowser(parentDiv, config) {
 
     browser.navbar.navbarDidResize()
 
-    if(config.enableWebSockets) {
+    if(config.enableWebSocket) {
         const host = config.webSocketHost || "localhost"
-        const port = config.webSockePort || 60141
+        const port = config.webSocketPort || 60141
         createWebSocketClient(host, port, browser)
     }
 
