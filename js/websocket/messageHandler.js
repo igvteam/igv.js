@@ -145,6 +145,7 @@ export default async function handleMessage(json, browser) {
                     returnMsg.message = `No tracks found matching name ${trackName}`
                     returnMsg.status = 'warning'
                 }
+                break
 
             case "renametrack":
 
