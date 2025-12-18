@@ -14,7 +14,7 @@ class OverlayTrackButton extends NavbarButton {
 
         const mouseClickHandler = () => {
             this.setVisibility(false)
-            trackOverlayClickHandler.call(this)
+            this.trackOverlayClickHandler()
         }
 
         this.boundMouseClickHandler = mouseClickHandler.bind(this)
@@ -24,50 +24,49 @@ class OverlayTrackButton extends NavbarButton {
         this.setVisibility(true)
 
     }
-}
 
-async function trackOverlayClickHandler(e) {
+    async trackOverlayClickHandler() {
 
-    if (true === isOverlayTrackCriteriaMet(this.browser)) {
+        if (true === isOverlayTrackCriteriaMet(this.browser)) {
 
-        const tracks = this.browser.getSelectedTrackViews().map(({track}) => track)
-        for (const track of tracks) {
-            track.selected = false
-        }
-
-        // Flatten any merged tracks.  Must do this before their removal
-        const flattenedTracks = []
-        for (let t of tracks) {
-            if ("merged" === t.type) {
-                flattenedTracks.push(...t.tracks)
-            } else {
-                flattenedTracks.push(t)
-            }
-        }
-
-        const config =
-            {
-                name: 'Overlay',
-                type: 'merged',
-                autoscale: false,
-                alpha: 0.5, //fudge * (1.0/tracks.length),
-                height: Math.max(...tracks.map(({height}) => height)),
-                order: Math.min(...tracks.map(({order}) => order)),
+            const tracks = this.browser.getSelectedTrackViews().map(({track}) => track)
+            for (const track of tracks) {
+                track.selected = false
             }
 
-        const mergedTrack = new MergedTrack(config, this.browser, flattenedTracks)
+            // Flatten any merged tracks.  Must do this before their removal
+            const flattenedTracks = []
+            for (let t of tracks) {
+                if ("merged" === t.type) {
+                    flattenedTracks.push(...t.tracks)
+                } else {
+                    flattenedTracks.push(t)
+                }
+            }
 
-        for (const track of tracks) {
-            const idx = this.browser.trackViews.indexOf(track.trackView)
-            this.browser.trackViews.splice(idx, 1)
-            track.trackView.dispose()
+            const config =
+                {
+                    name: 'Overlay',
+                    type: 'merged',
+                    autoscale: false,
+                    alpha: 0.5, //fudge * (1.0/tracks.length),
+                    height: Math.max(...tracks.map(({height}) => height)),
+                    order: Math.min(...tracks.map(({order}) => order))
+                }
+
+            const mergedTrack = new MergedTrack(config, this.browser, flattenedTracks)
+
+            for (const track of tracks) {
+                const idx = this.browser.trackViews.indexOf(track.trackView)
+                this.browser.trackViews.splice(idx, 1)
+                track.trackView.dispose()
+            }
+
+            await this.browser.addTrack(mergedTrack)
+            await mergedTrack.trackView.updateViews()
+            this.browser.reorderTracks()
         }
-
-        this.browser.addTrack(mergedTrack)
-        await mergedTrack.trackView.updateViews()
-        this.browser.reorderTracks()
     }
-
 }
 
 function isOverlayTrackCriteriaMet(browser) {
