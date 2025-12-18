@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>igv.js</title>
+</head>
+
+<body>
+
+<h1>HIC Contact Matrix</h1>
+<p>
+    Hi-C contact matrix along with several associated tracks from 4DN data portal.
+</p>
+
+
+<div id="igv-div" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+<script type="module">
+
+    import igv from "../dist/igv.esm.min.js"
+
+    const version = igv.version()
+    console.log("Using IGV version: " + version)
+
+    const igvDiv = document.getElementById("igv-div")
+    const options =
+        {
+            "genome": "hg38",
+            "locus": "chr1:1,074,973-20,326,747",
+            "tracks": [
+                {
+                    "url": "https://4dn-open-data-public.s3.amazonaws.com/fourfront-webprod/wfoutput/a844f39f-3aa7-4e21-ba09-7683e1d91ab2/4DNFIH1NZ1M8.hic",
+                    "name": "Hi-C on WTC-11 differentiated to cardiac muscle cell",
+                    "color": "rgb(0, 150, 0)",
+                    "altColor": "rgb(0, 150, 0)",
+                    "format": "hic",
+                    "type": "interact"
+                },
+                {
+                    "url": "https://4dn-open-data-public.s3.amazonaws.com/fourfront-webprod/wfoutput/05966a12-d29c-4a20-88db-3aadf623e802/4DNFI42F1OEY.bw",
+                    "name": "compartments",
+                    "color": "rgb(249,88,148)",
+                    "altColor": "rgb(213,144,182)",
+                    "format": "bigwig",
+                    "type": "wig"
+                },
+                {
+                    "url": "https://4dn-open-data-public.s3.amazonaws.com/fourfront-webprod/wfoutput/1d071487-fc3d-46fd-b652-b5d322b726ae/4DNFI4DXOG39.bed.gz",
+                    "name": "boundaries",
+                    "color": "rgb(0, 150, 0)",
+                    "altColor": "rgb(0, 150, 0)",
+                    "format": "bed",
+                    "type": "annotation",
+                },
+                {
+                    "url": "https://4dn-open-data-public.s3.amazonaws.com/fourfront-webprod/wfoutput/d0f292ef-e71a-4255-a3d8-565df30d4b0d/4DNFIFKF1V4A.bw",
+                    "name": "insulation score-diamond",
+                    "color": "rgb(3,127,252)",
+                    "altColor": "rgb(11,177,250)",
+                    "format": "bigwig",
+                    "type": "wig"
+                }
+            ]
+        }
+
+
+    const browser = await igv.createBrowser(igvDiv, options)
+
+
+</script>
+
+</body>
+
+</html>
