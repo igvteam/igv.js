@@ -59,10 +59,13 @@ class ChromosomeSelectWidget {
             genome.wgChromosomeNames.map(nm => genome.getChromosomeDisplayName(nm)) :
             []
 
+        const alreadyAdded = genome.wgChromosomeNames ? new Set(genome.wgChromosomeNames) : new Set()
+
         if (this.showAllChromosomes && genome.chromosomeNames.length > 1) {
             const exclude = new Set(list)
-            let count = 0
+            let count = alreadyAdded.size
             for (let nm of genome.chromosomeNames) {
+                if(alreadyAdded.has(nm)) continue
                 if (++count === 1000) {
                     list.push(maximumSequenceCountExceeded)
                     break
