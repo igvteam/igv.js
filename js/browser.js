@@ -510,7 +510,7 @@ class Browser {
             }
         }
 
-        const genomeOrReference = session.reference || session.genome
+        const genomeOrReference = session.reference || session.genome || session.genarkAccession
         if (!genomeOrReference) {
             console.warn("No genome or reference object specified")
             return
@@ -727,6 +727,15 @@ class Browser {
         return genome
     }
 
+    async expandGenarkAccession(genarkAccession) {
+
+        const url = convertToHubURL(genarkAccession)
+        const hub = await loadHub(url)
+        const genomeConfig = hub.getGenomeConfig()
+        genomeConfig.nameSet = "ucsc"
+        return genomeConfig
+    }
+
     /**
      * Load a genome, defined by a string ID or a json-like configuration object. This includes a fasta reference
      * as well as optional cytoband and annotation tracks.
@@ -736,31 +745,33 @@ class Browser {
      */
     async loadGenome(idOrConfig) {
 
-        if (idOrConfig.genarkAccession) {
-            idOrConfig.url = convertToHubURL(idOrConfig.genarkAccession)
-        }
-
-        // Translate the generic "url" field, used by clients such as igv-webapp
-        if (idOrConfig.url) {
-            if (StringUtils.isString(idOrConfig.url) && idOrConfig.url.endsWith("/hub.txt")) {
-                idOrConfig.hubURL = idOrConfig.url
-                delete idOrConfig.url
-            } else if ("gbk" === getFileExtension(idOrConfig.url)) {
-                idOrConfig.gbkURL = idOrConfig.url
-                delete idOrConfig.url
-            }
-        }
-
         let genomeConfig
-        const isHubGenome = idOrConfig.hubURL || (idOrConfig.url && StringUtils.isString(idOrConfig.url) && idOrConfig.url.endsWith("/hub.txt"))
-        if (isHubGenome) {
-            const hub = await loadHub(idOrConfig.hubURL || idOrConfig.url, idOrConfig)
-            genomeConfig = hub.getGenomeConfig()
-        } else if (StringUtils.isString(idOrConfig) || !(idOrConfig.url || idOrConfig.fastaURL || idOrConfig.twoBitURL || idOrConfig.gbkURL)) {
-            // Either an ID, a json string, or an object missing required properties.
-            genomeConfig = await GenomeUtils.expandReference(this.alert, idOrConfig)
+
+        if (idOrConfig.genarkAccession) {
+            genomeConfig = await this.expandGenarkAccession(idOrConfig.genarkAccession)
         } else {
-            genomeConfig = idOrConfig
+            // Translate the generic "url" field, used by clients such as igv-webapp
+            if (idOrConfig.url) {
+                if (StringUtils.isString(idOrConfig.url) && idOrConfig.url.endsWith("/hub.txt")) {
+                    idOrConfig.hubURL = idOrConfig.url
+                    delete idOrConfig.url
+                } else if ("gbk" === getFileExtension(idOrConfig.url)) {
+                    idOrConfig.gbkURL = idOrConfig.url
+                    delete idOrConfig.url
+                }
+            }
+
+
+            const isHubGenome = idOrConfig.hubURL || (idOrConfig.url && StringUtils.isString(idOrConfig.url) && idOrConfig.url.endsWith("/hub.txt"))
+            if (isHubGenome) {
+                const hub = await loadHub(idOrConfig.hubURL || idOrConfig.url, idOrConfig)
+                genomeConfig = hub.getGenomeConfig()
+            } else if (StringUtils.isString(idOrConfig) || !(idOrConfig.url || idOrConfig.fastaURL || idOrConfig.twoBitURL || idOrConfig.gbkURL)) {
+                // Either an ID, a json string, or an object missing required properties.
+                genomeConfig = await GenomeUtils.expandReference(this.alert, idOrConfig)
+            } else {
+                genomeConfig = idOrConfig
+            }
         }
 
         await this.loadReference(genomeConfig)
