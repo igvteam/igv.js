@@ -87,6 +87,15 @@ class ChromAliasFile {
         }
     }
 
+    /**
+     * Search for chromosome alias record.  If found, cache results in the alias -> chr map
+     *
+     * An alias record is an object with keys corresponding to the chromosome name set (e.g. "ucsc", "refseq", etc) and
+     * value the corresponding chromosome alias for that name set.
+     *
+     * @param alias - the sequence name or alias
+     * @returns {Promise<any>} promise to resolve to the alias record.
+     */
     async search(alias) {
         if(this.aliasRecordCache.size === 0) {
             await this.loadAliases()

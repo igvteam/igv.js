@@ -45,7 +45,7 @@ class Genome {
         this.ucscID = config.ucscID || ucsdIDMap.get(this.id) || this.id
         this.blatDB = config.blatDB || this.ucscID
         this.name = config.name
-        this.nameSet = config.nameSet || 'ucsc'
+        this.nameSet = config.nameSet
     }
 
 
