@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>genark</title>
+</head>
+
+<body>
+
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js"
+
+    const igvConfig = {
+        genarkAccession: "GCF_000001635.27"
+    }
+
+    const browser = await igv.createBrowser(document.getElementById('igvDiv'), igvConfig)
+
+    // Uncomment to test the loadGenome method
+    //browser.loadGenome({genarkAccession: "GCF_000001635.27"})
+
+
+</script>
+
+</body>
+
+</html>
