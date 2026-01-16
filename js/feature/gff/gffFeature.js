@@ -1,5 +1,5 @@
 import {StringUtils} from "../../../node_modules/igv-utils/src/index.js"
-import {isCoding, isIntron, isUTR, isTerminalCodon} from "./so.js"
+import {isCoding, isIntron, isUTR} from "./so.js"
 
 
 import {parseAttributeString} from "./parseAttributeString.js"
@@ -139,9 +139,6 @@ class GFFTranscript extends GFFFeature {
             const type = part.type
             if (isCoding(type)) {
                 this.addCDS(part)
-            }
-            if (isTerminalCodon(type)) {
-                this.addTerminalCodon(part)
             } else if (isUTR(type)) {
                 this.addUTR(part)
             }
@@ -173,14 +170,13 @@ class GFFTranscript extends GFFFeature {
             exon.cdStart = exon.cdStart ? Math.min(cds.start, exon.cdStart) : cds.start
             exon.cdEnd = exon.cdEnd ? Math.max(cds.end, exon.cdEnd) : cds.end
             if (cds.readingFrame !== undefined) {
-                if (exon.readingFrame == undefined) {
+                if (exon.readingFrame === undefined) {
                     exon.readingFrame = cds.readingFrame
                 } else {
                     // Keep reading frame of first CDS in direction of transcription
                     if (this.strand === '+') {
                         // TODO -- could check that cds.readingFrame is 0
-                    }
-                    else {
+                    } else {
                         exon.readingFrame = cds.readingFrame
                     }
                 }
@@ -225,7 +221,7 @@ class GFFTranscript extends GFFFeature {
                 // Do not "backup" the cdEnd based on a UTR record.  A stop_codon might extend cdEnd into the UTR, and we
                 // don't want to quash that with the UTR. Although stop codons are not translated, visually
                 // they appear as part exonic coding sequence. This is a long established convention,
-                if (utr.start > exon.cdEnd) {
+                if (exon.cdEnd === undefined || utr.start > exon.cdEnd) {
                     exon.cdEnd = utr.start
                 }
             }

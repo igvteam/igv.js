@@ -434,7 +434,7 @@ function getAminoAcidLetterWithExonGap(strand, phase, phaseExtentStart, phaseExt
 
         if (remainder) {
 
-            if(!riteExon) {
+            if (!riteExon) {
                 return undefined
             }
 
