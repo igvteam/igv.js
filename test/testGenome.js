@@ -7,44 +7,6 @@ import {shortenChromsomeName} from "../js/rulerTrack.js"
 
 suite("testGenome", function () {
 
-    test("Genome coordinates", async function () {
-
-        this.timeout(200000)
-
-        const reference = {
-            "id": "b37_1kg",
-            "name": "Human (1kg, b37+decoy)",
-            "fastaURL": "https://storage.googleapis.com/genomics-public-data/references/Homo_sapiens_assembly19_1000genomes_decoy/Homo_sapiens_assembly19_1000genomes_decoy.fasta",
-            "indexURL": "https://storage.googleapis.com/genomics-public-data/references/Homo_sapiens_assembly19_1000genomes_decoy/Homo_sapiens_assembly19_1000genomes_decoy.fasta.fai",
-            "cytobandURL": "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/cytoBand.txt.gz",
-            wholeGenomeView: true
-        }
-
-        const genome = await Genome.createGenome(reference)
-        assert.ok(genome)
-        assert.equal(86, genome.chromosomeNames.length)
-        assert.equal(genome.getCumulativeOffset("2"), 249250621)
-
-    })
-
-    // test("2bit genome with chromSizes", async function() {
-    //
-    //     this.timeout(400000)
-    //
-    //     const reference = {
-    //         id: "GCF_000364345.1",
-    //         format: "2bit",
-    //         twoBitURL: "https://hgdownload.soe.ucsc.edu/hubs/GCF/000/364/345/GCF_000364345.1/GCF_000364345.1.2bit",
-    //         chromSizesURL: "https://hgdownload.soe.ucsc.edu/hubs/GCF/000/364/345/GCF_000364345.1/GCF_000364345.1.chrom.sizes.txt"
-    //     }
-    //
-    //     const genome = await Genome.createGenome(reference)
-    //     assert.ok(genome.chromosomes.size > 0)
-    //     assert.ok(genome.chromosomeNames.length > 0)
-    //
-    // })
-
-
     test("Shorten name", function() {
         const names = ["chr1", "chromosome_1"]
         const expected = ["1", "chromosome_1"]

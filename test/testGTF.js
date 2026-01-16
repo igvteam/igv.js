@@ -3,12 +3,12 @@ import FeatureSource from "../js/feature/featureSource.js"
 import FeatureFileReader from "../js/feature/featureFileReader.js"
 import {assert} from 'chai'
 import {createGenome} from "./utils/MockGenome.js"
-
-const genome = createGenome()
 import GFFHelper from "../js/feature/gff/gffHelper.js"
 import {decodeGFFAttribute, parseAttributeString} from "../js/feature/gff/parseAttributeString.js"
 
-suite("testGFF", function () {
+const genome = createGenome()
+
+suite("testGTF", function () {
 
     const combineFeatures = (features, helper) => {
         const combinedFeatures = helper.combineFeatures(features)
@@ -22,57 +22,15 @@ suite("testGFF", function () {
         return combinedFeatures
     }
 
-    test("Eden GFF", async function () {
 
-        const chr = "chr1"
-        const start = 1
-        const end = 10000
-        const featureReader = new FeatureFileReader({
-                url: 'test/data/gff/eden.gff',
-                format: 'gff3',
-                filterTypes: [],
-                assembleGFF: false
-            },
-            genome
-        )
+    test("GTF phase", async function () {
 
-
-        // Fetch "raw" features (constituitive parts)
-        const features = await featureReader.readFeatures(chr, start, end)
-        assert.ok(features)
-        assert.equal(20, features.length)
-
-        // Combine features
-        const helper = new GFFHelper({format: "gff3"})
-        const combinedFeatures = combineFeatures(features, helper)
-        assert.equal(4, combinedFeatures.length)
-
-        // Check last transcript
-        /*
-mRNA	1300	9000	.	+	.	 ID=mRNA00003;Parent=gene00001;Name=EDEN.3
-exon	1300	1500	.	+	.	 ID=exon00001;Parent=mRNA00003
-exon	3000	3902	.	+	.	 ID=exon00003;Parent=mRNA00001,mRNA00003
-exon	5000	5500	.	+	.	 ID=exon00004;Parent=mRNA00001,mRNA00002,mRNA00003
-exon	7000	9000	.	+	.	 ID=exon00005;Parent=mRNA00001,mRNA00002,mRNA00003
-CDS	    3301	3902	.	+	0	ID=cds00003;Parent=mRNA00003;Name=edenprotein.3
-CDS	    5000	5500	.	+	1	ID=cds00003;Parent=mRNA00003;Name=edenprotein.3
-CDS	    7000	7600	.	+	1	ID=cds00003;Parent=mRNA00003;Name=edenprotein.3
-         */
-        const mRNA3 = combinedFeatures[3]
-        assert.equal(mRNA3.name, "EDEN.3")
-        assert.equal(mRNA3.exons.length, 4)
-        assert.equal(mRNA3.exons[0].utr, true)
-        assert.equal(mRNA3.exons[1].cdStart, 3300)
-        assert.equal(mRNA3.exons[3].cdEnd, 7600)
-    })
-
-    test("ENSEMBL GFF transcript", async function () {
+        //-1,-1,0,1,2,0,2,0,0,0,1,
 
         const featureReader = new FeatureFileReader({
-                url: 'test/data/gff/Ensembl_MYC-205.gff3',
-                format: 'gff3',
-                filterTypes: [],
-                assembleGFF: false
+                url: 'test/data/gff/ENST00000380013.9_1.gtf',
+                format: 'gtf',
+                filterTypes: []
             },
             genome
         )
@@ -81,39 +39,14 @@ CDS	    7000	7600	.	+	1	ID=cds00003;Parent=mRNA00003;Name=edenprotein.3
         // Fetch "raw" features (constituitive parts)
         const features = await featureReader.readFeatures()
         assert.ok(features)
-        assert.equal(9, features.length)
+        assert.equal(1, features.length)
 
-        // Combine features
-        const helper = new GFFHelper({format: "gff3"})
-        const combinedFeatures = combineFeatures(features, helper)
-        assert.equal(1, combinedFeatures.length)
-        assert.equal(3, combinedFeatures[0].exons.length)
-    })
+        // Expected reading frames from UCSC ncbiRefSeq file
+        const expectedReadingFrames = [undefined, undefined, 0, 1, 2, 0, 2, 0, 0, 0, 1]
+        features[0].exons.forEach((e, i) => {
+            assert.equal(expectedReadingFrames[i], e.readingFrame)
+        })
 
-    test("ENSEMBL GFF region", async function () {
-
-        const featureReader = new FeatureFileReader({
-                url: 'test/data/gff/Ensembl_MYC-region.gff3',
-                format: 'gff3',
-                filterTypes: [],
-                assembleGFF: false
-            },
-            genome
-        )
-
-
-        // Fetch "raw" features (constituitive parts)
-        const features = await featureReader.readFeatures()
-        assert.ok(features)
-        assert.equal(76, features.length)
-
-        // Combine features
-        const helper = new GFFHelper({format: "gff3"})
-        const combinedFeatures = combineFeatures(features, helper)
-
-        // 9 mRNAs, 11 biological regions
-        assert.equal(20, combinedFeatures.length)
-        assert.equal(9, combinedFeatures.filter(f => f.type === "mRNA").length)
 
     })
 

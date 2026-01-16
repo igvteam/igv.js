@@ -1,5 +1,5 @@
 import {StringUtils} from "../../../node_modules/igv-utils/src/index.js"
-import {isCoding, isIntron, isUTR} from "./so.js"
+import {isCoding, isIntron, isUTR, isTerminalCodon} from "./so.js"
 
 
 import {parseAttributeString} from "./parseAttributeString.js"
@@ -139,6 +139,9 @@ class GFFTranscript extends GFFFeature {
             const type = part.type
             if (isCoding(type)) {
                 this.addCDS(part)
+            }
+            if (isTerminalCodon(type)) {
+                this.addTerminalCodon(part)
             } else if (isUTR(type)) {
                 this.addUTR(part)
             }
@@ -169,12 +172,20 @@ class GFFTranscript extends GFFFeature {
         if (exon) {
             exon.cdStart = exon.cdStart ? Math.min(cds.start, exon.cdStart) : cds.start
             exon.cdEnd = exon.cdEnd ? Math.max(cds.end, exon.cdEnd) : cds.end
-            exon.readingFrame = cds.readingFrame
-            // TODO -- merge attributes?
+            if (cds.readingFrame !== undefined) {
+                if (exon.readingFrame == undefined) {
+                    exon.readingFrame = cds.readingFrame
+                } else {
+                    // Keep reading frame of first CDS in direction of transcription
+                    if (this.strand === '+') {
+                        // TODO -- could check that cds.readingFrame is 0
+                    }
+                    else {
+                        exon.readingFrame = cds.readingFrame
+                    }
+                }
+            }
         } else {
-            // cds.cdStart = cds.start
-            // cds.cdEnd = cds.end
-            // exons.push(cds)
             console.error("No exon found spanning " + cds.start + "-" + cds.end)
         }
 
@@ -184,6 +195,11 @@ class GFFTranscript extends GFFFeature {
 
         this.cdStart = this.cdStart ? Math.min(cds.start, this.cdStart) : cds.start
         this.cdEnd = this.cdEnd ? Math.max(cds.end, this.cdEnd) : cds.end
+    }
+
+    addTerminalCodon(codon) {
+        // Treat terminal codons as CDS
+        this.addCDS(codon)
     }
 
     addUTR(utr) {
@@ -206,7 +222,10 @@ class GFFTranscript extends GFFFeature {
                 if (utr.end < exon.end) {
                     exon.cdStart = utr.end
                 }
-                if (utr.start > exon.start) {
+                // Do not "backup" the cdEnd based on a UTR record.  A stop_codon might extend cdEnd into the UTR, and we
+                // don't want to quash that with the UTR. Although stop codons are not translated, visually
+                // they appear as part exonic coding sequence. This is a long established convention,
+                if (utr.start > exon.cdEnd) {
                     exon.cdEnd = utr.start
                 }
             }
