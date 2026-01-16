@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>dev - alignment - bam</title>
+</head>
+
+<body>
+
+<h2>
+    GIAB
+</h2>
+
+Data from https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js"
+
+    const config =
+        {
+            "genome": "hg38",
+            "locus": "myc",
+
+            "tracks": [
+                {
+                    "name": "ONT Direct RNA",
+                    "url": "https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/data_RNAseq/AshkenazimTrio/HG002_NA24385_son/Mason_ONT-directRNA/alignments/HG002_GM24385_directRNA_ONT_Mason_20230526.sorted.bam",
+                    "indexURL": "https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/data_RNAseq/AshkenazimTrio/HG002_NA24385_son/Mason_ONT-directRNA/alignments/HG002_GM24385_directRNA_ONT_Mason_20230526.sorted.bam.bai"
+                },
+                {
+                    "url": "https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/data_RNAseq/AshkenazimTrio/HG002_NA24385_son/Google_Illumina/mRNA/alignments/hg002_gm24385.mrna.grch38.bam",
+                    "indexURL": "https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/data_RNAseq/AshkenazimTrio/HG002_NA24385_son/Google_Illumina/mRNA/alignments/hg002_gm24385.mrna.grch38.bam.bai",
+                    "name": "Illumina mRNA"
+                }
+            ]
+        }
+
+    igv.createBrowser(document.getElementById('igvDiv'), config)
+
+
+
+</script>
+
+</body>
+
+</html>
