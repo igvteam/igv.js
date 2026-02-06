@@ -140,7 +140,12 @@ class TrackView {
 
             })
 
+            // Preserve checked state if materialProviderInput already exists
+            const existingCheckedValue = this.materialProviderInput?.checked
             this.materialProviderInput = input
+            if (existingCheckedValue !== undefined) {
+                this.materialProviderInput.checked = existingCheckedValue
+            }
         }
 
         return axis
