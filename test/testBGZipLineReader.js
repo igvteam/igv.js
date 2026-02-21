@@ -1,10 +1,9 @@
 import BGZLineReader from "../js/util/bgzLineReader.js"
-import "./utils/mockObjects.js"
-import {assert} from 'chai'
+import {assert} from './utils/assert.js'
 
-suite("testBGZipLineReader", function () {
+describe("testBGZipLineReader", function () {
 
-    test("long lines ", async function () {
+    it("long lines ", async function () {
 
         // Test of a line spanning multiple bgzip blocks
         const config = {
@@ -30,11 +29,8 @@ suite("testBGZipLineReader", function () {
 
     })
 
-    test("1kg VCF", async function () {
-
-        this.timeout(10000)
-
-        const config = {
+    it("1kg VCF", async function () {
+const config = {
             url: 'https://s3.amazonaws.com/1000genomes/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz',
             bgzip: true
         }

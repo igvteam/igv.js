@@ -1,12 +1,11 @@
-import "./utils/mockObjects.js"
-import {assert} from 'chai'
+import {assert} from './utils/assert.js'
 import {createGenome} from "./utils/MockGenome.js"
 import search, {parseLocusString, searchWebService} from "../js/search.js"
 import FeatureSource from "../js/feature/featureSource.js"
 
 const genome = createGenome()
 
-suite("testSearch", function () {
+describe("testSearch", function () {
 
     const browser = {
         genome: genome,
@@ -42,7 +41,7 @@ suite("testSearch", function () {
 
     }
 
-    test("locus strings", function () {
+    it("locus strings", function () {
         const s1 = "chr1:100-200"
         const locus1 = parseLocusString(s1)
         assert.equal(locus1.chr, "chr1")
@@ -59,11 +58,8 @@ suite("testSearch", function () {
 
     })
 
-    test("webservice", async function () {
-
-        this.timeout(10000)
-
-        // myc =>  chr8:127,735,434-127,742,951 (+), chr8:127,736,231-127,742,951 (+)
+    it("webservice", async function () {
+// myc =>  chr8:127,735,434-127,742,951 (+), chr8:127,736,231-127,742,951 (+)
         const gene = "myc"
         const locus = await searchWebService(browser, gene, browser.searchConfig)
         assert.equal(locus.chr, "chr8")
@@ -71,11 +67,8 @@ suite("testSearch", function () {
         assert.equal(locus.end, 127742951)
     })
 
-    test("search (main function)", async function () {
-
-        this.timeout(10000)
-
-        const s1 = "chr1:100-200"
+    it("search (main function)", async function () {
+const s1 = "chr1:100-200"
         const s2 = "myc"
         const s3 = "muc1"
 
@@ -100,7 +93,7 @@ suite("testSearch", function () {
         assert.equal(locus3.name, 'MUC1')
     })
 
-    test("search name with spaces from bed file", async function () {
+    it("search name with spaces from bed file", async function () {
 
         const config = {
             format: "bed",

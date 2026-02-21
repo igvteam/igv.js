@@ -1,13 +1,12 @@
-import "./utils/mockObjects.js"
-import {assert} from 'chai'
+import {assert} from './utils/assert.js'
 import CytobandFileBB from "../js/genome/cytobandFileBB.js"
 import {createGenome} from "./utils/MockGenome.js"
 import CytobandFile from "../js/genome/cytobandFile.js"
 
 
-suite("test cytobands", function () {
+describe("test cytobands", function () {
 
-    test("test cytoband text", async function () {
+    it("test cytoband text", async function () {
 
         const genome = createGenome("ncbi")
         const url = "test/data/cyto/cytoBand.txt.gz"
@@ -31,7 +30,7 @@ suite("test cytobands", function () {
      *   "gieStain": "gneg"
      * }
      */
-    test("test cytoband bigbed", async function () {
+    it("test cytoband bigbed", async function () {
 
         const url = "test/data/bb/cytoBandMapped.bb"
         const src = new CytobandFileBB(url)
@@ -42,7 +41,7 @@ suite("test cytobands", function () {
 
     })
 
-    test("test cytoband bigbed - aliasing", async function () {
+    it("test cytoband bigbed - aliasing", async function () {
 
         const genome = createGenome("ncbi")
         const url = "test/data/bb/cytoBandMapped.bb"

@@ -7,8 +7,6 @@ import {File} from "./File.js"
 import {XMLHttpRequestMock} from "./XMLHttpRequestMock.js"
 import {Document, DOMImplementation} from "./Document.js"
 import {DOMParser} from "./DOMParser.js"
-import atob from 'atob'
-import btoa from 'btoa'
 
 global.document = new Document()
 
@@ -38,8 +36,3 @@ global.File = File
 global.XMLHttpRequest = XMLHttpRequestMock
 
 global.DOMParser = DOMParser
-
-global.atob = atob
-
-global.btoa = btoa
-

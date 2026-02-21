@@ -1,4 +1,4 @@
-import {StringUtils} from "../node_modules/igv-utils/src/index.js"
+import {StringUtils} from "igv-utils/src/index.js"
 import * as DOMUtils from "./ui/utils/dom-utils.js"
 import {prettyBasePairNumber, validateGenomicExtent} from "./util/igvUtils.js"
 import GenomeUtils from "./genome/genomeUtils.js"

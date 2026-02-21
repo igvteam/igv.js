@@ -1,11 +1,10 @@
-import "./utils/mockObjects.js"
 import RnaStructTrack from "../js/rna/rnaStruct.js"
-import {assert} from 'chai'
+import {assert} from './utils/assert.js'
 import {createGenome} from "./utils/MockGenome.js"
 
 // Mock genome object
 const genome = createGenome("ncbi")
-suite("testRnaStruct", function () {
+describe("testRnaStruct", function () {
 
 // mock brower object
     const browser = {
@@ -13,7 +12,7 @@ suite("testRnaStruct", function () {
         constants: {}
     }
 
-    test('Test parsing .bp file', async function () {
+    it('Test parsing .bp file', async function () {
 
         const rnaStruct = new RnaStructTrack(
             {url: 'test/data/bp/example.bp'},

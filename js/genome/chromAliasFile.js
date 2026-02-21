@@ -10,7 +10,7 @@
  * @returns {Promise<*[]>}
  */
 import {buildOptions} from "../util/igvUtils.js"
-import {igvxhr, StringUtils} from "../../node_modules/igv-utils/src/index.js"
+import {igvxhr, StringUtils} from "igv-utils/src/index.js"
 import ChromAliasDefaults from "./chromAliasDefaults.js"
 
 class ChromAliasFile {

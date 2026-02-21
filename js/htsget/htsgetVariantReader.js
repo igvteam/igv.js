@@ -1,7 +1,7 @@
 import HtsgetReader from "./htsgetReader.js"
 import getDataWrapper from "../feature/dataWrapper.js"
 import VcfParser from "../variant/vcfParser.js"
-import {isgzipped, ungzip} from "../../node_modules/igv-utils/src/bgzf.js"
+import {isgzipped, ungzip} from "igv-utils/src/bgzf.js"
 import ChromAliasManager from "../feature/chromAliasManager.js"
 
 class HtsgetVariantReader extends HtsgetReader {

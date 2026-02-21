@@ -1,11 +1,10 @@
-import "./utils/mockObjects.js"
-import {assert} from 'chai'
+import {assert} from './utils/assert.js'
 import {ClinVar} from "../js/genome/clinVar.js"
 
 
-suite("test ClinVar", function () {
+describe("test ClinVar", function () {
 
-    test("ClinVar record exists", async function () {
+    it("ClinVar record exists", async function () {
         const existingHgvs = "NM_000546.5:c.215C>G" // Known to exist
         const nonExistingHgvs = "NM_000000.0:c.9999A>T" // Known not to exist
         const existingResult = await ClinVar.getClinVarURL(existingHgvs)

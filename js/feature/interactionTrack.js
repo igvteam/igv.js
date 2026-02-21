@@ -1,7 +1,7 @@
 import TrackBase from "../trackBase.js"
 import IGVGraphics from "../igv-canvas.js"
 import paintAxis from "../util/paintAxis.js"
-import {IGVColor, StringUtils} from "../../node_modules/igv-utils/src/index.js"
+import {IGVColor, StringUtils} from "igv-utils/src/index.js"
 import {createCheckbox} from "../igv-icons.js"
 import {scoreShade} from "../util/ucscUtils.js"
 import FeatureSource from "./featureSource.js"

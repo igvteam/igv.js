@@ -1,31 +1,33 @@
-To update the cram-js bundle
+## Updating the CRAM bundle
 
-(1)  update the @gmod/cram package to the latest version in package.json
+`cram-bundle.js` is a vendored, pre-patched copy of the `@gmod/cram` dist bundle.
+`@gmod/cram` is **not** in `devDependencies` — install it temporarily when regenerating the bundle.
 
-```bash
+### Steps
 
-(2)  update the @gmod/cram package by running the following command in the igv.js root directory
+1. Install the package temporarily:
+   ```bash
+   npm install --no-save @gmod/cram
+   ```
 
-```bash
-npm install
-```
+2. Copy the dist bundle:
+   ```bash
+   cp node_modules/@gmod/cram/dist/cram-bundle.js js/cram/cram-bundle.js
+   ```
 
-(3) copy `node_modules/@gmod/cram/dist/cram-bundle.js`  to `js/cram/cram-bundle.js`
+3. Patch `js/cram/cram-bundle.js` to convert from UMD to ES module:
 
-Edit `cram-bundle.js` as follows. (The gmod distribution bundle sets a windows global, and does not provide an ES6
-export.  The modification below will convert the bundle to an ES6 module, required by igv.js)
+   **At the very start of the file**, add an `export default` before the IIFE:
+   ```js
+   export default (()=>{ ...
+   ```
 
-(4) Add an export default statment to the beginning of the file
+   **At the very end of the file**, replace the UMD global assignment:
+   ```js
+   // before:
+   window.gmodCram = r(5590); })();
+   // after:
+   var n = r(5590); return n; })();
+   ```
 
-```js
- export default ....
-```
-
-(5) replace ```window.gmodCram= ``` at the end of the file with ```return ```,  e.g.
-
-```js
-var n = r(5590);return n})();
-```
-
-
-
+4. Commit the updated `cram-bundle.js`.

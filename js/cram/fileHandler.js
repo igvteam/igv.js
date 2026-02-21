@@ -1,4 +1,4 @@
-import {igvxhr, FileUtils} from "../../node_modules/igv-utils/src/index.js"
+import {igvxhr, FileUtils} from "igv-utils/src/index.js"
 import {buildOptions} from "../util/igvUtils.js"
 
 

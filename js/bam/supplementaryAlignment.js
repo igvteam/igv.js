@@ -1,4 +1,4 @@
-import {numberFormatter} from "../../node_modules/igv-utils/src/stringUtils.js"
+import {numberFormatter} from "igv-utils/src/stringUtils.js"
 
 class SupplementaryAlignment {
 

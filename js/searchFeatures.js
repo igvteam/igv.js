@@ -1,5 +1,5 @@
 // Lazy import to avoid circular dependency
-import {igvxhr, StringUtils} from "../node_modules/igv-utils/src/index.js"
+import {igvxhr, StringUtils} from "igv-utils/src/index.js"
 
 /**
  * Search for a feature by name across various data sources

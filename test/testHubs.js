@@ -1,13 +1,12 @@
-import "./utils/mockObjects.js"
-import {assert} from 'chai'
+import {assert} from './utils/assert.js'
 import {convertToHubURL} from "../js/ucsc/ucscUtils.js"
 import {loadStanzas, loadHub} from "../js/ucsc/hub/hubParser.js"
 import TrackDbHub from "../js/ucsc/hub/trackDbHub.js"
 import {parseMetadata} from "../js/ucsc/hub/trackDbHub.js"
 
-suite("hub.txt", function () {
+describe("hub.txt", function () {
 
-    test("get genome configs", async function () {
+    it("get genome configs", async function () {
 
         const hubFile = "test/data/hubs/hub.txt"
         const hub = await loadHub(hubFile)
@@ -25,11 +24,8 @@ suite("hub.txt", function () {
     })
 
 
-    test("genome config", async function () {
-
-        this.timeout(20000)
-
-        const hubURL = convertToHubURL("GCF_000186305.1")
+    it("genome config", async function () {
+const hubURL = convertToHubURL("GCF_000186305.1")
         const hub = await loadHub(hubURL)
         assert.ok(hub.hubStanza)
         assert.ok(hub.genomeStanzas)
@@ -46,10 +42,8 @@ suite("hub.txt", function () {
         assert.ok(genomeConfig.chromAliasBbURL)
     })
 
-    test("track configs", async function () {
-
-        this.timeout(20000)
-        const hubURL = convertToHubURL("GCF_000186305.1")
+    it("track configs", async function () {
+const hubURL = convertToHubURL("GCF_000186305.1")
         const hub = await loadHub(hubURL)
         const groupedTrackConfigurations = await hub.getGroupedTrackConfigurations("GCF_000186305.1")
         assert.equal(5, groupedTrackConfigurations.length)
@@ -66,7 +60,7 @@ suite("hub.txt", function () {
      * @throws IOException
      */
 
-    test("supertrack", async function () {
+    it("supertrack", async function () {
 
         const stanzas = await loadStanzas("test/data/hubs/supertrack_hub.txt")
         assert.equal(stanzas.length, 7)
@@ -93,7 +87,7 @@ suite("hub.txt", function () {
         assert.equal(4, meta.size)
     })
 
-    test("grouped containers", async function () {
+    it("grouped containers", async function () {
         const stanzas = await loadStanzas("test/data/hubs/gtexCoverage.txt")
         const groupStanzas = await loadStanzas("test/data/hubs/groups.txt")
         const trackDbHub = new TrackDbHub(stanzas, groupStanzas)
@@ -111,18 +105,15 @@ suite("hub.txt", function () {
         assert.equal(2, compositeContainer.tracks.length)
     })
 
-    test("NCBI Hosted Hub", async function () {
-
-        this.timeout(20000)
-
-        const hubFile = "https://ftp.ncbi.nlm.nih.gov/snp/population_frequency/TrackHub/latest/hub.txt"
+    it("NCBI Hosted Hub", async function () {
+const hubFile = "https://ftp.ncbi.nlm.nih.gov/snp/population_frequency/TrackHub/latest/hub.txt"
         const hub = await loadHub(hubFile)
         const groupedTrackConfigurations = await hub.getGroupedTrackConfigurations("hg38")
         assert.equal(1, groupedTrackConfigurations.length)
         assert.equal(12, groupedTrackConfigurations[0].tracks.length)
     })
 
-    test("parse metadata", async function () {
+    it("parse metadata", async function () {
         const metadata = "differentiation=\"10 hour\" treatment=X donor=A lab=\"List Meta Lab\" data_set_id=ucscTest1 access=group assay=long-RNA-seq enriched_in=exon life_stage=postpartum species=\"Homo sapiens\" ucsc_db=hg38"
         const metadataMap = parseMetadata(metadata)
         assert.equal(11, metadataMap.size)
@@ -136,7 +127,7 @@ suite("hub.txt", function () {
         assert.equal("long-RNA-seq", metadataMap.get("Assay"))
     })
 
-    test("parse metadata2", async function () {
+    it("parse metadata2", async function () {
         const metadata = "\"Epigenome_Mnemonic\"=\"GI.STMC.GAST\" \"Standardized_Epigenome_name\"=\"Gastric\" \"EDACC_Epigenome_name\"=\"Gastric\" \"Group\"=\"<span style=\"color:#C58DAA\">Digestive</span>\" \"Age\"=\"34Y\" \"Lab\"=\"UCSD\" \"Sex\"=\"Male\" \"Anatomy\"=\"GI_STOMACH\" \"EID\"=\"E094\" \"Type\"=\"PrimaryTissue\" \"Order\"=\"100\" \"Ethnicity\"=\"Caucasian\""
         const metadataMap = parseMetadata(metadata)
         assert.equal("GI.STMC.GAST", metadataMap.get("Epigenome_Mnemonic"))

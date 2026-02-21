@@ -1,7 +1,7 @@
 
 import BamAlignment from "./bamAlignment.js"
 import AlignmentBlock from "./alignmentBlock.js"
-import {BGZip, igvxhr, StringUtils} from "../../node_modules/igv-utils/src/index.js"
+import {BGZip, igvxhr, StringUtils} from "igv-utils/src/index.js"
 import BamFilter from "./bamFilter.js"
 
 

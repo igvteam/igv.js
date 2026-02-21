@@ -1,5 +1,4 @@
-import "./utils/mockObjects.js"
-import {assert} from 'chai'
+import {assert} from './utils/assert.js'
 import HtsgetBamReader from "../js/htsget/htsgetBamReader.js"
 import HtsgetVariantReader from "../js/htsget/htsgetVariantReader.js"
 import Browser from "../js/browser.js"
@@ -8,17 +7,14 @@ import {createGenome} from "./utils/MockGenome.js"
 // Mock genome with "chr1, chr2, chr3 ..." name convention
 const genome = createGenome("ucsc")
 
-suite("htsget", function () {
+describe("htsget", function () {
 
     /**
      * Minimal tests of htsget -- just verifies that something parsable as a BAM record is returned.
      */
 
-    test("bam", async function() {
-
-        this.timeout(40000)
-
-        const trackConfig = {
+    it("bam", async function() {
+const trackConfig = {
             sourceType: 'htsget',
             format: 'bam',
             url: 'https://htsget.ga4gh-demo.org/reads/htsnexus_test_NA12878'
@@ -32,11 +28,8 @@ suite("htsget", function () {
 
     })
 
-    test("Variants", async function () {
-
-        this.timeout(40000)
-
-        const trackConfig = {
+    it("Variants", async function () {
+const trackConfig = {
             sourceType: 'htsget',
             format: "VCF",
             url: 'https://htsget.ga4gh-demo.org/variants/spec-v4.3'

@@ -1,13 +1,13 @@
-import {assert} from 'chai'
+import {assert} from './utils/assert.js'
 import {
     isLocalFile,
     isGoogleDriveURL,
     isProblematicResource
 } from '../js/util/sessionResourceValidator.js'
 
-suite('Session Resource Validator', function () {
+describe('Session Resource Validator', function () {
 
-    test('isGoogleDriveURL detects googleapis.com URLs', function () {
+    it('isGoogleDriveURL detects googleapis.com URLs', function () {
         const url1 = 'https://www.googleapis.com/drive/v3/files/1pO8Czk913zXRhU7MeWnXB6uSIwNpNqDV?alt=media&supportsAllDrives=true'
         const url2 = 'https://drive.google.com/file/d/abc123/view'
         const url3 = 'https://example.com/file.bed'
@@ -22,7 +22,7 @@ suite('Session Resource Validator', function () {
         assert.equal(isGoogleDriveURL(undefined), false, 'Should handle undefined')
     })
 
-    test('isLocalFile detects File objects', function () {
+    it('isLocalFile detects File objects', function () {
         const notAFile1 = 'https://example.com/file.bed'
         const notAFile2 = { name: 'file.txt' }
         const notAFile3 = null
@@ -32,7 +32,7 @@ suite('Session Resource Validator', function () {
         assert.equal(isLocalFile(notAFile3), false, 'Should handle null')
     })
 
-    test('isProblematicResource detects resource types', function () {
+    it('isProblematicResource detects resource types', function () {
         const googleDriveURL = 'https://drive.google.com/file/d/abc123'
         const normalURL = 'https://example.com/file.bed'
         
@@ -41,7 +41,7 @@ suite('Session Resource Validator', function () {
         assert.equal(isProblematicResource(null), null, 'Should handle null')
     })
 
-    test('isGoogleDriveURL detects various Google Drive URL formats', function () {
+    it('isGoogleDriveURL detects various Google Drive URL formats', function () {
         const formats = [
             'https://www.googleapis.com/drive/v3/files/abc123?alt=media',
             'https://drive.google.com/file/d/abc123/view',
@@ -54,7 +54,7 @@ suite('Session Resource Validator', function () {
         })
     })
 
-    test('isGoogleDriveURL does not false positive on similar URLs', function () {
+    it('isGoogleDriveURL does not false positive on similar URLs', function () {
         const nonGoogleDrive = [
             'https://google.com/search',
             'https://mydrive.example.com/file.bed',

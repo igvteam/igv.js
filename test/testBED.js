@@ -1,15 +1,14 @@
-import "./utils/mockObjects.js"
 import FeatureFileReader from "../js/feature/featureFileReader.js"
 import FeatureSource from "../js/feature/featureSource.js"
-import {assert} from 'chai'
+import {assert} from './utils/assert.js'
 import {createGenome} from "./utils/MockGenome.js"
 import Genome from "../js/genome/genome.js"
 
 const genome = createGenome()
 
-suite("testBed", function () {
+describe("testBed", function () {
 
-    test("Space delimited", async function () {
+    it("Space delimited", async function () {
         const config = {
             format: "bed",
             url: "test/data/bed/space_delimited.bed",
@@ -19,7 +18,7 @@ suite("testBed", function () {
         assert.equal(features.length, 5)
     })
 
-    test("Empty lines", async function () {
+    it("Empty lines", async function () {
         const config = {
             format: "bed",
             url: "test/data/bed/basic_feature_3_columns_empty_lines.bed",
@@ -30,7 +29,7 @@ suite("testBed", function () {
         assert.equal(features.length, 6)
     })
 
-    test("Empty lines - gzipped", async function () {
+    it("Empty lines - gzipped", async function () {
         const config = {
             format: "bed",
             url: "test/data/bed/basic_feature_3_columns_empty_lines.bed.gz",
@@ -41,7 +40,7 @@ suite("testBed", function () {
         assert.equal(features.length, 6)
     })
 
-    test("GWAS Catalog format", async function () {
+    it("GWAS Catalog format", async function () {
         const config = {
             format: "gwasCatalog",
             indexed: false,
@@ -54,7 +53,7 @@ suite("testBed", function () {
         assert.equal(features[0].name, 'rs141175086')
     })
 
-    test("wgRna format", async function () {
+    it("wgRna format", async function () {
         const config = {
             format: "wgRna",
             indexed: false,
@@ -67,7 +66,7 @@ suite("testBed", function () {
         assert.equal(features[0].name, 'hsa-mir-1302-2')
     })
 
-    test("cpgIslandExt format", async function () {
+    it("cpgIslandExt format", async function () {
 
         const config = {
             format: "cpgIslandExt",
@@ -81,7 +80,7 @@ suite("testBed", function () {
         assert.equal(features[0].name, 'CpG: 111')
     })
 
-    test("ensgene format", async function () {
+    it("ensgene format", async function () {
 
         const config = {
             format: "ensgene",
@@ -116,7 +115,7 @@ suite("testBed", function () {
     * 16 id    1    char(1)    First digit of id field in RepeatMasker .out file. Best ignored. */
     //24	0	0	0	chr1	46216	46240	-249204381	+	AT_rich	Low_complexity	Low_complexity	1	24	0	4
 
-    test("UCSC repeat masker format", async function () {
+    it("UCSC repeat masker format", async function () {
 
         const config = {
             type: "annotation",
@@ -136,7 +135,7 @@ suite("testBed", function () {
         assert.equal(f.repName, 'AT_rich')
     })
 
-    test("splice junctions", async function () {
+    it("splice junctions", async function () {
 
         const config = {
             format: "bed",
@@ -154,7 +153,7 @@ suite("testBed", function () {
         assert.equal("CT/AC", f1.attributes["motif"])           // old style
     })
 
-    test("BED query", async function () {
+    it("BED query", async function () {
 
         var chr = "chr1",
             start = 67655271,
@@ -174,7 +173,7 @@ suite("testBed", function () {
     })
 
 
-    test("BED query - aliasing", async function () {
+    it("BED query - aliasing", async function () {
 
         const genome = createGenome("ncbi")
         var chr = "1",
@@ -193,7 +192,7 @@ suite("testBed", function () {
         assert.equal(128, features.length)   // feature count. Determined by grepping file
     })
 
-    test("BED track line", async function () {
+    it("BED track line", async function () {
 
         const featureSource = FeatureSource({
                 format: 'bed',
@@ -208,7 +207,7 @@ suite("testBed", function () {
         assert.equal(header.color, "255,0,0")
     })
 
-    test("BED query gzip", async function () {
+    it("BED query gzip", async function () {
 
         const chr = "chr1",
             start = 67655271,
@@ -225,7 +224,7 @@ suite("testBed", function () {
         assert.equal(chr, features[0].chr) // ensure features chromosome is specified chromosome
     })
 
-    test("broadPeak parsing ", async function () {
+    it("broadPeak parsing ", async function () {
 
         const featureSource = FeatureSource({
             format: 'broadPeak',
@@ -245,7 +244,7 @@ suite("testBed", function () {
     })
 
 
-    test("refflat parsing ", async function () {
+    it("refflat parsing ", async function () {
 
         const featureSource = FeatureSource({
                 format: 'refflat',
@@ -268,7 +267,7 @@ suite("testBed", function () {
     })
 
 
-    test("genepred parsing ", async function () {
+    it("genepred parsing ", async function () {
 
         const featureSource = FeatureSource({
                 format: 'genePred',
@@ -291,7 +290,7 @@ suite("testBed", function () {
     })
 
 
-    test("refgene parsing ", async function () {
+    it("refgene parsing ", async function () {
 
         const featureSource = FeatureSource({
                 format: 'refgene',
@@ -314,7 +313,7 @@ suite("testBed", function () {
 
     })
 
-    test("ucsc interact", async function () {
+    it("ucsc interact", async function () {
 
         const featureSource = FeatureSource({
             url: "test/data/bed/ucsc_interact_1.bed"
@@ -327,7 +326,7 @@ suite("testBed", function () {
         assert.equal(trackType, "interact")
     })
 
-    test("Chr aliasing", async function () {
+    it("Chr aliasing", async function () {
 
         const config = {
             format: "bed",
@@ -340,11 +339,8 @@ suite("testBed", function () {
 
     })
 
-    test("Whole genome", async function () {
-
-        this.timeout(20000)
-
-        // Need an actual genome object for this test, not a mock object
+    it("Whole genome", async function () {
+// Need an actual genome object for this test, not a mock object
         const genome = await Genome.createGenome({
             id: "hg38",
             name: "Human (GRCh38/hg38)",
@@ -363,7 +359,7 @@ suite("testBed", function () {
         assert.equal(23, features.length)   // # of features over this region
     })
 
-    test("gffTags/nameField", async function () {
+    it("gffTags/nameField", async function () {
         const config = {
             type: "annotation",
             format: "bed",

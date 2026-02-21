@@ -1,5 +1,5 @@
 
-import {BGZip, igvxhr, StringUtils} from "../../node_modules/igv-utils/src/index.js"
+import {BGZip, igvxhr, StringUtils} from "igv-utils/src/index.js"
 import lm from '../vendor/lm-esm.js'
 
 

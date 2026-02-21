@@ -1,4 +1,4 @@
-import {IGVMath} from "../../node_modules/igv-utils/src/index.js"
+import {IGVMath} from "igv-utils/src/index.js"
 
 const defaultColorScaleConfig = {min: 0, max: 3000, color: "rgb(0,0,255)"}
 

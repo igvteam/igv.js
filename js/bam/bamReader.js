@@ -1,7 +1,7 @@
 import {loadIndex} from "./indexFactory.js"
 import AlignmentContainer from "./alignmentContainer.js"
 import BamUtils from "./bamUtils.js"
-import {BGZip, igvxhr} from "../../node_modules/igv-utils/src/index.js"
+import {BGZip, igvxhr} from "igv-utils/src/index.js"
 import {buildOptions} from "../util/igvUtils.js"
 import BGZBlockLoader from "./bgzBlockLoader.js"
 

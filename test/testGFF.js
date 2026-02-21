@@ -1,14 +1,13 @@
-import "./utils/mockObjects.js"
 import FeatureSource from "../js/feature/featureSource.js"
 import FeatureFileReader from "../js/feature/featureFileReader.js"
-import {assert} from 'chai'
+import {assert} from './utils/assert.js'
 import {createGenome} from "./utils/MockGenome.js"
 
 const genome = createGenome()
 import GFFHelper from "../js/feature/gff/gffHelper.js"
 import {decodeGFFAttribute, parseAttributeString} from "../js/feature/gff/parseAttributeString.js"
 
-suite("testGFF", function () {
+describe("testGFF", function () {
 
     const combineFeatures = (features, helper) => {
         const combinedFeatures = helper.combineFeatures(features)
@@ -22,7 +21,7 @@ suite("testGFF", function () {
         return combinedFeatures
     }
 
-    test("Eden GFF", async function () {
+    it("Eden GFF", async function () {
 
         const chr = "chr1"
         const start = 1
@@ -66,7 +65,7 @@ CDS	    7000	7600	.	+	1	ID=cds00003;Parent=mRNA00003;Name=edenprotein.3
         assert.equal(mRNA3.exons[3].cdEnd, 7600)
     })
 
-    test("ENSEMBL GFF transcript", async function () {
+    it("ENSEMBL GFF transcript", async function () {
 
         const featureReader = new FeatureFileReader({
                 url: 'test/data/gff/Ensembl_MYC-205.gff3',
@@ -90,7 +89,7 @@ CDS	    7000	7600	.	+	1	ID=cds00003;Parent=mRNA00003;Name=edenprotein.3
         assert.equal(3, combinedFeatures[0].exons.length)
     })
 
-    test("ENSEMBL GFF region", async function () {
+    it("ENSEMBL GFF region", async function () {
 
         const featureReader = new FeatureFileReader({
                 url: 'test/data/gff/Ensembl_MYC-region.gff3',
@@ -117,7 +116,7 @@ CDS	    7000	7600	.	+	1	ID=cds00003;Parent=mRNA00003;Name=edenprotein.3
 
     })
 
-    test("GFF query", async function () {
+    it("GFF query", async function () {
 
         const chr = "chr1"
         const start = 0
@@ -138,7 +137,7 @@ CDS	    7000	7600	.	+	1	ID=cds00003;Parent=mRNA00003;Name=edenprotein.3
 
     })
 
-    test("Multiline feature", async function () {
+    it("Multiline feature", async function () {
 
         const featureSource = FeatureSource({
                 url: 'test/data/gff/multi_line_feature.gff3',
@@ -170,7 +169,7 @@ CDS	    7000	7600	.	+	1	ID=cds00003;Parent=mRNA00003;Name=edenprotein.3
     ["%26", "&"],
     ["%2C", ","]])
      */
-    test("GFF3 attribute encoding", function () {
+    it("GFF3 attribute encoding", function () {
 
         // all allowable characters from GFF3 spec should be decoded;
         // others (here %20 = space) should be left as-is
@@ -182,7 +181,7 @@ CDS	    7000	7600	.	+	1	ID=cds00003;Parent=mRNA00003;Name=edenprotein.3
 
     })
 
-    test("GFF quotes", function () {
+    it("GFF quotes", function () {
 
         // Quotes are stripped from GFF2 / GTF attributes, kept for GFF3.  GFF type is determined from the delimiter
         const gff3AttributeString = 'key="value";key2=value'

@@ -1,4 +1,4 @@
-import {StringUtils} from "../../node_modules/igv-utils/src/index.js"
+import {StringUtils} from "igv-utils/src/index.js"
 import {createSupplementaryAlignments} from "./supplementaryAlignment.js"
 import {byteToUnsignedInt, getBaseModificationSets} from "./mods/baseModificationUtils.js"
 import orientationTypes from "./orientationTypes.js"

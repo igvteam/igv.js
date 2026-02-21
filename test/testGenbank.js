@@ -1,13 +1,12 @@
-import "./utils/mockObjects.js"
-import {igvxhr} from "../node_modules/igv-utils/src/index.js"
+import {igvxhr} from "igv-utils/src/index.js"
 import {loadGenbank} from "../js/gbk/genbankParser.js"
-import {assert} from 'chai'
+import {assert} from './utils/assert.js'
 
 
 //https://ftp.ncbi.nlm.nih.gov/genomes/archive/old_genbank/Fungi/Candida_dubliniensis_CD36_uid38659/FM992689.gbk
-suite("testGenbank", function () {
+describe("testGenbank", function () {
 
-    test("pten genbank", async function () {
+    it("pten genbank", async function () {
 
         const url = "test/data/gbk/pten_test.gbk"
 

@@ -1,7 +1,7 @@
 import * as UIUtils from "../utils/ui-utils.js"
 import * as DOMUtils from "../utils/dom-utils.js"
 import makeDraggable from "../utils/draggable.js"
-import DOMPurify from "../../../node_modules/dompurify/dist/purify.es.mjs"
+import DOMPurify from "dompurify"
 
 class SliderDialog {
 

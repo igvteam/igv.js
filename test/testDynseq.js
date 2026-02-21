@@ -1,12 +1,11 @@
-import "./utils/mockObjects.js"
-import {assert} from 'chai'
+import {assert} from './utils/assert.js'
 import WigTrack from "../js/feature/wigTrack.js"
 import {createGenome} from "./utils/MockGenome.js"
 import {defaultNucleotideColors} from "../js/util/nucleotideColors.js"
 
 const genome = createGenome()
 
-suite("testDynseq", function () {
+describe("testDynseq", function () {
 
     // Enhanced mock browser object with nucleotide colors
     const browser = {
@@ -19,7 +18,7 @@ suite("testDynseq", function () {
         }
     }
 
-    test("dynseq graphType option in menu", async function () {
+    it("dynseq graphType option in menu", async function () {
         const config = {
             format: 'bedgraph',
             url: 'test/data/wig/allPositive.bedgraph',
@@ -33,7 +32,7 @@ suite("testDynseq", function () {
         assert.include(supportedTypes, track.graphType)
     })
 
-    test("dynseq track configuration", async function () {
+    it("dynseq track configuration", async function () {
         const config = {
             format: 'bedgraph',
             url: 'test/data/wig/allPositive.bedgraph',
@@ -47,7 +46,7 @@ suite("testDynseq", function () {
         assert.equal(track.height, 100)
     })
 
-    test("dynseq track state serialization", async function () {
+    it("dynseq track state serialization", async function () {
         const config = {
             format: 'bedgraph',
             url: 'test/data/wig/allPositive.bedgraph',
@@ -60,7 +59,7 @@ suite("testDynseq", function () {
         assert.equal(state.graphType, 'dynseq')
     })
 
-    test("dynseq sequence data attachment", async function () {
+    it("dynseq sequence data attachment", async function () {
         // Test the sequence attachment logic directly
         const config = {
             format: 'bedgraph',
@@ -86,7 +85,7 @@ suite("testDynseq", function () {
         assert.equal(mockFeature.sequence.length, 10)
     })
 
-    test("dynseq SVG path parser", async function () {
+    it("dynseq SVG path parser", async function () {
         const config = {
             format: 'bedgraph',
             url: 'test/data/wig/allPositive.bedgraph',
@@ -120,7 +119,7 @@ suite("testDynseq", function () {
         }
     })
 
-    test("dynseq letter glyph rendering", async function () {
+    it("dynseq letter glyph rendering", async function () {
         const config = {
             format: 'bedgraph',
             url: 'test/data/wig/allPositive.bedgraph',
@@ -154,7 +153,7 @@ suite("testDynseq", function () {
         }
     })
 
-    test("dynseq vertical flipping for negative values", async function () {
+    it("dynseq vertical flipping for negative values", async function () {
         const config = {
             format: 'bedgraph',
             url: 'test/data/wig/mixedPosNeg.bedgraph',
@@ -189,7 +188,7 @@ suite("testDynseq", function () {
         assert.equal(scaleYCall, -1)
     })
 
-    test("dynseq renders with mixed positive/negative values", async function () {
+    it("dynseq renders with mixed positive/negative values", async function () {
         const config = {
             format: 'bedgraph',
             url: 'test/data/wig/mixedPosNeg.bedgraph',
@@ -213,7 +212,7 @@ suite("testDynseq", function () {
         assert.match(negativeFeature.sequence, /^[ATCGN]*$/)
     })
 
-    test("dynseq menu items include dynseq option", async function () {
+    it("dynseq menu items include dynseq option", async function () {
         const config = {
             format: 'bedgraph',
             url: 'test/data/wig/allPositive.bedgraph'

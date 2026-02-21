@@ -1,13 +1,12 @@
-import "./utils/mockObjects.js"
 import Genome from "../js/genome/genome.js"
 import {updateReference} from "../js/genome/updateReference.js"
-import {assert} from 'chai'
+import {assert} from './utils/assert.js'
 import {shortenChromsomeName} from "../js/rulerTrack.js"
 
 
-suite("testGenome", function () {
+describe("testGenome", function () {
 
-    test("Shorten name", function() {
+    it("Shorten name", function() {
         const names = ["chr1", "chromosome_1"]
         const expected = ["1", "chromosome_1"]
 
@@ -17,7 +16,7 @@ suite("testGenome", function () {
         }
     })
 
-    test("update reference", function() {
+    it("update reference", function() {
 
         const reference = {
             "id": "hg18",

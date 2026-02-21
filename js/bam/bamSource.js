@@ -5,7 +5,7 @@ import BamWebserviceReader from "./bamWebserviceReader.js"
 import HtsgetBamReader from "../htsget/htsgetBamReader.js"
 import CramReader from "../cram/cramReader.js"
 import {isDataURL} from "../util/igvUtils.js"
-import {StringUtils} from "../../node_modules/igv-utils/src/index.js"
+import {StringUtils} from "igv-utils/src/index.js"
 import {inferIndexPath} from "../util/fileFormatUtils.js"
 
 class BamSource {

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>igv.js Examples</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #f4f4f2;
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+  color: #111;
+}
+
+.container { max-width: 1120px; margin: 0 auto; padding: 3rem 2rem 6rem; }
+
+header { margin-bottom: 2.5rem; }
+header .eyebrow { font-size: .875rem; color: #888; font-weight: 400; }
+header h1 { font-size: 2.5rem; font-weight: 700; line-height: 1; margin-top: .2rem; }
+
+.search {
+  display: block; width: 100%; padding: .75rem 1rem; margin-bottom: 3rem;
+  border: 1px solid #e0e0dc; background: #fff;
+  font-size: 1rem; font-family: inherit; color: #111;
+  outline: none; appearance: none;
+}
+.search:focus { border-color: #aaa; }
+
+.section { margin-bottom: 3rem; }
+
+.section-header {
+  font-size: .875rem; letter-spacing: .1em; text-transform: uppercase;
+  color: #888; margin-bottom: 1px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1px;
+  background: #e0e0dc;
+}
+
+.card {
+  display: block; background: #fff;
+  padding: 1.25rem 1rem;
+  text-decoration: none; color: #111;
+  font-size: .9375rem; line-height: 1.4;
+}
+.card:hover { background: #efefed; }
+.card[hidden] { display: none; }
+
+.section[hidden] { display: none; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="eyebrow">igv.js</div>
+    <h1>Examples</h1>
+  </header>
+
+  <input class="search" type="search" placeholder="Filter examples…" aria-label="Filter examples">
+
+  <section class="section">
+    <div class="section-header">Examples</div>
+    <div class="grid">
+      <a class="card" href="quick-start.html" target="_blank">Quick Start</a>
+      <a class="card" href="igvjs.html" target="_blank">IGV.js</a>
+      <a class="card" href="multi-locus.html" target="_blank">Multi Locus</a>
+      <a class="card" href="base-modifications.html" target="_blank">Base Modifications</a>
+      <a class="card" href="bedpe-interact.html" target="_blank">BEDPE Interact</a>
+      <a class="card" href="copyNumber.html" target="_blank">Copy Number</a>
+      <a class="card" href="copyNumber-big.html" target="_blank">Copy Number Big</a>
+      <a class="card" href="cram-vcf.html" target="_blank">CRAM VCF</a>
+      <a class="card" href="custom-file-format.html" target="_blank">Custom File Format</a>
+      <a class="card" href="custom-reader.html" target="_blank">Custom Reader</a>
+      <a class="card" href="custom-webservice.html" target="_blank">Custom Webservice</a>
+      <a class="card" href="customSearchService.html" target="_blank">Custom Search Service</a>
+      <a class="card" href="cytoband-names.html" target="_blank">Cytoband Names</a>
+      <a class="card" href="dataURI.html" target="_blank">Data URI</a>
+      <a class="card" href="dynseq-example.html" target="_blank">Dynseq Example</a>
+      <a class="card" href="events.html" target="_blank">Events</a>
+      <a class="card" href="functional-url.html" target="_blank">Functional URL</a>
+      <a class="card" href="genark.html" target="_blank">Genark</a>
+      <a class="card" href="genbank.html" target="_blank">Genbank</a>
+      <a class="card" href="gff-colors.html" target="_blank">GFF Colors</a>
+      <a class="card" href="hic-4dn.html" target="_blank">HiC 4dn</a>
+      <a class="card" href="iframe.html" target="_blank">Iframe</a>
+      <a class="card" href="igv-links.html" target="_blank">IGV Links</a>
+      <a class="card" href="json-features.html" target="_blank">JSON Features</a>
+      <a class="card" href="loadTracks.html" target="_blank">Load Tracks</a>
+      <a class="card" href="maf-tcga.html" target="_blank">MAF TCGA</a>
+      <a class="card" href="mergedWig.html" target="_blank">Merged Wig</a>
+      <a class="card" href="roi.html" target="_blank">ROI</a>
+      <a class="card" href="roi-api.html" target="_blank">ROI API</a>
+      <a class="card" href="sampleInfo.html" target="_blank">Sample Info</a>
+      <a class="card" href="spliceJunctions.html" target="_blank">Splice Junctions</a>
+      <a class="card" href="tabs.html" target="_blank">Tabs</a>
+      <a class="card" href="variant-colors.html" target="_blank">Variant Colors</a>
+      <a class="card" href="variant-custom-draw.html" target="_blank">Variant Custom Draw</a>
+      <a class="card" href="xqtl.html" target="_blank">xQTL</a>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-header">Events</div>
+    <div class="grid">
+      <a class="card" href="events/locus-change.html" target="_blank">Locus Change</a>
+      <a class="card" href="events/track-reorder.html" target="_blank">Track Reorder</a>
+      <a class="card" href="events/roi-events.html" target="_blank">ROI Events</a>
+      <a class="card" href="events/custom-track-click.html" target="_blank">Custom Track Click</a>
+      <a class="card" href="events/custom-track-popover.html" target="_blank">Custom Track Popover</a>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-header">cBio</div>
+    <div class="grid">
+      <a class="card" href="cBio/sampleinfo-config.html" target="_blank">Sample Info Config</a>
+      <a class="card" href="cBio/sampleinfo-load.html" target="_blank">Sample Info Load</a>
+      <a class="card" href="cBio/svs-config.html" target="_blank">SVS Config</a>
+      <a class="card" href="cBio/svs-load.html" target="_blank">SVS Load</a>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-header">CNVpytor</div>
+    <div class="grid">
+      <a class="card" href="cnvpytor/cnvpytorTrack.html" target="_blank">CNVpytor Track</a>
+      <a class="card" href="cnvpytor/cnvpytorTrackVCF.html" target="_blank">CNVpytor Track VCF</a>
+      <a class="card" href="cnvpytor/cnvpytorTrackVCF_small.html" target="_blank">CNVpytor Track VCF Small</a>
+    </div>
+  </section>
+
+</div>
+<script>
+const input = document.querySelector('.search')
+const cards = [...document.querySelectorAll('.card')]
+const sections = [...document.querySelectorAll('.section')]
+
+input.addEventListener('input', () => {
+  const q = input.value.trim().toLowerCase()
+  cards.forEach(card => {
+    card.hidden = q && !card.textContent.toLowerCase().includes(q)
+  })
+  sections.forEach(section => {
+    const visible = [...section.querySelectorAll('.card')].some(c => !c.hidden)
+    section.hidden = q && !visible
+  })
+})
+</script>
+</body>
+</html>

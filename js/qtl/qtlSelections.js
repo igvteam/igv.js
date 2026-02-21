@@ -1,4 +1,4 @@
-import IGVColor from "../../node_modules/igv-utils/src/igv-color.js"
+import IGVColor from "igv-utils/src/igv-color.js"
 
 /**
  * Manages XQTL selections.

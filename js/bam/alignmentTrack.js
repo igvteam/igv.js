@@ -1,7 +1,7 @@
 import BaseModificationRenderer from "./mods/baseModificationRenderer.js"
 import IGVGraphics from "../igv-canvas.js"
 import PairedAlignment from "./pairedAlignment.js"
-import {IGVColor, StringUtils} from "../../node_modules/igv-utils/src/index.js"
+import {IGVColor, StringUtils} from "igv-utils/src/index.js"
 import {isSecureContext} from "../util/igvUtils.js"
 import {createBlatTrack, maxSequenceSize} from "../blat/blatTrack.js"
 import {reverseComplementSequence} from "../util/sequenceUtils.js"

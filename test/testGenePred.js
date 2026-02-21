@@ -1,17 +1,12 @@
-import "./utils/mockObjects.js"
 import FeatureFileReader from "../js/feature/featureFileReader.js"
-import {assert} from 'chai'
+import {assert} from './utils/assert.js'
 
 
-suite("testGenePredExt", function () {
+describe("testGenePredExt", function () {
 
 
-    test("Plus strand gene", async function () {
-
-        this.timeout(200000)
-
-
-        const config = {
+    it("Plus strand gene", async function () {
+const config = {
             format: "refgene",
             url: "test/data/bed/myc.refgene",
         }
@@ -24,7 +19,7 @@ suite("testGenePredExt", function () {
         assert.equal(1, myc.exons[2].readingFrame)
     })
 
-    test("Minus strand gene", async function () {
+    it("Minus strand gene", async function () {
         const config = {
             format: "refgene",
             url: "test/data/bed/muc1.refgene",

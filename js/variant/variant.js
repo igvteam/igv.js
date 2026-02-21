@@ -1,5 +1,5 @@
 import TrackBase from "../trackBase.js"
-import {StringUtils} from "../../node_modules/igv-utils/src/index.js"
+import {StringUtils} from "igv-utils/src/index.js"
 
 /**
  * Create a variant from an array of tokens representing a line in a "VCF" file

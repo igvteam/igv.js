@@ -1,6 +1,6 @@
 import TrackBase from "../trackBase.js"
 import paintAxis from "../util/paintAxis.js"
-import {FeatureUtils} from "../../node_modules/igv-utils/src/index.js"
+import {FeatureUtils} from "igv-utils/src/index.js"
 import * as DOMUtils from "../ui/utils/dom-utils.js"
 import {doAutoscale} from "../util/igvUtils.js"
 

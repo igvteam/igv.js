@@ -1,5 +1,5 @@
 import IGVGraphics from "./igv-canvas.js"
-import {IGVColor} from "../node_modules/igv-utils/src/index.js"
+import {IGVColor} from "igv-utils/src/index.js"
 
 /**
  * Class represents an ideogram of a chromsome cytobands.  It is used for the header of a track panel.

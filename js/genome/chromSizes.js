@@ -1,4 +1,4 @@
-import {BGZip, igvxhr, StringUtils} from "../../node_modules/igv-utils/src/index.js"
+import {BGZip, igvxhr, StringUtils} from "igv-utils/src/index.js"
 import Chromosome from "./chromosome.js"
 import {isDataURL} from "../util/igvUtils.js"
 

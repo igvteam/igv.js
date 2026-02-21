@@ -1,13 +1,12 @@
-import "./utils/mockObjects.js"
 import {loadIndex} from "../js/bam/indexFactory.js"
 import FeatureFileReader from "../js/feature/featureFileReader.js"
-import {assert} from 'chai'
+import {assert} from './utils/assert.js'
 import {createGenome} from "./utils/MockGenome.js"
 import TextFeatureSource from "../js/feature/textFeatureSource.js"
 
-suite("testTabix", function () {
+describe("testTabix", function () {
 
-    test("TBI index", async function () {
+    it("TBI index", async function () {
 
         const refID = 26,
             beg = 55369194,
@@ -24,7 +23,7 @@ suite("testTabix", function () {
 
     })
 
-    test("TBI index - aliasing", async function () {
+    it("TBI index - aliasing", async function () {
 
         const chr = "chr1",
             start = 0,
@@ -51,7 +50,7 @@ suite("testTabix", function () {
     })
 
 
-    test("CSI index", async function () {
+    it("CSI index", async function () {
 
         const refID = 0,
             beg = 1226000,
@@ -68,7 +67,7 @@ suite("testTabix", function () {
 
     })
 
-    test("CSI query - vcf", async function () {
+    it("CSI query - vcf", async function () {
 
         const chr = "chr1",
             beg = 1226000,
@@ -93,7 +92,7 @@ suite("testTabix", function () {
         }
     })
 
-    test("CSI query - aliasing", async function () {
+    it("CSI query - aliasing", async function () {
 
         const chr = "1",
             start = 1226000,

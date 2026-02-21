@@ -1,14 +1,13 @@
-import "./utils/mockObjects.js"
 import FeatureSource from "../js/feature/featureSource.js"
 import FeatureFileReader from "../js/feature/featureFileReader.js"
-import {assert} from 'chai'
+import {assert} from './utils/assert.js'
 import {createGenome} from "./utils/MockGenome.js"
 
 const genome = createGenome()
 
-suite("testBedpe", function () {
+describe("testBedpe", function () {
 
-    test("No header line -- column 7 score", async function () {
+    it("No header line -- column 7 score", async function () {
         const chr = "chr12"
         const start = 1
         const end = Number.MAX_SAFE_INTEGER
@@ -29,7 +28,7 @@ suite("testBedpe", function () {
         }
     })
 
-    test("Header line -- no pound -- column 7 score all '.'", async function () {
+    it("Header line -- no pound -- column 7 score all '.'", async function () {
         const chr = "chr9"
         const start = 1
         const end = Number.MAX_SAFE_INTEGER
@@ -50,7 +49,7 @@ suite("testBedpe", function () {
         }
     })
 
-    test("Multiple header lines -- column 8 score", async function () {
+    it("Multiple header lines -- column 8 score", async function () {
         const chr = "chr1"
         const start = 1
         const end = Number.MAX_SAFE_INTEGER
@@ -72,7 +71,7 @@ suite("testBedpe", function () {
         }
     })
 
-    test("10X SV", async function () {
+    it("10X SV", async function () {
         const chr = "chr1"
         const start = 1
         const end = Number.MAX_SAFE_INTEGER
@@ -94,7 +93,7 @@ suite("testBedpe", function () {
     })
 
 
-    test("10X Large SVs", async function () {
+    it("10X Large SVs", async function () {
         const chr = "chr1"
         const start = 1
         const end = Number.MAX_SAFE_INTEGER
@@ -114,7 +113,7 @@ suite("testBedpe", function () {
         assert.equal(extras.length, 2)
     })
 
-    test("Inter chr", async function () {
+    it("Inter chr", async function () {
 
         const reader = new FeatureFileReader({
             format: 'bedpe',
@@ -136,7 +135,7 @@ suite("testBedpe", function () {
 
     })
 
-    test("interact example 1", async function () {
+    it("interact example 1", async function () {
         const chr = "chr12"
         const start = 1
         const end = Number.MAX_SAFE_INTEGER
@@ -157,7 +156,7 @@ suite("testBedpe", function () {
         }
     })
 
-    test("alias", async function () {
+    it("alias", async function () {
         const chr = "12"
         const start = 1
         const end = Number.MAX_SAFE_INTEGER
@@ -179,7 +178,7 @@ suite("testBedpe", function () {
     })
 
 
-    test("hiccups (old format)", async function () {
+    it("hiccups (old format)", async function () {
         const chr = "chr1"
         const start = 1
         const end = Number.MAX_SAFE_INTEGER
@@ -200,7 +199,7 @@ suite("testBedpe", function () {
         }
     })
 
-    test("hiccups (ENCODE tsv)", async function () {
+    it("hiccups (ENCODE tsv)", async function () {
         const chr = "chr9"
         const start = 1
         const end = Number.MAX_SAFE_INTEGER

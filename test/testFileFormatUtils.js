@@ -1,10 +1,9 @@
-import "./utils/mockObjects.js"
 import {inferFileFormat, inferFileFormatFromContents} from "../js/util/fileFormatUtils.js"
-import {assert} from 'chai'
+import {assert} from './utils/assert.js'
 
-suite("testFileFormatUtils", async function () {
+describe("testFileFormatUtils", async function () {
 
-    test("Test inferring formats from filename", async function () {
+    it("Test inferring formats from filename", async function () {
 
         let config = {url: "foo/test.qtl"}
         let format = await inferFileFormat(config)
@@ -24,7 +23,7 @@ suite("testFileFormatUtils", async function () {
     })
 
 
-    test("Test inferring formats from header", async function () {
+    it("Test inferring formats from header", async function () {
 
         // BAM
         let url = 'test/data/bam/na12889.bam'

@@ -1,5 +1,5 @@
 import * as DOMUtils from "../utils/dom-utils.js"
-import Picker from "../../../node_modules/vanilla-picker/dist/vanilla-picker.csp.mjs"
+import Picker from "vanilla-picker/csp"
 import GenericContainer from './genericContainer.js'
 import {genericColorPickerPalette} from "../../util/colorPalletes.js"
 

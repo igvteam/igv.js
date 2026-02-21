@@ -1,19 +1,15 @@
-import "./utils/mockObjects.js"
 import FeatureSource from "../js/feature/featureSource.js"
 import Genome from "../js/genome/genome.js"
-import {assert} from 'chai'
+import {assert} from './utils/assert.js'
 import {createGenome} from "./utils/MockGenome.js"
 
-suite("testSeg", function () {
+describe("testSeg", function () {
 
     const dataURL = "https://data.broadinstitute.org/igvdata/test/data/"
 
 
-    test("SEG indexed query", async function () {
-
-        this.timeout(100000)
-
-        const genome = createGenome("ucsc")
+    it("SEG indexed query", async function () {
+const genome = createGenome("ucsc")
 
         await genome.loadChromosome("chr1")
 
@@ -35,11 +31,8 @@ suite("testSeg", function () {
     })
 
 
-    test("SEG query", async function () {
-
-        this.timeout(100000)
-
-        const genome = createGenome("ucsc")
+    it("SEG query", async function () {
+const genome = createGenome("ucsc")
 
         const url = "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz"
         const featureSource = FeatureSource(
@@ -60,11 +53,8 @@ suite("testSeg", function () {
     })
 
 
-    test("SEG whole genome", async function () {
-
-        this.timeout(100000)
-
-        const genome = createGenome("ucsc")
+    it("SEG whole genome", async function () {
+const genome = createGenome("ucsc")
         const url = "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz"
         const featureSource = FeatureSource({
             format: 'seg',

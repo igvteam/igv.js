@@ -1,5 +1,4 @@
-import "./utils/mockObjects.js"
-import {assert} from 'chai'
+import {assert} from './utils/assert.js'
 import Genome from "../js/genome/genome.js"
 import CramReader from "../js/cram/cramReader.js"
 import LocalFile from "./utils/JBrowseFileHandler.js"
@@ -17,11 +16,8 @@ const genome = await Genome.createGenome({
 
 })
 
-suite("testCRAM", function () {
-
-    this.timeout(20000)
-
-    test("CRAM", async function () {
+describe("testCRAM", function () {
+it("CRAM", async function () {
 
         const start = 155140000
         const end = 155160000

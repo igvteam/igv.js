@@ -1,5 +1,4 @@
-import "./utils/mockObjects.js"
-import {assert} from 'chai'
+import {assert} from './utils/assert.js'
 import Browser from "../js/browser.js"
 import FeatureSource from "../js/feature/featureSource.js"
 import search from "../js/search.js"
@@ -10,9 +9,9 @@ const MockBrowser = {
     }
 }
 
-suite("testBrowser", function () {
+describe("testBrowser", function () {
 
-    test("compressedSession", async function () {
+    it("compressedSession", async function () {
 
         const compressedSession = Browser.prototype.compressedSession.call(MockBrowser)
         assert.ok(compressedSession)

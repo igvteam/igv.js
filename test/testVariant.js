@@ -1,8 +1,7 @@
-import "./utils/mockObjects.js"
 import VcfParser from "../js/variant/vcfParser.js"
 import FeatureFileReader from "../js/feature/featureFileReader.js"
-import {igvxhr} from "../node_modules/igv-utils/src/index.js"
-import {assert} from 'chai'
+import {igvxhr} from "igv-utils/src/index.js"
+import {assert} from './utils/assert.js'
 import getDataWrapper from "../js/feature/dataWrapper.js"
 import {createGenome} from "./utils/MockGenome.js"
 import pack from "../js/feature/featurePacker.js"
@@ -12,9 +11,9 @@ import VariantTrack from "../js/variant/variantTrack.js"
 const genome = createGenome()
 const browser = {genome}
 
-suite("testVariant", function () {
+describe("testVariant", function () {
 
-    test("Test gcvf non-ref variants", async function () {
+    it("Test gcvf non-ref variants", async function () {
         const url = "test/data/vcf/gvcf_non_ref.vcf"
 
         const data = await igvxhr.loadString(url)
@@ -31,7 +30,7 @@ suite("testVariant", function () {
         }
     })
 
-    test("Test gcvf mixed variants", async function () {
+    it("Test gcvf mixed variants", async function () {
         const url = "test/data/vcf/gvcf_mixed.vcf"
 
         const data = await igvxhr.loadString(url)
@@ -48,7 +47,7 @@ suite("testVariant", function () {
         }
     })
 
-    test("No variants", async function () {
+    it("No variants", async function () {
         const reader = new FeatureFileReader({
             format: "vcf",
             url: "test/data/vcf/NoVariantsVCF/novariants.vcf.gz",
@@ -59,7 +58,7 @@ suite("testVariant", function () {
         assert.equal(features.length, 0)
     })
 
-    test("VCF parser", async function () {
+    it("VCF parser", async function () {
 
         // 20	14370	rs6054257	G	A
         // 20	1110696	rs6040355	A	G,A
@@ -108,7 +107,7 @@ suite("testVariant", function () {
 
     })
 
-    test("CNV (explicit END field)", async function () {
+    it("CNV (explicit END field)", async function () {
 
         const url = "test/data/vcf/cnv.vcf"
 
@@ -131,7 +130,7 @@ suite("testVariant", function () {
 
 
     //SKBR3_Sniffles_variants_tra.vcf
-    test("Sniffles <TRA> records", async function () {
+    it("Sniffles <TRA> records", async function () {
 
         const url = "test/data/vcf/SKBR3_Sniffles_variants_tra.vcf"
 
@@ -151,7 +150,7 @@ suite("testVariant", function () {
         assert.ok(!tra.isFiltered())
     })
 
-    test("tribble indexed - large header", async function () {
+    it("tribble indexed - large header", async function () {
         const config = {
             url: "test/data/vcf/large_header.vcf",
             indexURL: "test/data/vcf/large_header.vcf.idx"
@@ -176,7 +175,7 @@ suite("testVariant", function () {
 
     })
 
-    test("tabix indexed - large header", async function () {
+    it("tabix indexed - large header", async function () {
 
         const config = {
             url: "test/data/vcf/large_header.vcf",
@@ -195,7 +194,7 @@ suite("testVariant", function () {
         assert.equal(features.length, 3)
     })
 
-    test("parse svtype = BND ", async function () {
+    it("parse svtype = BND ", async function () {
 
         const url = "test/data/vcf/svtype_BND.vcf"
 
@@ -210,7 +209,7 @@ suite("testVariant", function () {
         assert.equal(featureList.length, 6)
     })
 
-    test("track svtype = BND", async function () {
+    it("track svtype = BND", async function () {
 
         const config = {
             url: "test/data/vcf/svtype_BND.vcf",
@@ -225,7 +224,7 @@ suite("testVariant", function () {
         assert.equal(features.length, 2)
     })
 
-    test("track chrom alias", async function () {
+    it("track chrom alias", async function () {
 
         const config = {
             url: "test/data/vcf/svtype_BND.vcf",
@@ -241,7 +240,7 @@ suite("testVariant", function () {
         assert.equal(features.length, 2)
     })
 
-    test("Packing with insertion", async function () {
+    it("Packing with insertion", async function () {
 
         // chr14	105246530	.	G	GT	.	.	Gene=AKT1;MutationCDS=c.100G>GT;MutationAA=p.C3D
         // chr14	105246530	.	G	T	.	.	Gene=AKT1;MutationCDS=c.100C>T;MutationAA=p.A1B
@@ -271,7 +270,7 @@ suite("testVariant", function () {
 
     })
 
-    test("Test no info fields", async function () {
+    it("Test no info fields", async function () {
 
         const url = "test/data/vcf/noheader.vcf"
 

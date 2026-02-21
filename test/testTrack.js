@@ -1,5 +1,4 @@
-import "./utils/mockObjects.js"
-import {assert} from 'chai'
+import {assert} from './utils/assert.js'
 import WigTrack from "../js/feature/wigTrack.js"
 import BAMTrack from "../js/bam/bamTrack.js"
 import VariantTrack from "../js/variant/variantTrack.js"
@@ -10,7 +9,7 @@ import {createGenome} from "./utils/MockGenome.js"
 
 const genome = createGenome()
 
-suite("test getState()", function () {
+describe("test getState()", function () {
 
     const browser = {
         genome,
@@ -20,7 +19,7 @@ suite("test getState()", function () {
         }
     }
 
-    test("wig track default state", async function () {
+    it("wig track default state", async function () {
 
         const path = "test/data/wig/noTrackProperties.wig"
 
@@ -53,7 +52,7 @@ suite("test getState()", function () {
     })
 
     //track type=wiggle_0 graphType=points name="truc" description="une description" visibility=full color=50,150,255 yLineMark=11.76 yLineOnOff=on viewLimits=0:200
-    test("wig track state with track line", async function () {
+    it("wig track state with track line", async function () {
 
         const path = "test/data/wig/trackLine.wig"
 
@@ -78,7 +77,7 @@ suite("test getState()", function () {
         assert.equal(track.dataRange.max, 200)
     })
 
-    test("wig track state with track line and config", async function () {
+    it("wig track state with track line and config", async function () {
 
         const path = "test/data/wig/trackLine.wig"
 
@@ -105,7 +104,7 @@ suite("test getState()", function () {
         assert.equal(track.autoscale, true)
     })
 
-    test("bam track state", async function () {
+    it("bam track state", async function () {
 
         const path = "test/data/bam/gstt1_sample.bam"
 
@@ -133,7 +132,7 @@ suite("test getState()", function () {
 
     })
 
-    test("vcf track state", async function () {
+    it("vcf track state", async function () {
 
         const path = "test/data/vcf/example.vcf"
 
@@ -158,7 +157,7 @@ suite("test getState()", function () {
         assert.equal(state.visibilityWindow, 1000)
     })
 
-    test("interaction track state", async function () {
+    it("interaction track state", async function () {
 
         const path = "test/data/bedpe/hg19_myc.bedpe"
 
@@ -187,7 +186,7 @@ suite("test getState()", function () {
     /**
      * BlatTrack is extended from FeatureTrack.  Verify that BlatTrack inherits FeatureTrack default properties*
      */
-    test("blat track state", async function () {
+    it("blat track state", async function () {
 
 
         const config = {sequence: ''}

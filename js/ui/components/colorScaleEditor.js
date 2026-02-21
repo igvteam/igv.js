@@ -1,7 +1,7 @@
 import * as DOMUtils from "../utils/dom-utils.js"
-import Picker from "../../../node_modules/vanilla-picker/dist/vanilla-picker.csp.mjs"
+import Picker from "vanilla-picker/csp"
 import Dialog from "./dialog.js"
-import DOMPurify from "../../../node_modules/dompurify/dist/purify.es.mjs"
+import DOMPurify from "dompurify"
 import Checkbox from "./checkbox.js"
 import {DivergingGradientScale, GradientColorScale} from "../../util/colorScale.js"
 

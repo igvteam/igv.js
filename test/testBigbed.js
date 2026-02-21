@@ -1,7 +1,6 @@
-import "./utils/mockObjects.js"
 import BWSource from "../js/bigwig/bwSource.js"
 import {parseAutoSQL} from "../js/util/ucscUtils.js"
-import {assert} from 'chai'
+import {assert} from './utils/assert.js'
 import {fileToDataURL} from "./utils/URLUtils.js"
 import BWReader from "../js/bigwig/bwReader.js"
 import {createGenome} from "./utils/MockGenome.js"
@@ -17,9 +16,9 @@ function getWGChromosomeNames() {
     return chromosomeNames
 }
 
-suite("testBigBed", function () {
+describe("testBigBed", function () {
 
-    test("bed9+2 features", async function () {
+    it("bed9+2 features", async function () {
         const url = "test/data/bb/myBigBed2.bb"
         const chr = "chr7"
         const start = 0
@@ -40,7 +39,7 @@ suite("testBigBed", function () {
         assert.equal(f.spID, 'Q86Y56-3')
     })
 
-    test("test aliasing", async function () {
+    it("test aliasing", async function () {
 
         const genome = createGenome("ncbi")
         const url = "test/data/bb/myBigBed2.bb"
@@ -64,7 +63,7 @@ suite("testBigBed", function () {
     })
 
 
-    test("bed9+2 features - dataURL", async function () {
+    it("bed9+2 features - dataURL", async function () {
         const url = await fileToDataURL("test/data/bb/myBigBed2.bb")
 
         const chr = "chr7"
@@ -86,7 +85,7 @@ suite("testBigBed", function () {
         assert.equal(f.spID, 'Q86Y56-3')
     })
 
-    test("interact features", async function () {
+    it("interact features", async function () {
         const url = "test/data/bb/interactExample3.inter.bb"
 
         const chr = "chr3"
@@ -109,7 +108,7 @@ suite("testBigBed", function () {
         assert.equal(secondFeature.end2, 63978511)
     })
 
-    test("interact features - dataURL", async function () {
+    it("interact features - dataURL", async function () {
         const url = await fileToDataURL("test/data/bb/interactExample3.inter.bb")
 
 
@@ -133,7 +132,7 @@ suite("testBigBed", function () {
         assert.equal(secondFeature.end2, 63978511)
     })
 
-    test("Autosql", function () {
+    it("Autosql", function () {
         const autosql = `
 table chromatinInteract
 "Chromatin interaction between two regions"
@@ -170,11 +169,8 @@ table chromatinInteract
         assert.equal(r2s.description, 'Orientation of upper/this region: + or -.  Use . if not applicable')
     })
 
-    test("clinvar", async function () {
-
-        this.timeout(20000)
-
-        const url = "https://hgdownload.soe.ucsc.edu/gbdb/hg38/bbi/clinvar/clinvarMain.bb",
+    it("clinvar", async function () {
+const url = "https://hgdownload.soe.ucsc.edu/gbdb/hg38/bbi/clinvar/clinvarMain.bb",
             chr = "chr22",
             start = 23786974,
             end = 23787050
@@ -189,7 +185,7 @@ table chromatinInteract
     /**
      * Test parsing a aliasBbURL file from the T2T hub
      */
-    test("test whole genome with alias", async function () {
+    it("test whole genome with alias", async function () {
 
         const url = "test/data/bb/GCA_009914755.4.chromAlias.bb"  //T2T
 
@@ -219,7 +215,7 @@ table chromatinInteract
      *   "gieStain": "gneg"
      * }
      */
-    test("test cytoband", async function () {
+    it("test cytoband", async function () {
 
         const url = "test/data/bb/cytoBandMapped.bb"
         const bbReader = new BWReader({url: url, format: "bigbed"})

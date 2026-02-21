@@ -1,4 +1,4 @@
-import {IGVMath} from "../../node_modules/igv-utils/src/index.js"
+import {IGVMath} from "igv-utils/src/index.js"
 
 function hexToRGB(hex) {
     // Ensure the hex value is in the proper format

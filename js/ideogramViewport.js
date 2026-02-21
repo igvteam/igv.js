@@ -1,7 +1,7 @@
 import IGVGraphics from './igv-canvas.js'
 import * as DOMUtils from "./ui/utils/dom-utils.js"
 import TrackViewport from "./trackViewport.js"
-import { IGVMath } from "../node_modules/igv-utils/src/index.js"
+import { IGVMath } from "igv-utils/src/index.js"
 
 let timer
 const toolTipTimeout = 1e4

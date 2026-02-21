@@ -1,19 +1,17 @@
-import "./utils/mockObjects.js"
 import TDFReader from "../js/tdf/tdfReader.js"
 import TDFSource from "../js/tdf/tdfSource.js"
 import FeatureSource from "../js/feature/featureSource.js"
-import {assert} from 'chai'
+import {assert} from './utils/assert.js'
 import {createGenome} from "./utils/MockGenome.js"
 
 const genome = createGenome()
 
-suite("testTDF", function () {
+describe("testTDF", function () {
 
     const dataURL = "https://data.broadinstitute.org/igvdata/test/data/"
 
-    test("TDF source get features (zoom)", async function () {
-        this.timeout(10000)
-        const url = "test/data/tdf/gstt1_sample.bam.tdf"
+    it("TDF source get features (zoom)", async function () {
+const url = "test/data/tdf/gstt1_sample.bam.tdf"
 
         const chr = "22",
             start = 24049020,
@@ -26,9 +24,8 @@ suite("testTDF", function () {
     })
 
 
-    test("TDF header", async function () {
-        this.timeout(10000)
-        const url = "test/data/tdf/gstt1_sample.bam.tdf"
+    it("TDF header", async function () {
+const url = "test/data/tdf/gstt1_sample.bam.tdf"
 
         const tdfReader = new TDFReader({url: url}, genome)
         await tdfReader.readHeader()
@@ -38,9 +35,8 @@ suite("testTDF", function () {
     })
 
 
-    test("TDF dataset", async function () {
-        this.timeout(10000)
-        const url = "test/data/tdf/gstt1_sample.bam.tdf"
+    it("TDF dataset", async function () {
+const url = "test/data/tdf/gstt1_sample.bam.tdf"
 
         const tdfReader = new TDFReader({url: url}, genome)
         const dataset = await tdfReader.readDataset("chr22", "mean", 6)
@@ -54,9 +50,8 @@ suite("testTDF", function () {
     })
 
 
-    test("TDF root group", async function () {
-        this.timeout(10000)
-        const url = "test/data/tdf/gstt1_sample.bam.tdf"
+    it("TDF root group", async function () {
+const url = "test/data/tdf/gstt1_sample.bam.tdf"
 
         const tdfReader = new TDFReader({url: url}, genome)
         const group = await tdfReader.readGroup("/")
@@ -66,9 +61,8 @@ suite("testTDF", function () {
     })
 
 
-    test("TDF variable step tile", async function () {
-        this.timeout(20000)
-        const url = "test/data/tdf/gstt1_sample.bam.tdf"
+    it("TDF variable step tile", async function () {
+const url = "test/data/tdf/gstt1_sample.bam.tdf"
 
         const tdfReader = new TDFReader({url: url}, genome)
         const dataset = await tdfReader.readDataset("chr22", "mean", 6)
@@ -83,9 +77,8 @@ suite("testTDF", function () {
     })
 
 
-    test("TDF bed tile", async function () {
-        this.timeout(20000)
-        const url = "test/data/tdf/gstt1_sample.bam.tdf"
+    it("TDF bed tile", async function () {
+const url = "test/data/tdf/gstt1_sample.bam.tdf"
 
         const tdfReader = new TDFReader({url: url}, genome)
         const dataset = await tdfReader.readDataset("chr22", "raw")
@@ -104,9 +97,8 @@ suite("testTDF", function () {
     // TODO -- NEED FIXED STEP TILE TEST
 
 
-    test("TDF root group", async function () {
-        this.timeout(10000)
-        const url = "test/data/tdf/gstt1_sample.bam.tdf"
+    it("TDF root group", async function () {
+const url = "test/data/tdf/gstt1_sample.bam.tdf"
 
         const tdfReader = new TDFReader({url: url}, genome)
         const group = await tdfReader.readRootGroup()
@@ -116,9 +108,8 @@ suite("testTDF", function () {
     })
 
 
-    test("TDF source get features (raw)", async function () {
-        this.timeout(10000)
-        const url = "test/data/tdf/gstt1_sample.bam.tdf"
+    it("TDF source get features (raw)", async function () {
+const url = "test/data/tdf/gstt1_sample.bam.tdf"
 
         const chr = "22",
             start = 24376175,
@@ -130,9 +121,8 @@ suite("testTDF", function () {
 
     })
 
-    test("TDF - alias", async function () {
-        this.timeout(10000)
-        const url = "test/data/tdf/gstt1_sample.bam.tdf"
+    it("TDF - alias", async function () {
+const url = "test/data/tdf/gstt1_sample.bam.tdf"
 
         const chr = "chr22",
             start = 24376175,

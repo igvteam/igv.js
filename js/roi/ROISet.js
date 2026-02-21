@@ -1,7 +1,7 @@
 import FeatureSource from '../feature/featureSource.js'
 import {appleCrayonRGBA, rgbaStringTokens} from '../util/colorPalletes.js'
 import {computeWGFeatures} from "../feature/featureUtils.js"
-import {IGVColor} from "../../node_modules/igv-utils/src/index.js"
+import {IGVColor} from "igv-utils/src/index.js"
 
 const appleCrayonColorName = 'nickel'
 

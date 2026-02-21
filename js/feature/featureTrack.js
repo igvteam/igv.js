@@ -6,10 +6,10 @@ import {reverseComplementSequence} from "../util/sequenceUtils.js"
 import {aminoAcidSequenceRenderThreshold, renderFeature} from "./render/renderFeature.js"
 import {renderSnp} from "./render/renderSnp.js"
 import {renderFusionJuncSpan} from "./render/renderFusionJunction.js"
-import {StringUtils, FeatureUtils} from "../../node_modules/igv-utils/src/index.js"
+import {StringUtils, FeatureUtils} from "igv-utils/src/index.js"
 import {ColorTable, PaletteColorTable} from "../util/colorPalletes.js"
 import {isSecureContext} from "../util/igvUtils.js"
-import {IGVColor} from "../../node_modules/igv-utils/src/index.js"
+import {IGVColor} from "igv-utils/src/index.js"
 
 
 class FeatureTrack extends TrackBase {

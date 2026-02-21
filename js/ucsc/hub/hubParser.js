@@ -6,7 +6,7 @@
  */
 
 import Stanza from "./stanza.js"
-import {igvxhr} from "../../../node_modules/igv-utils/src/index.js"
+import {igvxhr} from "igv-utils/src/index.js"
 import Hub from "./hub.js"
 
 const urlProperties = new Set(["descriptionUrl", "desriptionUrl",

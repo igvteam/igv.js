@@ -1,12 +1,11 @@
-import "./utils/mockObjects.js"
 import SegParser from "../js/feature/segParser.js"
-import {assert} from 'chai'
+import {assert} from './utils/assert.js'
 import getDataWrapper from "../js/feature/dataWrapper.js"
 import fs from 'fs'
 
-suite("testMaf", function () {
+describe("testMaf", function () {
 
-    test("parse MAF", async function () {
+    it("parse MAF", async function () {
 
         const data = fs.readFileSync('test/data/mut/tcga_test.maf')
         const dataWrapper = getDataWrapper(data)

@@ -1,13 +1,12 @@
-import {assert} from 'chai'
-import "./utils/mockObjects.js"
+import {assert} from './utils/assert.js'
 import {createGenome} from "./utils/MockGenome.js"
 
 
 import Browser from "../js/browser.js"
 
-suite("testTribble", function () {
+describe("testTribble", function () {
 
-    test("vcf indexed", async function () {
+    it("vcf indexed", async function () {
 
         const config = {
             url: "test/data/vcf/SRP32_v4.sorted.0.vcf",
@@ -35,7 +34,7 @@ suite("testTribble", function () {
     })
 
 
-    test("vcf indexed with chr alias", async function () {
+    it("vcf indexed with chr alias", async function () {
 
         const config = {
             url: "test/data/vcf/SRP32_v4.sorted.0.vcf",

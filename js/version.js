@@ -1,5 +1,5 @@
-const _version = "3.7.3"
 function version() {
-    return _version
+    return __APP_VERSION__
 }
+
 export default version

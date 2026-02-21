@@ -1,6 +1,5 @@
-import "./utils/mockObjects.js"
 import {HGVS} from "../js/genome/hgvs.js"
-import {assert} from 'chai'
+import {assert} from './utils/assert.js'
 import Genome from "../js/genome/genome.js"
 import {getTrack} from "../js/trackFactory.js"
 
@@ -36,9 +35,9 @@ const track = getTrack("annotation", refseqTrack, browser)
 browser.tracks = [track]
 await track.getFeatures("chr1", 0, 1000000000)  // Pre-load features
 
-suite("testHGVS", function () {
+describe("testHGVS", function () {
 
-    test("isValid", function () {
+    it("isValid", function () {
         assert.isOk(HGVS.isValidHGVS("NC_000017.11:g.7579472C>G"))
         assert.isOk(HGVS.isValidHGVS("NC_000017.11:g.7579472"))
         assert.isOk(HGVS.isValidHGVS("NM_000546.5:c.215C>G"))
@@ -49,11 +48,8 @@ suite("testHGVS", function () {
         assert.isNotOk(HGVS.isValidHGVS("No_Colon_Or_Type"))
     })
 
-    test("genome search", async function () {
-
-        this.timeout(20000)
-
-        let hgvs = "NC_000017.11:g.7579472C>G"
+    it("genome search", async function () {
+let hgvs = "NC_000017.11:g.7579472C>G"
         assert.isOk(HGVS.isValidHGVS(hgvs))
         let result = await HGVS.search(hgvs, browser)
         assert.equal(result.chr, "chr17")
@@ -83,22 +79,16 @@ suite("testHGVS", function () {
 
     })
 
-    test("coding search", async function () {
-
-        this.timeout(20000)
-
-        let hgvs = "NM_000546.6(TP53):c.815T>G"
+    it("coding search", async function () {
+let hgvs = "NM_000546.6(TP53):c.815T>G"
         assert.isOk(HGVS.isValidHGVS(hgvs))
         let result = await HGVS.search(hgvs, browser)
         assert.equal(result.chr, "chr17")
         assert.equal(result.start, 7673804)
     })
 
-    test("search in introns", async function () {
-
-        this.timeout(20000)
-
-        // Adapted from UCSC tests
+    it("search in introns", async function () {
+// Adapted from UCSC tests
         // chr1	11256193	11256194	NM_004958.3(MTOR):c.505-2A>G	0	-
         let hgvs = "ENST00000361445.9:c.505-2A>G"
         assert.isOk(HGVS.isValidHGVS(hgvs))
@@ -136,11 +126,8 @@ suite("testHGVS", function () {
         assert.equal(result.start, 40073531)
     })
 
-    test("historical refseq", async function () {
-
-        this.timeout(20000)
-
-        // Adapted from UCSC tests
+    it("historical refseq", async function () {
+// Adapted from UCSC tests
         // chr1	11256193	11256194	NM_004958.3(MTOR):c.505-2A>G	0	-
         let hgvs = "NM_004958.3(MTOR):c.505-2A>G"
         assert.isOk(HGVS.isValidHGVS(hgvs))
@@ -157,11 +144,8 @@ suite("testHGVS", function () {
 
     })
 
-    test("create annotation", async function () {
-
-        this.timeout(20000)
-        
-        // - strand gene, coding exon. Validated at ClinVar, genome location 17:7673596
+    it("create annotation", async function () {
+// - strand gene, coding exon. Validated at ClinVar, genome location 17:7673596
         let expected = "NM_000546.6:c.932A>C"
         let hgvs = await HGVS.createHGVSAnnotation(browser.genome, "chr17", 7673595, 'T', 'G')
         assert.equal(hgvs, expected)

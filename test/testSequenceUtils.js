@@ -1,11 +1,10 @@
-import "./utils/mockObjects.js"
-import {assert} from 'chai'
+import {assert} from './utils/assert.js'
 import {reverseComplementSequence, complementSequence, complementBase} from "../js/util/sequenceUtils.js"
 
-suite("testSequenceUtils", function () {
+describe("testSequenceUtils", function () {
 
 
-    test("Complement sequence", async function () {
+    it("Complement sequence", async function () {
 
 
         const sequence = "ATCG"
@@ -16,7 +15,7 @@ suite("testSequenceUtils", function () {
 
     })
 
-    test("Reverse complement sequence", function () {
+    it("Reverse complement sequence", function () {
 
         const sequence = "ACCTGAG"
         const expectedSequence = "CTCAGGT"
@@ -25,7 +24,7 @@ suite("testSequenceUtils", function () {
         assert.equal(reverseComplementSequence("*"), "*")
     })
 
-    test("Complement base", function () {
+    it("Complement base", function () {
 
         assert.equal(complementBase('A'), 'T')
         assert.equal(complementBase('a'), 't')

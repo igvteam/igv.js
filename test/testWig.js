@@ -1,14 +1,13 @@
-import "./utils/mockObjects.js"
 import FeatureSource from "../js/feature/featureSource.js"
-import {assert} from 'chai'
+import {assert} from './utils/assert.js'
 import {createGenome} from "./utils/MockGenome.js"
 import {summarizeData} from "../js/feature/wigTrack.js"
 
 const genome = createGenome()
 
-suite("testWig", function () {
+describe("testWig", function () {
 
-    test("wig fixed step", async function () {
+    it("wig fixed step", async function () {
 
         const path = "test/data/wig/fixedStep-example.wig"
 
@@ -28,7 +27,7 @@ suite("testWig", function () {
         assert.equal(features[1].start - features[0].start, 300)
     })
 
-    test("wig variable step", async function () {
+    it("wig variable step", async function () {
 
         const url = "test/data/wig/variableStep-example.wig"
 
@@ -58,7 +57,7 @@ suite("testWig", function () {
     /**
      * Insure we get all features requested, but no more (i.e. no features out of interval)
      */
-    test("wig query", async function () {
+    it("wig query", async function () {
 
         const url = "test/data/wig/ENCFF000ARZ.wig"
 
@@ -75,7 +74,7 @@ suite("testWig", function () {
         assert.equal(10, queryFeatures.length)
     })
 
-    test("wig summarize", async function () {
+    it("wig summarize", async function () {
 
         const url = "test/data/wig/ENCFF000ARZ.wig"
 

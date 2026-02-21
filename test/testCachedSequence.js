@@ -1,15 +1,11 @@
-import "./utils/mockObjects.js"
 import {loadSequence} from "../js/genome/loadSequence.js"
-import {assert} from 'chai'
+import {assert} from './utils/assert.js'
 
-suite("testCachedSequence", function () {
+describe("testCachedSequence", function () {
 
 
-    test("Cached Sequence -  getSequence", async function () {
-
-        this.timeout(100000)
-
-        const fasta = await loadSequence({
+    it("Cached Sequence -  getSequence", async function () {
+const fasta = await loadSequence({
                 "twoBitURL": "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/bigZips/hg19.2bit"
             }
         )
@@ -27,11 +23,8 @@ suite("testCachedSequence", function () {
 
     })
 
-    test("Cached Sequence -  getSequenceInterval", async function () {
-
-        this.timeout(100000)
-
-        const fasta = await loadSequence({
+    it("Cached Sequence -  getSequenceInterval", async function () {
+const fasta = await loadSequence({
                 "twoBitURL": "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/bigZips/hg19.2bit"
             }
         )

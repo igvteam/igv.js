@@ -1,12 +1,11 @@
-import "./utils/mockObjects.js"
 import BamReader from "../js/bam/bamReader.js"
-import {assert} from 'chai'
+import {assert} from './utils/assert.js'
 import {createGenome} from "./utils/MockGenome.js"
 
 
-suite("testCSIIndex", function () {
+describe("testCSIIndex", function () {
 
-    test("BAM alignments - CSI index", async function () {
+    it("BAM alignments - CSI index", async function () {
 
         const genome = createGenome("ncbi")
         const start = 122000

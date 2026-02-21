@@ -1,14 +1,13 @@
-import "./utils/mockObjects.js"
 import {createFile} from "./utils/File.js"
 import FeatureSource from "../js/feature/featureSource.js"
-import {assert} from 'chai'
+import {assert} from './utils/assert.js'
 import {createGenome} from "./utils/MockGenome.js"
 
 const genome = createGenome()
 
-suite("testAED", function () {
+describe("testAED", function () {
 
-    test("AED - UTF8 with BOM", async function () {
+    it("AED - UTF8 with BOM", async function () {
 
         var chr = "chr2",
             start = 0,

@@ -1,6 +1,6 @@
 import {buildOptions} from "./igvUtils.js"
 import BinaryParser from "../binary.js"
-import {BGZip, igvxhr, StringUtils, FileUtils} from "../../node_modules/igv-utils/src/index.js"
+import {BGZip, igvxhr, StringUtils, FileUtils} from "igv-utils/src/index.js"
 import QTLParser from "../qtl/qtlParser.js"
 import {isHiccups} from "../feature/decode/bedpe.js"
 import GWASParser from "../gwas/gwasParser.js"

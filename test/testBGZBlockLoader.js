@@ -1,13 +1,12 @@
-import "./utils/mockObjects.js"
 import BGZBlockLoader, {inflateBlocks, findBlockBoundaries} from "../js/bam/bgzBlockLoader.js"
-import {assert} from 'chai'
+import {assert} from './utils/assert.js'
 import fs from 'fs'
 
 const inflatedBlockSize = 65536
 
-suite("test BGZBlockLoader", function () {
+describe("test BGZBlockLoader", function () {
 
-    test("inflate blocks", async function () {
+    it("inflate blocks", async function () {
         const path = "test/data/tabix/sorted.genes.gtf.gz"
         const b = fs.readFileSync(path)
         const arrayBuffer = b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength)
@@ -31,7 +30,7 @@ suite("test BGZBlockLoader", function () {
         assert.equal(blocks.length, 3)
     })
 
-    test("load individual blocks", async function () {
+    it("load individual blocks", async function () {
 
         const config = {
             url: "test/data/tabix/sorted.genes.gtf.gz"
@@ -47,7 +46,7 @@ suite("test BGZBlockLoader", function () {
         }
     })
 
-    test("load and inflate blocks", async function () {
+    it("load and inflate blocks", async function () {
 
         const startBlock = 113873
         const endBlock = 131295
@@ -65,7 +64,7 @@ suite("test BGZBlockLoader", function () {
         assert.equal(sz, 5 * inflatedBlockSize)
     })
 
-    test("cache - inner overlap", async function () {
+    it("cache - inner overlap", async function () {
 
         const config = {
             url: "test/data/tabix/sorted.genes.gtf.gz"
@@ -88,7 +87,7 @@ suite("test BGZBlockLoader", function () {
         assert.equal(sz, 3 * inflatedBlockSize)
     })
 
-    test("cache - overlap left", async function () {
+    it("cache - overlap left", async function () {
 
 
         const config = {
@@ -112,7 +111,7 @@ suite("test BGZBlockLoader", function () {
         assert.equal(sz, 3 * inflatedBlockSize)
     })
 
-    test("cache - overlap right", async function () {
+    it("cache - overlap right", async function () {
 
         const config = {
             url: "test/data/tabix/sorted.genes.gtf.gz"
@@ -137,7 +136,7 @@ suite("test BGZBlockLoader", function () {
 
     })
 
-    test("cache - outer overlap", async function () {
+    it("cache - outer overlap", async function () {
 
         const config = {
             url: "test/data/tabix/sorted.genes.gtf.gz"
@@ -160,7 +159,7 @@ suite("test BGZBlockLoader", function () {
         assert.equal(sz, 5 * inflatedBlockSize)
     })
 
-    test("bam", async function () {
+    it("bam", async function () {
         const config = {
             url: "test/data/bam/gstt1_sample.bam"
 

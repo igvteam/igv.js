@@ -1,4 +1,4 @@
-import {igvxhr} from "../../node_modules/igv-utils/src/index.js"
+import {igvxhr} from "igv-utils/src/index.js"
 
 const UCSCServiceReader = function (config, genome) {
     this.config = config

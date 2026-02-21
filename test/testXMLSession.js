@@ -1,15 +1,14 @@
-import "./utils/mockObjects.js"
-import {assert} from 'chai'
-import {igvxhr} from "../node_modules/igv-utils/src/index.js"
+import {assert} from './utils/assert.js'
+import {igvxhr} from "igv-utils/src/index.js"
 import XMLSession from "../js/session/igvXmlSession.js"
 
-suite("testXMLSession", function () {
+describe("testXMLSession", function () {
 
     const knownGenomes = {
         "hg19": {}
     }
 
-    test("merge track session", async function () {
+    it("merge track session", async function () {
 
         const sessionPath = "test/data/session/session-merged.xml"
 

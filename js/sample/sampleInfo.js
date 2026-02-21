@@ -1,4 +1,4 @@
-import {igvxhr, IGVMath} from '../../node_modules/igv-utils/src/index.js'
+import {igvxhr, IGVMath} from 'igv-utils/src/index.js'
 import {
     appleCrayonRGB,
     rgbaColor,

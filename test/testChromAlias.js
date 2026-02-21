@@ -1,12 +1,11 @@
-import "./utils/mockObjects.js"
 import ChromAliasFile from "../js/genome/chromAliasFile.js"
 import BWReader from "../js/bigwig/bwReader.js"
-import {assert} from "chai"
+import {assert} from "./utils/assert.js"
 import ChromAliasDefaults from "../js/genome/chromAliasDefaults.js"
 import ChromAliasBB from "../js/genome/chromAliasBB.js"
 
 
-suite("chromAlias", function () {
+describe("chromAlias", function () {
 
     const genome = {
         chromosomes: new Map([
@@ -37,7 +36,7 @@ suite("chromAlias", function () {
      * NC_007200.1	7	CM000175.1	7	chr7
      * NC_007201.1	8	CM000176.1	8	chr8
      */
-    test("test chromAlias.txt", async function () {
+    it("test chromAlias.txt", async function () {
 
         const url = "test/data/genomes/GCF_000002655.1.chromAlias.txt"
 
@@ -51,7 +50,7 @@ suite("chromAlias", function () {
         assert.equal(chromAlias.getChromosomeAlias("NC_007194.1", "genbank"), "CM000169.1")
     })
 
-    test("test chromAlias.bb", async function () {
+    it("test chromAlias.bb", async function () {
 
         const url = "test/data/genomes/GCF_000002655.1.chromAlias.bb"
 
@@ -65,9 +64,8 @@ suite("chromAlias", function () {
 
     })
 
-    test("test chromalias bb extra index search", async function () {
-        this.timeout(200000)
-        const config = {
+    it("test chromalias bb extra index search", async function () {
+const config = {
             url: "test/data/genomes/GCF_000002655.1.chromAlias.bb",
             format: "bigbed"
         }
@@ -85,7 +83,7 @@ suite("chromAlias", function () {
     })
 
 
-    test("test defaults", async function () {
+    it("test defaults", async function () {
 
         const genomeID = "hg*"
 

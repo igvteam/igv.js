@@ -1,5 +1,5 @@
 import {buildOptions, isDataURL} from "../util/igvUtils.js"
-import {BGZip, igvxhr, StringUtils} from "../../node_modules/igv-utils/src/index.js"
+import {BGZip, igvxhr, StringUtils} from "igv-utils/src/index.js"
 import BWReader from "../bigwig/bwReader.js"
 import Chromosome from "./chromosome.js"
 

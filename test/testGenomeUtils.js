@@ -1,13 +1,10 @@
-import "./utils/mockObjects.js"
 import GenomeUtils from "../js/genome/genomeUtils.js"
-import {assert} from 'chai'
+import {assert} from './utils/assert.js'
 
-suite("testGenomeUtils", function () {
+describe("testGenomeUtils", function () {
 
-    test("agument default genome list 1", async function () {
-
-        this.timeout(100000)
-        const config = {
+    it("agument default genome list 1", async function () {
+const config = {
             genomeList: "test/data/genomes/altGenomes.json"
         }
 
@@ -17,10 +14,8 @@ suite("testGenomeUtils", function () {
 
     })
 
-    test("agument default genome list 2", async function () {
-
-        this.timeout(100000)
-        GenomeUtils.KNOWN_GENOMES = undefined   // reset
+    it("agument default genome list 2", async function () {
+GenomeUtils.KNOWN_GENOMES = undefined   // reset
 
         const config = {
             genomeList: [
@@ -67,10 +62,8 @@ suite("testGenomeUtils", function () {
 
     })
 
-    test("replace default genome list", async function () {
-
-        this.timeout(100000)
-        GenomeUtils.KNOWN_GENOMES = undefined   // reset
+    it("replace default genome list", async function () {
+GenomeUtils.KNOWN_GENOMES = undefined   // reset
 
         const config = {
             loadDefaultGenomes: false,

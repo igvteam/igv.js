@@ -1,13 +1,12 @@
-import "./utils/mockObjects.js"
 import BamReader from "../js/bam/bamReader.js"
-import {assert} from 'chai'
+import {assert} from './utils/assert.js'
 import BamReaderNonIndexed from "../js/bam/bamReaderNonIndexed.js"
 import {createGenome} from "./utils/MockGenome.js"
 
 
-suite("testBAM", function () {
+describe("testBAM", function () {
 
-    test("BAM alignments - CSI index", async function () {
+    it("BAM alignments - CSI index", async function () {
 
         const genome = createGenome("ucsc")
         const start = 155140000
@@ -28,7 +27,7 @@ suite("testBAM", function () {
 
     })
 
-    test("BAM alignments - CSI index alias", async function () {
+    it("BAM alignments - CSI index alias", async function () {
 
         const genome = createGenome("ncbi")
         const start = 155140000
@@ -54,7 +53,7 @@ suite("testBAM", function () {
 
     })
 
-    test("BAM alignments - non indexed", async function () {
+    it("BAM alignments - non indexed", async function () {
 
         const start = 155140000
         const end = 155160000
@@ -69,7 +68,7 @@ suite("testBAM", function () {
         validate(assert, alignmentContainer)
     })
 
-    test("BAM alignments - non indexed alias", async function () {
+    it("BAM alignments - non indexed alias", async function () {
 
         const start = 155140000
         const end = 155160000
@@ -144,7 +143,7 @@ suite("testBAM", function () {
      *
      *  X0:i:10	X1:i:5	MD:Z:100	RG:Z:SRR360773	AM:i:0	NM:i:0	SM:i:0	MQ:i:0	XT:A:R	BQ:Z:@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@C	pa:f:228.71
      */
-    test("tags", async function () {
+    it("tags", async function () {
 
         const bamReader = new BamReaderNonIndexed({
             type: 'bam',

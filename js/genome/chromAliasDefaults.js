@@ -3,7 +3,7 @@
  *
  */
 import {isNumber, buildOptions} from "../util/igvUtils.js"
-import {igvxhr, StringUtils} from "../../node_modules/igv-utils/src/index.js"
+import {igvxhr, StringUtils} from "igv-utils/src/index.js"
 
 class ChromAliasDefaults {
 

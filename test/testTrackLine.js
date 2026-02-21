@@ -1,16 +1,15 @@
-import "./utils/mockObjects.js"
-import {assert} from 'chai'
+import {assert} from './utils/assert.js'
 import WigTrack from "../js/feature/wigTrack.js"
 import {createGenome} from "./utils/MockGenome.js"
 
 const genome = createGenome()
 
-suite("testTrackLine", function () {
+describe("testTrackLine", function () {
 
     const browser = {genome}
 
     //track type=wiggle_0 name="fixedStep" description="fixedStep format" visibility=full autoScale=off viewLimits=0:1000 color=0,200,100 maxHeightPixels=100:50:20 graphType=points priority=20
-    test("trackline settings", async function () {
+    it("trackline settings", async function () {
 
         const path = "test/data/wig/fixedStep-example.wig"
 
@@ -31,7 +30,7 @@ suite("testTrackLine", function () {
         // assert.equal(track.graphType, "points");
     })
 
-    test("trackline override", async function () {
+    it("trackline override", async function () {
 
         const path = "test/data/wig/fixedStep-example.wig"
 

@@ -1,5 +1,5 @@
 import BaseFeatureSource from "./baseFeatureSource.js"
-import {igvxhr} from "../../node_modules/igv-utils/src/index.js"
+import {igvxhr} from "igv-utils/src/index.js"
 import {buildOptions} from "../util/igvUtils.js"
 import getDataWrapper from "./dataWrapper.js"
 import FeatureSource from "./featureSource.js"

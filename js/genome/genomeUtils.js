@@ -1,4 +1,4 @@
-import {igvxhr, StringUtils} from "../../node_modules/igv-utils/src/index.js"
+import {igvxhr, StringUtils} from "igv-utils/src/index.js"
 import {convertToHubURL} from "../ucsc/ucscUtils.js"
 import {loadHub} from "../ucsc/hub/hubParser.js"
 

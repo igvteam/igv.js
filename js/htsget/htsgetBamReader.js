@@ -1,7 +1,7 @@
 import HtsgetReader from "./htsgetReader.js"
 import AlignmentContainer from "../bam/alignmentContainer.js"
 import BamUtils from "../bam/bamUtils.js"
-import {BGZip} from "../../node_modules/igv-utils/src/index.js"
+import {BGZip} from "igv-utils/src/index.js"
 import ChromAliasManager from "../feature/chromAliasManager.js"
 
 class HtsgetBamReader extends HtsgetReader {

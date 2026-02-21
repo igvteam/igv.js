@@ -1,12 +1,11 @@
-import "./utils/mockObjects.js"
-import {assert} from 'chai'
+import {assert} from './utils/assert.js'
 import TwobitSequence from "../js/genome/twobit.js"
 import BPTree from "../js/bigwig/bpTree.js"
 
 
-suite("testTwobit", function () {
+describe("testTwobit", function () {
 
-    test("twobit", async function () {
+    it("twobit", async function () {
 
         const expectedSequence = "NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNACTCTATCTATCTATCTATCTATCTTTTT" +
             "CCCCCCGGGGGGagagagagactc tagcatcctcctacctcacNNacCNctTGGACNCcCaGGGatttcNNNcccNNCCNCgN"
@@ -20,7 +19,7 @@ suite("testTwobit", function () {
         assert.equal(seqString, expectedSequence.substring(start, end))
     })
     //
-    // test("twobit sequence", async function () {
+    // it("twobit sequence", async function () {
     //
     //     this.timeout(200000)
     //
@@ -48,7 +47,7 @@ suite("testTwobit", function () {
     //     assert.equal(expectedSeq, seq)
     // })
 
-    test("twobit metadata", async function () {
+    it("twobit metadata", async function () {
         const url = "test/data/twobit/GCF_000002655.1.2bit"
         const twobit = new TwobitSequence({twoBitURL: url})
         await twobit.init()
@@ -56,7 +55,7 @@ suite("testTwobit", function () {
         assert.deepEqual(sequenceRecord.dnaSize, 4079167)
     })
 
-    // test("twobit blocks", async function () {
+    // it("twobit blocks", async function () {
     //
     //     this.timeout(200000)
     //
@@ -82,7 +81,7 @@ suite("testTwobit", function () {
     //     }
     // })
 
-    test("twobit .bpt index", async function () {
+    it("twobit .bpt index", async function () {
 
         const url = "test/data/twobit/GCA_004363605.1.2bit.bpt"
         const bpTree = await BPTree.loadBpTree(url, {}, 0)
@@ -98,7 +97,7 @@ suite("testTwobit", function () {
 
     })
 
-    test("twobit w bpt", async function () {
+    it("twobit w bpt", async function () {
 
         const expectedSequence = "GCAGGTATCCAAAGCCAGAGGCCTGGTGCTACACGACTGG"
 

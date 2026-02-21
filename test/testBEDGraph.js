@@ -1,14 +1,13 @@
-import "./utils/mockObjects.js"
 import FeatureSource from "../js/feature/featureSource.js"
-import {assert} from 'chai'
+import {assert} from './utils/assert.js'
 import {createGenome} from "./utils/MockGenome.js"
 
 
-suite("testBedGraph", function () {
+describe("testBedGraph", function () {
 
     const genome = createGenome()
 
-    test("bedgraph getFeatures", async function () {
+    it("bedgraph getFeatures", async function () {
 
         var chr = "chr19",
             start = 49302001,
@@ -33,7 +32,7 @@ suite("testBedGraph", function () {
         assert.equal(f.value, -0.50, "value")
     })
 
-    test("bedgraph getFeatures - aliasing", async function () {
+    it("bedgraph getFeatures - aliasing", async function () {
 
         const genome = createGenome("ncbi")
         var chr = "19",

@@ -1,8 +1,7 @@
-import "./utils/mockObjects.js"
 import FeatureFileReader from '../js/feature/featureFileReader.js'
-import {assert} from 'chai'
+import {assert} from './utils/assert.js'
 
-suite("testTrackLine", function () {
+describe("testTrackLine", function () {
 
     const browser = {
         genome: {
@@ -12,7 +11,7 @@ suite("testTrackLine", function () {
         }
     }
 
-    test("WigTrack trackLine", async function () {
+    it("WigTrack trackLine", async function () {
 
         const featureReader = new FeatureFileReader({
             format: 'bedgraph',
@@ -30,7 +29,7 @@ suite("testTrackLine", function () {
         assert.equal(header.priority, "20")
     })
 
-    test("Column headers", async function () {
+    it("Column headers", async function () {
 
         const featureReader = new FeatureFileReader({
             format: 'bedpe',

@@ -1,14 +1,10 @@
-import "./utils/mockObjects.js"
-import {assert} from 'chai'
+import {assert} from './utils/assert.js'
 import ChromTree from "../js/bigwig/chromTree.js"
 
-suite("test bbChromTree", function () {
+describe("test bbChromTree", function () {
 
-    test("ID to name lookup", async function () {
-
-        this.timeout(10000)
-
-        const url = "test/data/bb/cytoBandMapped.bb"
+    it("ID to name lookup", async function () {
+const url = "test/data/bb/cytoBandMapped.bb"
         const bbChromTree = new ChromTree(url, {}, 757 )
         await bbChromTree.init()
         assert.equal(bbChromTree.getItemCount(), 24)
@@ -24,10 +20,8 @@ suite("test bbChromTree", function () {
     /**
      * Test a BB file with a small large chrom tree (24 contigs).  The estimate should be the exact size.
      */
-    test("Larenome size estimate", async function () {
-
-        this.timeout(10000)
-        const url = "https://hgdownload.soe.ucsc.edu/gbdb/hs1/ncbiRefSeq/ncbiRefSeqCurated.bb"
+    it("Larenome size estimate", async function () {
+const url = "https://hgdownload.soe.ucsc.edu/gbdb/hs1/ncbiRefSeq/ncbiRefSeqCurated.bb"
         const bbChromTree = new ChromTree(url, {}, 1752 )
         await bbChromTree.init()
         assert.equal(bbChromTree.getItemCount(), 24)
@@ -43,10 +37,8 @@ suite("test bbChromTree", function () {
      * point is to test the function returns in reasonable time
      * Actual size = 5335596729
      */
-    test("Large genome size estimate", async function () {
-
-        this.timeout(10000)
-        const url = "https://hgdownload.soe.ucsc.edu/hubs/GCA/004/027/955/GCA_004027955.1/GCA_004027955.1.chromAlias.bb"
+    it("Large genome size estimate", async function () {
+const url = "https://hgdownload.soe.ucsc.edu/hubs/GCA/004/027/955/GCA_004027955.1/GCA_004027955.1.chromAlias.bb"
         const bbChromTree = new ChromTree(url, {}, 738 )
         await bbChromTree.init()
         assert.equal(bbChromTree.getItemCount(), 7677333)

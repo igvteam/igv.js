@@ -1,17 +1,13 @@
-import "./utils/mockObjects.js"
 import BWSource from "../js/bigwig/bwSource.js"
 import BWReader from "../js/bigwig/bwReader.js"
 import FeatureSource from "../js/feature/featureSource.js"
-import {assert} from 'chai'
+import {assert} from './utils/assert.js'
 import {createGenome} from "./utils/MockGenome.js"
 
-suite("testBigWig", function () {
+describe("testBigWig", function () {
 
-    test("Uncompressed bigwig", async function () {
-
-        this.timeout(10000)
-
-        const url = "https://s3.amazonaws.com/igv.org.test/data/uncompressed.bw",
+    it("Uncompressed bigwig", async function () {
+const url = "https://s3.amazonaws.com/igv.org.test/data/uncompressed.bw",
             chr = "chr21",
             start = 0,
             end = Number.MAX_SAFE_INTEGER,
@@ -26,21 +22,15 @@ suite("testBigWig", function () {
     /**
      * Test a BW file with an unusual layout (chromTree after full data).
      */
-    test("chromTree", async function () {
-
-        this.timeout(10000)
-
-        const url = "https://data.broadinstitute.org/igvdata/test/data/bb/chromTreeTest.bigwig"
+    it("chromTree", async function () {
+const url = "https://data.broadinstitute.org/igvdata/test/data/bb/chromTreeTest.bigwig"
         const bwReader = new BWReader({url: url})
         const header = await bwReader.loadHeader()
         assert.ok(header)
     })
 
-    test("bigwig", async function () {
-
-        this.timeout(10000)
-
-        const url = "test/data/bb/fixedStep.bw"
+    it("bigwig", async function () {
+const url = "test/data/bb/fixedStep.bw"
         const chr = "chr1"
         const bwReader = new BWReader({url: url})
 
@@ -61,11 +51,8 @@ suite("testBigWig", function () {
         }
     })
 
-    test("bigwig - aliasing", async function () {
-
-        this.timeout(10000)
-
-        const genome = createGenome("ncbi")
+    it("bigwig - aliasing", async function () {
+const genome = createGenome("ncbi")
         const url = "test/data/bb/fixedStep.bw"
         const chr = "1"
         const bwReader = new BWReader({url: url}, genome)
@@ -90,7 +77,7 @@ suite("testBigWig", function () {
     /**
      * Test a bigwig with a very large reduction level value.  This value overflows a 32-bit signed integer,
      */
-    test("bigwig - big reductionLevel", async function () {
+    it("bigwig - big reductionLevel", async function () {
 
         const genome = createGenome("ncbi")
         const url = "test/data/bb/bigtools.bigWig"
@@ -102,11 +89,8 @@ suite("testBigWig", function () {
     /**
      * Test a bigwig with no zoom levels.,
      */
-    test("bigwig - no zooms", async function () {
-
-        this.timeout(10000)
-
-        const genome = createGenome("ncbi")
+    it("bigwig - no zooms", async function () {
+const genome = createGenome("ncbi")
         const url = "test/data/bb/nozooms.bw"
         const bwReader = new BWReader({url: url}, genome)
         const zoomLevelHeaders = await bwReader.getZoomHeaders()

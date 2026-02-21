@@ -1,4 +1,4 @@
-import {openH5File} from "../../node_modules/hdf5-indexed-reader/dist/hdf5-indexed-reader.esm.js"
+import {openH5File} from "hdf5-indexed-reader/dist/hdf5-indexed-reader.esm.js"
 import {buildOptions} from "../util/igvUtils.js"
 
 

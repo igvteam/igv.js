@@ -1,6 +1,6 @@
 import {doAutoscale} from "./util/igvUtils.js"
 import {createViewport} from "./util/viewportUtils.js"
-import {FeatureUtils, IGVColor} from '../node_modules/igv-utils/src/index.js'
+import {FeatureUtils, IGVColor} from 'igv-utils/src/index.js'
 import * as DOMUtils from "./ui/utils/dom-utils.js"
 import {createIcon} from "./ui/utils/icons.js"
 import SampleInfoViewport from "./sample/sampleInfoViewport.js"

@@ -1,4 +1,4 @@
-import HicFile from '../../node_modules/hic-straw/src/hicFile.js'
+import HicFile from 'hic-straw/src/hicFile.js'
 
 async function translateSession(juiceboxSession) {
 

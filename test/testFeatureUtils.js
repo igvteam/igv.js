@@ -1,13 +1,12 @@
-import "./utils/mockObjects.js"
-import {assert} from 'chai'
+import {assert} from './utils/assert.js'
 import FastaSequence from "../js/genome/indexedFasta.js"
 import NonIndexedFasta from "../js/genome/nonIndexedFasta.js"
 import {findFeatureAfterCenter} from "../js/feature/featureUtils.js"
 
-suite("testFeatureUtils", function () {
+describe("testFeatureUtils", function () {
 
 
-    test("find insert index", async function () {
+    it("find insert index", async function () {
 
 
         const featureList = [    // Center

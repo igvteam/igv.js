@@ -1,15 +1,14 @@
-import "./utils/mockObjects.js"
 import FeatureFileReader from "../js/feature/featureFileReader.js"
 import FeatureSource from "../js/feature/featureSource.js"
-import {assert} from 'chai'
+import {assert} from './utils/assert.js'
 import {createGenome} from "./utils/MockGenome.js"
 
 const genome = createGenome()
 import GenomeUtils from "../js/genome/genomeUtils.js"
 
-suite("testBed", function () {
+describe("testBed", function () {
 
-    test("bedmethyl", async function () {
+    it("bedmethyl", async function () {
         const config = {
             url: "test/data/bedmethyl/sample.bedmethyl",
             format: "bedmethyl"
@@ -24,7 +23,7 @@ suite("testBed", function () {
         }
     })
 
-    test("bedmethyl - mixed delimiters", async function () {
+    it("bedmethyl - mixed delimiters", async function () {
         const config = {
             url: "test/data/bedmethyl/sample.mixed_delimiters.bedmethyl",
             format: "bedmethyl"

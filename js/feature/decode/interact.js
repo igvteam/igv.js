@@ -1,4 +1,4 @@
-import {IGVColor} from "../../../node_modules/igv-utils/src/index.js"
+import {IGVColor} from "igv-utils/src/index.js"
 
 /**
  * Decode UCSC "interact" files.  See https://genome.ucsc.edu/goldenpath/help/interact.html

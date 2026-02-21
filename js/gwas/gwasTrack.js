@@ -5,7 +5,7 @@ import {BinnedColorScale, ConstantColorScale} from "../util/colorScale.js"
 import {doAutoscale} from "../util/igvUtils.js"
 import GWASColors from "./gwasColors.js"
 import {ColorTable} from "../util/colorPalletes.js"
-import {StringUtils} from "../../node_modules/igv-utils/src/index.js"
+import {StringUtils} from "igv-utils/src/index.js"
 
 const DEFAULT_POPOVER_WINDOW = 100000000
 

@@ -1,5 +1,4 @@
-import "./utils/mockObjects.js"
-import {assert} from 'chai'
+import {assert} from './utils/assert.js'
 import _igv from "../js/index.js"
 
 const oauth = _igv.oauth
@@ -21,9 +20,9 @@ const igv = {
  * Tests of the oauth object -- does not test oAuth servers or interaction with them
  */
 
-suite("testOauth", function () {
+describe("testOauth", function () {
 
-    test("Test google token", function () {
+    it("Test google token", function () {
 
         igv.oauth.setToken("foo")
         assert.equal(igv.oauth.getToken(), "foo")
@@ -36,7 +35,7 @@ suite("testOauth", function () {
         // assert.equal(oauth.google.access_token, "foo");
     })
 
-    test("Test exact host", function () {
+    it("Test exact host", function () {
 
         igv.setOauthToken("foo", "host")
         assert.equal(igv.oauth.getToken("host"), "foo")
@@ -45,7 +44,7 @@ suite("testOauth", function () {
         assert.ok(undefined === igv.oauth.getToken("host"))
     })
 
-    test("Test wildcard host", function () {
+    it("Test wildcard host", function () {
         igv.setOauthToken("foo", "hos*")
         assert.equal(igv.oauth.getToken("host.com"), "foo")
 

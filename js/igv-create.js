@@ -1,4 +1,4 @@
-import {GoogleAuth, igvxhr} from '../node_modules/igv-utils/src/index.js'
+import {GoogleAuth, igvxhr} from 'igv-utils/src/index.js'
 import Browser from "./browser.js"
 import GenomeUtils from "./genome/genomeUtils.js"
 import InputDialog  from "./ui/components/inputDialog.js"

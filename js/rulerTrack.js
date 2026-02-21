@@ -1,5 +1,5 @@
 import IGVGraphics from "./igv-canvas.js"
-import {IGVColor, StringUtils} from "../node_modules/igv-utils/src/index.js"
+import {IGVColor, StringUtils} from "igv-utils/src/index.js"
 import GenomeUtils from "./genome/genomeUtils.js"
 import {isInteger} from "./util/igvUtils.js"
 

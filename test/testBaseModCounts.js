@@ -1,12 +1,11 @@
-import "./utils/mockObjects.js"
 import BamReader from "../js/bam/bamReader.js"
-import {assert} from 'chai'
+import {assert} from './utils/assert.js'
 import BaseModificationCounts from "../js/bam/mods/baseModificationCounts.js"
 import BaseModificationKey from "../js/bam/mods/baseModificationKey.js"
 
-suite("test base-mod counts", function () {
+describe("test base-mod counts", function () {
 
-    test("counts", async function () {
+    it("counts", async function () {
 
         const bamReader = new BamReader({
             type: 'bam',
@@ -40,11 +39,8 @@ suite("test base-mod counts", function () {
         }
     })
 
-    test("counts 2", async function () {
-
-        this.timeout(20000)
-
-        const bamReader = new BamReader({
+    it("counts 2", async function () {
+const bamReader = new BamReader({
             type: 'bam',
             url: 'test/data/bam/HG002_chr11_119076212_119102218_2.bam',
             indexURL: 'test/data/bam/HG002_chr11_119076212_119102218_2.bam.bai'
@@ -73,7 +69,7 @@ suite("test base-mod counts", function () {
         assert.equal(12, belowThreshold)
     })
 
-    test("counts 3", async function () {
+    it("counts 3", async function () {
 
         const bamReader = new BamReader({
             type: 'bam',

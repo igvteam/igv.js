@@ -1,4 +1,4 @@
-import {StringUtils} from "../../../node_modules/igv-utils/src/index.js"
+import {StringUtils} from "igv-utils/src/index.js"
 import TrackConfigContainer from "./trackConfigContainer.js"
 
 const supportedTypes = new Set([

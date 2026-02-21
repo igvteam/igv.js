@@ -1,4 +1,4 @@
-import {igvxhr, StringUtils} from "../node_modules/igv-utils/src/index.js"
+import {igvxhr, StringUtils} from "igv-utils/src/index.js"
 import {HGVS} from "./genome/hgvs.js"
 import {searchFeatures, searchWebService} from "./searchFeatures.js"
 

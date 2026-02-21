@@ -1,14 +1,13 @@
-import "./utils/mockObjects.js"
 import FeatureSource from "../js/feature/featureSource.js"
 import FeatureFileReader from "../js/feature/featureFileReader.js"
-import {assert} from 'chai'
+import {assert} from './utils/assert.js'
 import {createGenome} from "./utils/MockGenome.js"
 import GFFHelper from "../js/feature/gff/gffHelper.js"
 import {decodeGFFAttribute, parseAttributeString} from "../js/feature/gff/parseAttributeString.js"
 
 const genome = createGenome()
 
-suite("testGTF", function () {
+describe("testGTF", function () {
 
     const combineFeatures = (features, helper) => {
         const combinedFeatures = helper.combineFeatures(features)
@@ -23,7 +22,7 @@ suite("testGTF", function () {
     }
 
 
-    test("GTF phase", async function () {
+    it("GTF phase", async function () {
 
         //-1,-1,0,1,2,0,2,0,0,0,1,
 
@@ -50,7 +49,7 @@ suite("testGTF", function () {
 
     })
 
-    test("NCBI GTF", async function () {
+    it("NCBI GTF", async function () {
 
 
         const featureReader = new FeatureFileReader({
@@ -85,7 +84,7 @@ suite("testGTF", function () {
         assert.equal(product, 'MYC proto-oncogene, bHLH transcription factor, transcript variant 2')
     })
 
-    test("gencode lincRNA gtf", async function () {
+    it("gencode lincRNA gtf", async function () {
 
         const featureReader = new FeatureFileReader({
                 url: 'test/data/gff/gencode-lincRNA.gtf',
@@ -110,7 +109,7 @@ suite("testGTF", function () {
         assert.equal(3, combinedFeatures[0].exons.length)
     })
 
-    test("Ensembl transcript gtf", async function () {
+    it("Ensembl transcript gtf", async function () {
 
         const featureReader = new FeatureFileReader({
                 url: 'test/data/gff/Ensembl-transcript.gtf',
@@ -152,7 +151,7 @@ suite("testGTF", function () {
 
     })
 
-    test("washU gtf", async function () {
+    it("washU gtf", async function () {
 
         const featureReader = new FeatureFileReader({
                 url: 'test/data/gff/wustl.gtf',
@@ -206,7 +205,7 @@ suite("testGTF", function () {
 
     })
 
-    test("GFF query", async function () {
+    it("GFF query", async function () {
 
         const chr = "chr1"
         const start = 0
@@ -227,7 +226,7 @@ suite("testGTF", function () {
 
     })
 
-    test("Multiline feature", async function () {
+    it("Multiline feature", async function () {
 
         const featureSource = FeatureSource({
                 url: 'test/data/gff/multi_line_feature.gff3',
@@ -259,7 +258,7 @@ suite("testGTF", function () {
     ["%26", "&"],
     ["%2C", ","]])
      */
-    test("GFF3 attribute encoding", function () {
+    it("GFF3 attribute encoding", function () {
 
         // all allowable characters from GFF3 spec should be decoded;
         // others (here %20 = space) should be left as-is
@@ -271,7 +270,7 @@ suite("testGTF", function () {
 
     })
 
-    test("GFF quotes", function () {
+    it("GFF quotes", function () {
 
         // Quotes are stripped from GFF2 / GTF attributes, kept for GFF3.  GFF type is determined from the delimiter
         const gff3AttributeString = 'key="value";key2=value'

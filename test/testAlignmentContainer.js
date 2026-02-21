@@ -1,14 +1,11 @@
-import "./utils/mockObjects.js"
-import {assert} from 'chai'
+import {assert} from './utils/assert.js'
 import BamReaderNonIndexed from "../js/bam/bamReaderNonIndexed.js"
 
-suite("testAlignmentUtils", function () {
+describe("testAlignmentUtils", function () {
 
 
-    test("Alignment packing", async function () {
-        this.timeout(10000)
-
-        const chr = "chr22"
+    it("Alignment packing", async function () {
+const chr = "chr22"
         const start = 24375132
         const end = 24385311
 

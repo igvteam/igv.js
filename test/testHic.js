@@ -1,11 +1,10 @@
-import { assert } from 'chai';
-import "./utils/mockObjects.js"
-import HicFile from '../node_modules/hic-straw/src/hicFile.js'
-import NodeLocalFile from '../node_modules/hic-straw/src/io/nodeLocalFile.mjs'
+import {assert} from './utils/assert.js'
+import HicFile from 'hic-straw/src/hicFile.js'
+import NodeLocalFile from 'hic-straw/src/io/nodeLocalFile.mjs'
 
-suite('HicFile', function () {
+describe('HicFile', function () {
 
-    test('local file read header', async function () {
+    it('local file read header', async function () {
 
         const file = new NodeLocalFile({
             "path": "test/data/hic/test_chr22.hic",
@@ -16,7 +15,7 @@ suite('HicFile', function () {
         assert.equal(hicFile.magic, "HIC")
     })
 
-    test('local file read matrix', async function () {
+    it('local file read matrix', async function () {
 
         const file = new NodeLocalFile({
             "path": "test/data/hic/test_chr22.hic",
@@ -27,7 +26,7 @@ suite('HicFile', function () {
     })
 
 
-    test('local file read norm vector index', async function () {
+    it('local file read norm vector index', async function () {
 
         const file = new NodeLocalFile({
             "path": "test/data/hic/test_chr22.hic"
@@ -41,7 +40,7 @@ suite('HicFile', function () {
 
     // getNormalizationVector(type, chrIdx, unit, binSize)
 
-    test('local file read norm vector', async function () {
+    it('local file read norm vector', async function () {
 
         const file = new NodeLocalFile({
             "path": "test/data/hic/test_chr22.hic",
@@ -60,7 +59,7 @@ suite('HicFile', function () {
         "path": "test/data/hic/testBp.hic",
     })
 
-    test('read header and footer', async function () {
+    it('read header and footer', async function () {
 
         const hicFile = new HicFile({file: file})
         await hicFile.readHeaderAndFooter()
@@ -69,7 +68,7 @@ suite('HicFile', function () {
 
     })
 
-    test('local file contact records', async function () {
+    it('local file contact records', async function () {
 
         const hicFile = new HicFile({file: file})
         const contactRecords = await hicFile.getContactRecords(

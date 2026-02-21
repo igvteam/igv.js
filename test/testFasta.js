@@ -1,15 +1,11 @@
-import "./utils/mockObjects.js"
-import {assert} from 'chai'
+import {assert} from './utils/assert.js'
 import FastaSequence from "../js/genome/indexedFasta.js"
 import NonIndexedFasta from "../js/genome/nonIndexedFasta.js"
 
-suite("testFasta", function () {
+describe("testFasta", function () {
 
-    test("FastaSequence - Test getSequence", async function () {
-
-        this.timeout(100000)
-
-        const fasta = new FastaSequence({
+    it("FastaSequence - Test getSequence", async function () {
+const fasta = new FastaSequence({
                 fastaURL: "https://igv-genepattern-org.s3.amazonaws.com/test/fasta/chr22.fa",
                 indexURL: "https://igv-genepattern-org.s3.amazonaws.com/test/fasta/chr22.fa.fai?"
             }
@@ -28,7 +24,7 @@ suite("testFasta", function () {
 
     })
 
-    test("FastaSequence - Non-indexed fasta", async function () {
+    it("FastaSequence - Non-indexed fasta", async function () {
 
         const expectedSeqString = "tgactgcaacgggcaatatgtctctgtgtggattaaaaaaagagtgtctgatagcagcttctgaactggt"
 
@@ -44,7 +40,7 @@ suite("testFasta", function () {
     /**
      * Test "old" syntax partial fasta (pre multi-locus support)
      */
-    test("FastaSequence - Test partial fasta", async function () {
+    it("FastaSequence - Test partial fasta", async function () {
         // >chr1:1000001-1000025
         // GGGCACAGCCTCACCCAGGAAAGCA
 
@@ -79,7 +75,7 @@ suite("testFasta", function () {
     /**
      * Test multi-locus sliced fasta wiht 2 sequences on chr1
      */
-    test("FastaSequence - Test mutli-slice partial fasta", async function () {
+    it("FastaSequence - Test mutli-slice partial fasta", async function () {
 
         // >chr1:2000001-2000025 @len=249250621
         // TTTGCTGAGGATTGGGCTTGGGTAC

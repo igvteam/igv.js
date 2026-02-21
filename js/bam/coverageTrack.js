@@ -1,5 +1,5 @@
 import paintAxis from "../util/paintAxis.js"
-import {IGVColor, StringUtils} from "../../node_modules/igv-utils/src/index.js"
+import {IGVColor, StringUtils} from "igv-utils/src/index.js"
 import IGVGraphics from "../igv-canvas.js"
 import {drawModifications} from "./mods/baseModificationCoverageRenderer.js"
 import {HGVS} from "../genome/hgvs.js"

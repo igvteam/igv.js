@@ -1,14 +1,11 @@
-import "./utils/mockObjects.js"
-import {assert} from 'chai'
+import {assert} from './utils/assert.js'
 import Trix from "../js/bigwig/trix.js"
 import BWReader from "../js/bigwig/bwReader.js"
 
-suite("ucsc utilities", function () {
+describe("ucsc utilities", function () {
 
-    test("trix", async function () {
-
-        this.timeout(200000)
-        const ixFile = "test/data/bb/ixIxx/GCF_000009045.1_ASM904v1.ncbiGene.ix"
+    it("trix", async function () {
+const ixFile = "test/data/bb/ixIxx/GCF_000009045.1_ASM904v1.ncbiGene.ix"
         const ixxFile = "test/data/bb/ixIxx/GCF_000009045.1_ASM904v1.ncbiGene.ixx"
         const trix = new Trix(ixxFile, ixFile)
         const results = await trix.search("ykoX")
@@ -23,7 +20,7 @@ suite("ucsc utilities", function () {
         assert.isUndefined(nomatches);
     })
 
-    test("test gene bb extra index search", async function () {
+    it("test gene bb extra index search", async function () {
 
         const config = {
             url: "test/data/bb/GCF_000009045.1_ASM904v1.ncbiGene.bb",

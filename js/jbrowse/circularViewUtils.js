@@ -1,7 +1,7 @@
 import Locus from "../locus.js"
-import {CircularView} from "../../node_modules/circular-view/dist/circular-view.js"
+import {CircularView} from "circular-view/dist/circular-view.js"
 import {createSupplementaryAlignments} from "../bam/supplementaryAlignment.js"
-import {IGVColor} from "../../node_modules/igv-utils/src/index.js"
+import {IGVColor} from "igv-utils/src/index.js"
 import {getChrColor} from "../util/getChrColor.js"
 
 /**

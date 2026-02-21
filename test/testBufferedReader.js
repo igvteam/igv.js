@@ -1,10 +1,9 @@
-import "./utils/mockObjects.js"
 import BufferedReader from "../js/bigwig/bufferedReader.js"
-import {assert} from 'chai'
+import {assert} from './utils/assert.js'
 
-suite("testBigWig", function () {
+describe("testBigWig", function () {
 
-    test("read", async function () {
+    it("read", async function () {
 
         const url = 'test/data/misc/BufferedReaderTest.bin'
 

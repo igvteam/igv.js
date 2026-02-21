@@ -1,4 +1,4 @@
-import {FileUtils, igvxhr} from "../../node_modules/igv-utils/src/index.js"
+import {FileUtils, igvxhr} from "igv-utils/src/index.js"
 import {buildOptions} from "../util/igvUtils.js"
 
 class HtsgetReader {

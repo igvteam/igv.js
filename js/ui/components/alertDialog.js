@@ -1,4 +1,4 @@
-import DOMPurify from "../../../node_modules/dompurify/dist/purify.es.mjs"
+import DOMPurify from "dompurify"
 import makeDraggable from "../utils/draggable.js"
 
 const httpMessages =

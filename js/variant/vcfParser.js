@@ -1,5 +1,5 @@
 import {Variant, Call, SVComplement} from "./variant.js"
-import {StringUtils} from "../../node_modules/igv-utils/src/index.js"
+import {StringUtils} from "igv-utils/src/index.js"
 
 /**
  * Parser for VCF files.

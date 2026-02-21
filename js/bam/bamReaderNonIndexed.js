@@ -1,6 +1,6 @@
 import AlignmentContainer from "./alignmentContainer.js"
 import BamUtils from "./bamUtils.js"
-import {BGZip, igvxhr} from "../../node_modules/igv-utils/src/index.js"
+import {BGZip, igvxhr} from "igv-utils/src/index.js"
 import {buildOptions, isDataURL} from "../util/igvUtils.js"
 import ChromAliasManager from "../feature/chromAliasManager.js"
 import FeatureCache from "../feature/featureCache.js"

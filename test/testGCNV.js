@@ -1,14 +1,13 @@
-import "./utils/mockObjects.js"
 import FeatureSource from "../js/feature/featureSource.js"
-import {assert} from 'chai'
+import {assert} from './utils/assert.js'
 import {createGenome} from "./utils/MockGenome.js"
 
 const genome = createGenome()
 import Browser from "../js/browser.js"
 
-suite("testGCNV", function () {
+describe("testGCNV", function () {
 
-    test("gcnv", async function () {
+    it("gcnv", async function () {
 
         const featureSource = FeatureSource({
                 url: "test/data/gcnv/gcnv_track_example_data.chr22.bed"
@@ -30,7 +29,7 @@ suite("testGCNV", function () {
 
     })
 
-    test("long lines", async function () {
+    it("long lines", async function () {
 
         const featureSource = FeatureSource({
                 url: "test/data/gcnv/gcnv_large.bed.gz",
@@ -47,11 +46,8 @@ suite("testGCNV", function () {
 
     })
 
-    test("example track", async function () {
-
-        this.timeout(10000)
-
-        const config = {
+    it("example track", async function () {
+const config = {
             name: 'example track',
             url: 'https://s3.amazonaws.com/igv.org.demo/gcnv_track_example_data.chr22.bed.gz',
             indexURL: 'https://s3.amazonaws.com/igv.org.demo/gcnv_track_example_data.chr22.bed.gz.tbi'
