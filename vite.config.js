@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
-import { readFileSync, copyFileSync } from 'fs'
+import { readFileSync, copyFileSync, readdirSync } from 'fs'
+import { join, relative } from 'path'
 import { transform } from 'esbuild'
 
 const pkg = JSON.parse(readFileSync('./package.json', 'utf-8'))
@@ -9,6 +10,28 @@ const minify = {
     async renderChunk(code) {
         const result = await transform(code, { minify: true, sourcemap: 'external' })
         return { code: result.code, map: result.map }
+    }
+}
+
+function walkHtml(dir, root) {
+    const results = []
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+        const full = join(dir, entry.name)
+        if (entry.isDirectory()) results.push(...walkHtml(full, root))
+        else if (entry.name.endsWith('.html')) results.push(relative(root, full))
+    }
+    return results
+}
+
+const devFiles = {
+    name: 'dev-files',
+    configureServer(server) {
+        server.middlewares.use('/__dev-files', (_req, res) => {
+            const root = process.cwd()
+            const files = walkHtml(join(root, 'dev'), root).sort()
+            res.setHeader('Content-Type', 'application/json')
+            res.end(JSON.stringify(files))
+        })
     }
 }
 
@@ -27,7 +50,7 @@ export default defineConfig({
     define: {
         __APP_VERSION__: JSON.stringify(pkg.version)
     },
-    plugins: [copyDts],
+    plugins: [devFiles, copyDts],
     build: {
         lib: {
             entry: 'js/index.js',

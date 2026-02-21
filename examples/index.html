@@ -19,6 +19,18 @@ header { margin-bottom: 2.5rem; }
 header .eyebrow { font-size: .875rem; color: #888; font-weight: 400; }
 header h1 { font-size: 2.5rem; font-weight: 700; line-height: 1; margin-top: .2rem; }
 
+.tabs {
+  display: flex; gap: 2rem; margin-bottom: 2rem;
+  border-bottom: 1px solid #e0e0dc;
+}
+.tab {
+  background: none; border: none; padding: .5rem 0 .75rem; cursor: pointer;
+  font-size: 1rem; font-family: inherit; color: #888;
+}
+.tab.active { color: #111; box-shadow: 0 2px 0 #111; }
+.panel[hidden] { display: none; }
+.loading { color: #888; font-size: .9375rem; padding: 2rem 0; }
+
 .search {
   display: block; width: 100%; padding: .75rem 1rem; margin-bottom: 3rem;
   border: 1px solid #e0e0dc; background: #fff;
@@ -61,95 +73,158 @@ header h1 { font-size: 2.5rem; font-weight: 700; line-height: 1; margin-top: .2r
     <h1>Examples</h1>
   </header>
 
+  <nav class="tabs">
+    <button class="tab active" data-panel="examples">Examples</button>
+    <button class="tab" data-panel="dev">Dev</button>
+  </nav>
+
   <input class="search" type="search" placeholder="Filter examples…" aria-label="Filter examples">
 
-  <section class="section">
-    <div class="section-header">Examples</div>
-    <div class="grid">
-      <a class="card" href="quick-start.html" target="_blank">Quick Start</a>
-      <a class="card" href="igvjs.html" target="_blank">IGV.js</a>
-      <a class="card" href="multi-locus.html" target="_blank">Multi Locus</a>
-      <a class="card" href="base-modifications.html" target="_blank">Base Modifications</a>
-      <a class="card" href="bedpe-interact.html" target="_blank">BEDPE Interact</a>
-      <a class="card" href="copyNumber.html" target="_blank">Copy Number</a>
-      <a class="card" href="copyNumber-big.html" target="_blank">Copy Number Big</a>
-      <a class="card" href="cram-vcf.html" target="_blank">CRAM VCF</a>
-      <a class="card" href="custom-file-format.html" target="_blank">Custom File Format</a>
-      <a class="card" href="custom-reader.html" target="_blank">Custom Reader</a>
-      <a class="card" href="custom-webservice.html" target="_blank">Custom Webservice</a>
-      <a class="card" href="customSearchService.html" target="_blank">Custom Search Service</a>
-      <a class="card" href="cytoband-names.html" target="_blank">Cytoband Names</a>
-      <a class="card" href="dataURI.html" target="_blank">Data URI</a>
-      <a class="card" href="dynseq-example.html" target="_blank">Dynseq Example</a>
-      <a class="card" href="events.html" target="_blank">Events</a>
-      <a class="card" href="functional-url.html" target="_blank">Functional URL</a>
-      <a class="card" href="genark.html" target="_blank">Genark</a>
-      <a class="card" href="genbank.html" target="_blank">Genbank</a>
-      <a class="card" href="gff-colors.html" target="_blank">GFF Colors</a>
-      <a class="card" href="hic-4dn.html" target="_blank">HiC 4dn</a>
-      <a class="card" href="iframe.html" target="_blank">Iframe</a>
-      <a class="card" href="igv-links.html" target="_blank">IGV Links</a>
-      <a class="card" href="json-features.html" target="_blank">JSON Features</a>
-      <a class="card" href="loadTracks.html" target="_blank">Load Tracks</a>
-      <a class="card" href="maf-tcga.html" target="_blank">MAF TCGA</a>
-      <a class="card" href="mergedWig.html" target="_blank">Merged Wig</a>
-      <a class="card" href="roi.html" target="_blank">ROI</a>
-      <a class="card" href="roi-api.html" target="_blank">ROI API</a>
-      <a class="card" href="sampleInfo.html" target="_blank">Sample Info</a>
-      <a class="card" href="spliceJunctions.html" target="_blank">Splice Junctions</a>
-      <a class="card" href="tabs.html" target="_blank">Tabs</a>
-      <a class="card" href="variant-colors.html" target="_blank">Variant Colors</a>
-      <a class="card" href="variant-custom-draw.html" target="_blank">Variant Custom Draw</a>
-      <a class="card" href="xqtl.html" target="_blank">xQTL</a>
-    </div>
-  </section>
+  <div id="panel-examples" class="panel">
+    <section class="section">
+      <div class="section-header">Examples</div>
+      <div class="grid">
+        <a class="card" href="quick-start.html" target="_blank">Quick Start</a>
+        <a class="card" href="igvjs.html" target="_blank">IGV.js</a>
+        <a class="card" href="multi-locus.html" target="_blank">Multi Locus</a>
+        <a class="card" href="base-modifications.html" target="_blank">Base Modifications</a>
+        <a class="card" href="bedpe-interact.html" target="_blank">BEDPE Interact</a>
+        <a class="card" href="copyNumber.html" target="_blank">Copy Number</a>
+        <a class="card" href="copyNumber-big.html" target="_blank">Copy Number Big</a>
+        <a class="card" href="cram-vcf.html" target="_blank">CRAM VCF</a>
+        <a class="card" href="custom-file-format.html" target="_blank">Custom File Format</a>
+        <a class="card" href="custom-reader.html" target="_blank">Custom Reader</a>
+        <a class="card" href="custom-webservice.html" target="_blank">Custom Webservice</a>
+        <a class="card" href="customSearchService.html" target="_blank">Custom Search Service</a>
+        <a class="card" href="cytoband-names.html" target="_blank">Cytoband Names</a>
+        <a class="card" href="dataURI.html" target="_blank">Data URI</a>
+        <a class="card" href="dynseq-example.html" target="_blank">Dynseq Example</a>
+        <a class="card" href="events.html" target="_blank">Events</a>
+        <a class="card" href="functional-url.html" target="_blank">Functional URL</a>
+        <a class="card" href="genark.html" target="_blank">Genark</a>
+        <a class="card" href="genbank.html" target="_blank">Genbank</a>
+        <a class="card" href="gff-colors.html" target="_blank">GFF Colors</a>
+        <a class="card" href="hic-4dn.html" target="_blank">HiC 4dn</a>
+        <a class="card" href="iframe.html" target="_blank">Iframe</a>
+        <a class="card" href="igv-links.html" target="_blank">IGV Links</a>
+        <a class="card" href="json-features.html" target="_blank">JSON Features</a>
+        <a class="card" href="loadTracks.html" target="_blank">Load Tracks</a>
+        <a class="card" href="maf-tcga.html" target="_blank">MAF TCGA</a>
+        <a class="card" href="mergedWig.html" target="_blank">Merged Wig</a>
+        <a class="card" href="roi.html" target="_blank">ROI</a>
+        <a class="card" href="roi-api.html" target="_blank">ROI API</a>
+        <a class="card" href="sampleInfo.html" target="_blank">Sample Info</a>
+        <a class="card" href="spliceJunctions.html" target="_blank">Splice Junctions</a>
+        <a class="card" href="tabs.html" target="_blank">Tabs</a>
+        <a class="card" href="variant-colors.html" target="_blank">Variant Colors</a>
+        <a class="card" href="variant-custom-draw.html" target="_blank">Variant Custom Draw</a>
+        <a class="card" href="xqtl.html" target="_blank">xQTL</a>
+      </div>
+    </section>
 
-  <section class="section">
-    <div class="section-header">Events</div>
-    <div class="grid">
-      <a class="card" href="events/locus-change.html" target="_blank">Locus Change</a>
-      <a class="card" href="events/track-reorder.html" target="_blank">Track Reorder</a>
-      <a class="card" href="events/roi-events.html" target="_blank">ROI Events</a>
-      <a class="card" href="events/custom-track-click.html" target="_blank">Custom Track Click</a>
-      <a class="card" href="events/custom-track-popover.html" target="_blank">Custom Track Popover</a>
-    </div>
-  </section>
+    <section class="section">
+      <div class="section-header">Events</div>
+      <div class="grid">
+        <a class="card" href="events/locus-change.html" target="_blank">Locus Change</a>
+        <a class="card" href="events/track-reorder.html" target="_blank">Track Reorder</a>
+        <a class="card" href="events/roi-events.html" target="_blank">ROI Events</a>
+        <a class="card" href="events/custom-track-click.html" target="_blank">Custom Track Click</a>
+        <a class="card" href="events/custom-track-popover.html" target="_blank">Custom Track Popover</a>
+      </div>
+    </section>
 
-  <section class="section">
-    <div class="section-header">cBio</div>
-    <div class="grid">
-      <a class="card" href="cBio/sampleinfo-config.html" target="_blank">Sample Info Config</a>
-      <a class="card" href="cBio/sampleinfo-load.html" target="_blank">Sample Info Load</a>
-      <a class="card" href="cBio/svs-config.html" target="_blank">SVS Config</a>
-      <a class="card" href="cBio/svs-load.html" target="_blank">SVS Load</a>
-    </div>
-  </section>
+    <section class="section">
+      <div class="section-header">cBio</div>
+      <div class="grid">
+        <a class="card" href="cBio/sampleinfo-config.html" target="_blank">Sample Info Config</a>
+        <a class="card" href="cBio/sampleinfo-load.html" target="_blank">Sample Info Load</a>
+        <a class="card" href="cBio/svs-config.html" target="_blank">SVS Config</a>
+        <a class="card" href="cBio/svs-load.html" target="_blank">SVS Load</a>
+      </div>
+    </section>
 
-  <section class="section">
-    <div class="section-header">CNVpytor</div>
-    <div class="grid">
-      <a class="card" href="cnvpytor/cnvpytorTrack.html" target="_blank">CNVpytor Track</a>
-      <a class="card" href="cnvpytor/cnvpytorTrackVCF.html" target="_blank">CNVpytor Track VCF</a>
-      <a class="card" href="cnvpytor/cnvpytorTrackVCF_small.html" target="_blank">CNVpytor Track VCF Small</a>
-    </div>
-  </section>
+    <section class="section">
+      <div class="section-header">CNVpytor</div>
+      <div class="grid">
+        <a class="card" href="cnvpytor/cnvpytorTrack.html" target="_blank">CNVpytor Track</a>
+        <a class="card" href="cnvpytor/cnvpytorTrackVCF.html" target="_blank">CNVpytor Track VCF</a>
+        <a class="card" href="cnvpytor/cnvpytorTrackVCF_small.html" target="_blank">CNVpytor Track VCF Small</a>
+      </div>
+    </section>
+  </div>
+
+  <div id="panel-dev" class="panel" hidden>
+    <p class="loading">Loading…</p>
+  </div>
 
 </div>
 <script>
 const input = document.querySelector('.search')
-const cards = [...document.querySelectorAll('.card')]
-const sections = [...document.querySelectorAll('.section')]
+const tabs = [...document.querySelectorAll('.tab')]
+const panelExamples = document.getElementById('panel-examples')
+const panelDev = document.getElementById('panel-dev')
+let devLoaded = false
 
-input.addEventListener('input', () => {
-  const q = input.value.trim().toLowerCase()
-  cards.forEach(card => {
-    card.hidden = q && !card.textContent.toLowerCase().includes(q)
-  })
-  sections.forEach(section => {
-    const visible = [...section.querySelectorAll('.card')].some(c => !c.hidden)
-    section.hidden = q && !visible
+tabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    tabs.forEach(t => t.classList.remove('active'))
+    tab.classList.add('active')
+    const isDev = tab.dataset.panel === 'dev'
+    panelExamples.hidden = isDev
+    panelDev.hidden = !isDev
+    input.placeholder = isDev ? 'Filter dev files…' : 'Filter examples…'
+    input.value = ''
+    runSearch()
+    if (isDev && !devLoaded) loadDev()
   })
 })
+
+async function loadDev() {
+  devLoaded = true
+  const files = await fetch('/__dev-files').then(r => r.json())
+  const groups = {}
+  for (const f of files) {
+    const inner = f.replace(/^dev\//, '')
+    const slash = inner.indexOf('/')
+    const group = slash === -1 ? 'general' : inner.slice(0, slash)
+    ;(groups[group] ??= []).push(f)
+  }
+  panelDev.innerHTML = Object.entries(groups).map(([group, paths]) => `
+    <section class="section">
+      <div class="section-header">${titleCase(group)}</div>
+      <div class="grid">${paths.map(p =>
+        `<a class="card" href="../${p}" target="_blank">${cardLabel(p)}</a>`
+      ).join('')}</div>
+    </section>`).join('')
+}
+
+function titleCase(s) {
+  return s.replace(/[-_]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+}
+
+const ACRONYMS = new Set(['BAM','VCF','BED','ROI','API','URI','MAF','QTL','BEDPE','CRAM','GFF','SVS','IGV','RNA','GTF','SNP','WIG','UCSC','HIC'])
+
+function cardLabel(path) {
+  const name = path.replace(/^dev\/[^/]+\//, '').replace(/\.html$/, '')
+  return name
+    .replace(/([a-z])([A-Z])/g, '$1 $2')
+    .split(/[-_\s]+/)
+    .map(w => ACRONYMS.has(w.toUpperCase()) ? w.toUpperCase() : w[0].toUpperCase() + w.slice(1))
+    .join(' ')
+}
+
+function runSearch() {
+  const q = input.value.trim().toLowerCase()
+  const active = panelExamples.hidden ? panelDev : panelExamples
+  active.querySelectorAll('.card').forEach(c => {
+    c.hidden = q && !c.textContent.toLowerCase().includes(q)
+  })
+  active.querySelectorAll('.section').forEach(s => {
+    s.hidden = q && ![...s.querySelectorAll('.card')].some(c => !c.hidden)
+  })
+}
+
+input.addEventListener('input', runSearch)
 </script>
 </body>
 </html>
