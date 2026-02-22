@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>igv.js Examples</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f5f5f5;
+      color: #111;
+      padding: 2rem 1rem 4rem;
+    }
+
+    .container {
+      max-width: 1120px;
+      margin: 0 auto;
+    }
+
+    header {
+      margin-bottom: 2.5rem;
+    }
+
+    .eyebrow {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #888;
+      margin-bottom: 0.4rem;
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    section {
+      margin-bottom: 2.5rem;
+    }
+
+    section + section {
+      padding-top: 2rem;
+      border-top: 1px solid #e0e0e0;
+    }
+
+    .section-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #888;
+      margin-bottom: 1rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .card {
+      display: block;
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      padding: 0.9rem 1rem;
+      text-decoration: none;
+      color: #111;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: background 0.12s, border-color 0.12s;
+    }
+
+    .card:hover {
+      background: #f0f0f0;
+      border-color: #ccc;
+    }
+
+    .search-wrap {
+      margin-bottom: 2rem;
+    }
+
+    #search {
+      width: 100%;
+      max-width: 400px;
+      padding: 0.55rem 0.85rem;
+      font-size: 0.9rem;
+      border: 1px solid #d0d0d0;
+      border-radius: 6px;
+      background: #fff;
+      color: #111;
+      outline: none;
+      transition: border-color 0.12s;
+    }
+
+    #search:focus {
+      border-color: #999;
+    }
+
+    section.hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <p class="eyebrow">igv.js</p>
+      <h1>Examples</h1>
+    </header>
+
+    <div class="search-wrap">
+      <input id="search" type="search" placeholder="Filter examples…" autocomplete="off" spellcheck="false">
+    </div>
+
+    <section>
+      <p class="section-label">Examples</p>
+      <div class="grid">
+        <a class="card" href="quick-start.html" target="_blank">Quick Start</a>
+        <a class="card" href="igvjs.html" target="_blank">IGV.js</a>
+        <a class="card" href="multi-locus.html" target="_blank">Multi Locus</a>
+        <a class="card" href="base-modifications.html" target="_blank">Base Modifications</a>
+        <a class="card" href="bedpe-interact.html" target="_blank">BEDPE Interact</a>
+        <a class="card" href="copyNumber.html" target="_blank">Copy Number</a>
+        <a class="card" href="copyNumber-big.html" target="_blank">Copy Number Big</a>
+        <a class="card" href="cram-vcf.html" target="_blank">CRAM VCF</a>
+        <a class="card" href="custom-file-format.html" target="_blank">Custom File Format</a>
+        <a class="card" href="custom-reader.html" target="_blank">Custom Reader</a>
+        <a class="card" href="custom-webservice.html" target="_blank">Custom Webservice</a>
+        <a class="card" href="customSearchService.html" target="_blank">Custom Search Service</a>
+        <a class="card" href="cytoband-names.html" target="_blank">Cytoband Names</a>
+        <a class="card" href="dataURI.html" target="_blank">Data URI</a>
+        <a class="card" href="dynseq-example.html" target="_blank">Dynseq Example</a>
+        <a class="card" href="events.html" target="_blank">Events</a>
+        <a class="card" href="functional-url.html" target="_blank">Functional URL</a>
+        <a class="card" href="genark.html" target="_blank">Genark</a>
+        <a class="card" href="genbank.html" target="_blank">Genbank</a>
+        <a class="card" href="gff-colors.html" target="_blank">GFF Colors</a>
+        <a class="card" href="hic-4dn.html" target="_blank">HiC 4dn</a>
+        <a class="card" href="iframe.html" target="_blank">Iframe</a>
+        <a class="card" href="igv-links.html" target="_blank">IGV Links</a>
+        <a class="card" href="json-features.html" target="_blank">JSON Features</a>
+        <a class="card" href="loadTracks.html" target="_blank">Load Tracks</a>
+        <a class="card" href="maf-tcga.html" target="_blank">MAF TCGA</a>
+        <a class="card" href="mergedWig.html" target="_blank">Merged Wig</a>
+        <a class="card" href="roi.html" target="_blank">ROI</a>
+        <a class="card" href="roi-api.html" target="_blank">ROI API</a>
+        <a class="card" href="sampleInfo.html" target="_blank">Sample Info</a>
+        <a class="card" href="spliceJunctions.html" target="_blank">Splice Junctions</a>
+        <a class="card" href="tabs.html" target="_blank">Tabs</a>
+        <a class="card" href="variant-colors.html" target="_blank">Variant Colors</a>
+        <a class="card" href="variant-custom-draw.html" target="_blank">Variant Custom Draw</a>
+        <a class="card" href="xqtl.html" target="_blank">xQTL</a>
+      </div>
+    </section>
+
+    <section>
+      <p class="section-label">Events</p>
+      <div class="grid">
+        <a class="card" href="events/locus-change.html" target="_blank">Locus Change</a>
+        <a class="card" href="events/track-reorder.html" target="_blank">Track Reorder</a>
+        <a class="card" href="events/roi-events.html" target="_blank">ROI Events</a>
+        <a class="card" href="events/custom-track-click.html" target="_blank">Custom Track Click</a>
+        <a class="card" href="events/custom-track-popover.html" target="_blank">Custom Track Popover</a>
+      </div>
+    </section>
+
+    <section>
+      <p class="section-label">cBio</p>
+      <div class="grid">
+        <a class="card" href="cBio/sampleinfo-config.html" target="_blank">Sample Info Config</a>
+        <a class="card" href="cBio/sampleinfo-load.html" target="_blank">Sample Info Load</a>
+        <a class="card" href="cBio/svs-config.html" target="_blank">SVS Config</a>
+        <a class="card" href="cBio/svs-load.html" target="_blank">SVS Load</a>
+      </div>
+    </section>
+
+    <section>
+      <p class="section-label">CNVpytor</p>
+      <div class="grid">
+        <a class="card" href="cnvpytor/cnvpytorTrack.html" target="_blank">CNVpytor Track</a>
+        <a class="card" href="cnvpytor/cnvpytorTrackVCF.html" target="_blank">CNVpytor Track VCF</a>
+        <a class="card" href="cnvpytor/cnvpytorTrackVCF_small.html" target="_blank">CNVpytor Track VCF Small</a>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const input = document.getElementById('search');
+    const sections = Array.from(document.querySelectorAll('section'));
+
+    input.addEventListener('input', () => {
+      const q = input.value.trim().toLowerCase();
+      sections.forEach(section => {
+        const cards = Array.from(section.querySelectorAll('.card'));
+        let visible = 0;
+        cards.forEach(card => {
+          const match = !q || card.textContent.toLowerCase().includes(q);
+          card.style.display = match ? '' : 'none';
+          if (match) visible++;
+        });
+        section.classList.toggle('hidden', visible === 0);
+      });
+    });
+  </script>
+</body>
+</html>
