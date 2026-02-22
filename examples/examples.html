@@ -64,6 +64,7 @@
 
     .card {
       display: block;
+      position: relative;
       background: #fff;
       border: 1px solid #e0e0e0;
       border-radius: 6px;
@@ -73,6 +74,36 @@
       font-size: 0.875rem;
       font-weight: 500;
       transition: background 0.12s, border-color 0.12s;
+    }
+
+    .card[data-tooltip]::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: calc(100% + 7px);
+      left: 0;
+      width: max-content;
+      max-width: 280px;
+      padding: 0.45em 0.65em;
+      background: #1a1a1a;
+      color: #e8e8e8;
+      font-size: 0.72rem;
+      font-weight: 400;
+      line-height: 1.45;
+      border-radius: 4px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s ease;
+      z-index: 10;
+      white-space: normal;
+    }
+
+    .card.tip-right[data-tooltip]::after {
+      left: auto;
+      right: 0;
+    }
+
+    .card[data-tooltip]:hover::after {
+      opacity: 1;
     }
 
     .card:hover {
@@ -120,71 +151,71 @@
     <section>
       <p class="section-label">Examples</p>
       <div class="grid">
-        <a class="card" href="quick-start.html" target="_blank">Quick Start</a>
-        <a class="card" href="igvjs.html" target="_blank">IGV.js</a>
-        <a class="card" href="multi-locus.html" target="_blank">Multi Locus</a>
-        <a class="card" href="base-modifications.html" target="_blank">Base Modifications</a>
-        <a class="card" href="bedpe-interact.html" target="_blank">BEDPE Interact</a>
-        <a class="card" href="copyNumber.html" target="_blank">Copy Number</a>
-        <a class="card" href="copyNumber-big.html" target="_blank">Copy Number Big</a>
-        <a class="card" href="cram-vcf.html" target="_blank">CRAM VCF</a>
-        <a class="card" href="custom-file-format.html" target="_blank">Custom File Format</a>
-        <a class="card" href="custom-reader.html" target="_blank">Custom Reader</a>
-        <a class="card" href="custom-webservice.html" target="_blank">Custom Webservice</a>
-        <a class="card" href="customSearchService.html" target="_blank">Custom Search Service</a>
-        <a class="card" href="cytoband-names.html" target="_blank">Cytoband Names</a>
-        <a class="card" href="dataURI.html" target="_blank">Data URI</a>
-        <a class="card" href="dynseq-example.html" target="_blank">Dynseq Example</a>
-        <a class="card" href="events.html" target="_blank">Events</a>
-        <a class="card" href="functional-url.html" target="_blank">Functional URL</a>
-        <a class="card" href="genark.html" target="_blank">Genark</a>
-        <a class="card" href="genbank.html" target="_blank">Genbank</a>
-        <a class="card" href="gff-colors.html" target="_blank">GFF Colors</a>
-        <a class="card" href="hic-4dn.html" target="_blank">HiC 4dn</a>
-        <a class="card" href="iframe.html" target="_blank">Iframe</a>
-        <a class="card" href="igv-links.html" target="_blank">IGV Links</a>
-        <a class="card" href="json-features.html" target="_blank">JSON Features</a>
-        <a class="card" href="loadTracks.html" target="_blank">Load Tracks</a>
-        <a class="card" href="maf-tcga.html" target="_blank">MAF TCGA</a>
-        <a class="card" href="mergedWig.html" target="_blank">Merged Wig</a>
-        <a class="card" href="roi.html" target="_blank">ROI</a>
-        <a class="card" href="roi-api.html" target="_blank">ROI API</a>
-        <a class="card" href="sampleInfo.html" target="_blank">Sample Info</a>
-        <a class="card" href="spliceJunctions.html" target="_blank">Splice Junctions</a>
-        <a class="card" href="tabs.html" target="_blank">Tabs</a>
-        <a class="card" href="variant-colors.html" target="_blank">Variant Colors</a>
-        <a class="card" href="variant-custom-draw.html" target="_blank">Variant Custom Draw</a>
-        <a class="card" href="xqtl.html" target="_blank">xQTL</a>
+        <a class="card" href="quick-start.html" target="_blank" data-tooltip="Minimal browser with two ENCODE histone mark BigWig tracks on hg38.">Quick Start</a>
+        <a class="card" href="igvjs.html" target="_blank" data-tooltip="Blank browser that loads sessions and files via URL query parameters.">IGV.js</a>
+        <a class="card" href="multi-locus.html" target="_blank" data-tooltip="Display multiple genomic regions simultaneously in a split view.">Multi Locus</a>
+        <a class="card" href="base-modifications.html" target="_blank" data-tooltip="PacBio BAM colored by 5mC/6mA base modifications in two-color and monochrome modes.">Base Modifications</a>
+        <a class="card" href="bedpe-interact.html" target="_blank" data-tooltip="Arc interaction tracks from BEDPE and UCSC interact files with proportional and nested layouts.">BEDPE Interact</a>
+        <a class="card" href="copyNumber.html" target="_blank" data-tooltip="Segmented copy number (SEG) with indexed, unindexed, and explicit-sample configurations.">Copy Number</a>
+        <a class="card" href="copyNumber-big.html" target="_blank" data-tooltip="Pan-cancer copy number across 10,000+ samples rendered in pixel-subsampled fill mode.">Copy Number Big</a>
+        <a class="card" href="cram-vcf.html" target="_blank" data-tooltip="Phase 3 WGS VCF variants with a CRAM alignment track sorted by base.">CRAM VCF</a>
+        <a class="card" href="custom-file-format.html" target="_blank" data-tooltip="Register a custom tab-delimited file format with field definitions.">Custom File Format</a>
+        <a class="card" href="custom-reader.html" target="_blank" data-tooltip="Supply a custom JavaScript class implementing async readFeatures(chr, start, end).">Custom Reader</a>
+        <a class="card" href="custom-webservice.html" target="_blank" data-tooltip="Configure a custom REST endpoint with parameter mapping and response transformation.">Custom Webservice</a>
+        <a class="card" href="customSearchService.html" target="_blank" data-tooltip="Use the Ensembl API as the gene search service for non-human genomes.">Custom Search Service</a>
+        <a class="card" href="cytoband-names.html" target="_blank" data-tooltip="Show cytoband labels on the chromosome ruler with showCytobandNames.">Cytoband Names</a>
+        <a class="card" href="dataURI.html" target="_blank" data-tooltip="Encode reference, annotations, and alignments as base64 data URIs embedded in the page.">Data URI</a>
+        <a class="card" href="dynseq-example.html" target="_blank" data-tooltip="WIG track with per-base glyphs whose heights are proportional to signal values.">Dynseq Example</a>
+        <a class="card" href="events.html" target="_blank" data-tooltip="Overview of the IGV event system: locuschange, trackclick, trackdrag, and ROI events.">Events</a>
+        <a class="card" href="functional-url.html" target="_blank" data-tooltip="Specify track URLs as strings, functions, Promises, or thenable objects.">Functional URL</a>
+        <a class="card" href="genark.html" target="_blank" data-tooltip="Load a genome from the UCSC Genark assembly hub by accession ID.">Genark</a>
+        <a class="card" href="genbank.html" target="_blank" data-tooltip="Use a GenBank .gbk file to define both reference sequence and feature annotations.">Genbank</a>
+        <a class="card" href="gff-colors.html" target="_blank" data-tooltip="Color GFF3/GTF features by biotype, source, strand, or a custom function.">GFF Colors</a>
+        <a class="card" href="hic-4dn.html" target="_blank" data-tooltip="Hi-C contact matrix from 4DN with compartment, boundary, and insulation score tracks.">HiC 4dn</a>
+        <a class="card" href="iframe.html" target="_blank" data-tooltip="Embed an IGV browser session in an iframe using a compressed session blob.">Iframe</a>
+        <a class="card" href="igv-links.html" target="_blank" data-tooltip="Load files and saved sessions from URL query parameters.">IGV Links</a>
+        <a class="card" href="json-features.html" target="_blank" data-tooltip="Embed genomic features (SEG, BED, WIG) directly in the config as JSON arrays.">JSON Features</a>
+        <a class="card" href="loadTracks.html" target="_blank" data-tooltip="Dynamically add tracks at runtime via the browser.loadTrack() API.">Load Tracks</a>
+        <a class="card" href="maf-tcga.html" target="_blank" data-tooltip="TCGA breast cancer somatic mutations in Mutation Annotation Format (MAF).">MAF TCGA</a>
+        <a class="card" href="mergedWig.html" target="_blank" data-tooltip="Overlay two BigWig tracks with global or per-track autoscaling.">Merged Wig</a>
+        <a class="card" href="roi.html" target="_blank" data-tooltip="Define regions of interest globally or per-track in the browser configuration.">ROI</a>
+        <a class="card" href="roi-api.html" target="_blank" data-tooltip="Interactive ROI API: loadROI(), clearROIs(), and getUserDefinedROIs().">ROI API</a>
+        <a class="card" href="sampleInfo.html" target="_blank" data-tooltip="Attach sample metadata tables to SEG copy number and VCF variant tracks.">Sample Info</a>
+        <a class="card" href="spliceJunctions.html" target="_blank" data-tooltip="Splice junction arcs colored by strand, canonical motif, and annotation status.">Splice Junctions</a>
+        <a class="card" href="tabs.html" target="_blank" data-tooltip="Handle IGV visibility changes when the browser is hidden inside a tab panel.">Tabs</a>
+        <a class="card" href="variant-colors.html" target="_blank" data-tooltip="Color VCF variants by INFO field, lookup table, or a custom canvas function.">Variant Colors</a>
+        <a class="card" href="variant-custom-draw.html" target="_blank" data-tooltip="Override variant glyph rendering with a context_hook canvas callback.">Variant Custom Draw</a>
+        <a class="card" href="xqtl.html" target="_blank" data-tooltip="eQTL and mQTL tracks with SNP-to-phenotype search via the track menu.">xQTL</a>
       </div>
     </section>
 
     <section>
       <p class="section-label">Events</p>
       <div class="grid">
-        <a class="card" href="events/locus-change.html" target="_blank">Locus Change</a>
-        <a class="card" href="events/track-reorder.html" target="_blank">Track Reorder</a>
-        <a class="card" href="events/roi-events.html" target="_blank">ROI Events</a>
-        <a class="card" href="events/custom-track-click.html" target="_blank">Custom Track Click</a>
-        <a class="card" href="events/custom-track-popover.html" target="_blank">Custom Track Popover</a>
+        <a class="card" href="events/locus-change.html" target="_blank" data-tooltip="Mirror the current locus in the browser URL via the locuschange event.">Locus Change</a>
+        <a class="card" href="events/track-reorder.html" target="_blank" data-tooltip="Reflect track order in a live list via the trackorderchanged event.">Track Reorder</a>
+        <a class="card" href="events/roi-events.html" target="_blank" data-tooltip="Listen for roiadded and roiremoved events to track user-defined regions.">ROI Events</a>
+        <a class="card" href="events/custom-track-click.html" target="_blank" data-tooltip="Replace the default popover with a custom gene list on trackclick.">Custom Track Click</a>
+        <a class="card" href="events/custom-track-popover.html" target="_blank" data-tooltip="Return custom HTML markup from the trackclick handler to customize the popover.">Custom Track Popover</a>
       </div>
     </section>
 
     <section>
       <p class="section-label">cBio</p>
       <div class="grid">
-        <a class="card" href="cBio/sampleinfo-config.html" target="_blank">Sample Info Config</a>
-        <a class="card" href="cBio/sampleinfo-load.html" target="_blank">Sample Info Load</a>
-        <a class="card" href="cBio/svs-config.html" target="_blank">SVS Config</a>
-        <a class="card" href="cBio/svs-load.html" target="_blank">SVS Load</a>
+        <a class="card" href="cBio/sampleinfo-config.html" target="_blank" data-tooltip="Load sample attribute data via the browser configuration object.">Sample Info Config</a>
+        <a class="card" href="cBio/sampleinfo-load.html" target="_blank" data-tooltip="Load sample attribute data at runtime via browser.loadSampleInfo().">Sample Info Load</a>
+        <a class="card" href="cBio/svs-config.html" target="_blank" data-tooltip="Embed structural variant BedPE features in config, colored by type.">SVS Config</a>
+        <a class="card" href="cBio/svs-load.html" target="_blank" data-tooltip="Load structural variant BedPE features at runtime via browser.loadTrack().">SVS Load</a>
       </div>
     </section>
 
     <section>
       <p class="section-label">CNVpytor</p>
       <div class="grid">
-        <a class="card" href="cnvpytor/cnvpytorTrack.html" target="_blank">CNVpytor Track</a>
-        <a class="card" href="cnvpytor/cnvpytorTrackVCF.html" target="_blank">CNVpytor Track VCF</a>
-        <a class="card" href="cnvpytor/cnvpytorTrackVCF_small.html" target="_blank">CNVpytor Track VCF Small</a>
+        <a class="card" href="cnvpytor/cnvpytorTrack.html" target="_blank" data-tooltip="CNVpytor output showing copy number and BAF from a .pytor file.">CNVpytor Track</a>
+        <a class="card" href="cnvpytor/cnvpytorTrackVCF.html" target="_blank" data-tooltip="CNVpytor copy number visualization loaded from a VCF file.">CNVpytor Track VCF</a>
+        <a class="card" href="cnvpytor/cnvpytorTrackVCF_small.html" target="_blank" data-tooltip="CNVpytor copy number from a small, region-limited VCF file.">CNVpytor Track VCF Small</a>
       </div>
     </section>
   </div>
@@ -205,6 +236,18 @@
         });
         section.classList.toggle('hidden', visible === 0);
       });
+    });
+
+    const TIP_MAX_WIDTH = 280;
+    const TIP_MARGIN = 12;
+    document.querySelectorAll('.card[data-tooltip]').forEach(card => {
+      card.addEventListener('mouseenter', () => {
+        const r = card.getBoundingClientRect();
+        if (r.left + TIP_MAX_WIDTH > window.innerWidth - TIP_MARGIN) {
+          card.classList.add('tip-right');
+        }
+      });
+      card.addEventListener('mouseleave', () => card.classList.remove('tip-right'));
     });
   </script>
 </body>
