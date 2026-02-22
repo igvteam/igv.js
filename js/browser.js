@@ -33,7 +33,7 @@ import SampleInfo from "./sample/sampleInfo.js"
 import {translateSession} from "./hic/shoeboxUtils.js"
 import MenuUtils from "./ui/menuUtils.js"
 import Genome from "./genome/genome.js"
-import {setDefaults} from "./igv-create.js"
+import {setDefaults} from "./util/browserDefaults.js"
 import {trackViewportPopoverList} from './trackViewport.js'
 import TrackBase from "./trackBase.js"
 import {loadGenbank} from "./gbk/genbankParser.js"

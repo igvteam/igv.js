@@ -3,6 +3,7 @@ import Browser from "./browser.js"
 import GenomeUtils from "./genome/genomeUtils.js"
 import InputDialog  from "./ui/components/inputDialog.js"
 import createWebSocketClient from "./websocket/websocketClient.js"
+import {setDefaults} from "./util/browserDefaults.js"
 
 let allBrowsers = []
 
@@ -98,19 +99,6 @@ async function visibilityChange() {
     }
 }
 
-function setDefaults(config, defaults) {
-    if (typeof defaults === "undefined") {
-        defaults = defaultOptions
-    }
-    for (const key of Object.keys(defaults)) {
-        if (config[key] === undefined) {
-            config[key] = defaults[key]
-        }
-    }
-    return config
-}
-
-
 function extractQuery(config) {
 
     var i1, i2, i, j, s, query, tokens, uri, key, value
@@ -198,28 +186,5 @@ function extractQuery(config) {
 async function createTrack(config, browser) {
     return await Browser.prototype.createTrack.call(browser, config)
 }
-
-const defaultOptions = {
-    minimumBases: 40,
-    showIdeogram: true,
-    showCytobandNames: false,
-    showCircularView: false,
-    showCircularViewButton: false,
-    showTrackLabelButton: true,
-    showTrackLabels: true,
-    showCursorTrackingGuideButton: true,
-    showCursorGuide: false,   // showCursorTrackingGuide is a synonym
-    showCenterGuideButton: true,
-    showCenterGuide: false,
-    showSampleNames: false,
-    showSVGButton: true,
-    showControls: true,
-    showNavigation: true,
-    showRuler: true,
-    flanking: 1000,
-    pairsSupported: true,
-    tracks: []
-}
-
 
 export {createTrack, createBrowser, removeBrowser, removeAllBrowsers, getAllBrowsers, visibilityChange, setDefaults}

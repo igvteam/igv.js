@@ -7,7 +7,6 @@
 
 
 import TrackDbHub from "./trackDbHub.js"
-import {loadStanzas} from "./hubParser.js"
 
 const idMappings = new Map([
     ["hg38", "GCF_000001405.40"],
@@ -207,6 +206,7 @@ isPcr dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
                 if (genomeId === stanza.getProperty("genome")) {
                     try {
                         const trackDbURL = stanza.getProperty("trackDb")
+                        const {loadStanzas} = await import('./hubParser.js')
                         const trackStanzas = await loadStanzas(trackDbURL)
                         trackHub = new TrackDbHub(trackStanzas, this.groupStanzas)
                         this.trackHubMap.set(genomeId, trackHub)

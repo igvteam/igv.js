@@ -4,7 +4,6 @@ import {CNVpytorVCF} from "./cnvpytorVCF.js"
 import FeatureSource from '../feature/featureSource.js'
 import {createCheckbox} from "../igv-icons.js"
 import IGVGraphics from "../igv-canvas.js"
-import VariantTrack from "../variant/variantTrack.js"
 
 class CNVPytorTrack extends TrackBase {
 
@@ -662,6 +661,7 @@ class CNVPytorTrack extends TrackBase {
     async convertToVariant() {
 
         if (this.variantState) {
+            const {default: VariantTrack} = await import('../variant/variantTrack.js')
             Object.setPrototypeOf(this, VariantTrack.prototype)
             this.init(this.variantState)
             await this.postInit()

@@ -1,6 +1,5 @@
 import {complementBase} from "../../util/sequenceUtils.js"
 import BaseModificationKey from "./baseModificationKey.js"
-import {byteToUnsignedInt} from "./baseModificationUtils.js"
 
 class BaseModificationSet {
 

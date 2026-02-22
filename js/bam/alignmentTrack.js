@@ -12,7 +12,7 @@ import {getChrColor} from "../util/getChrColor.js"
 import {createCheckbox} from "../igv-icons.js"
 import {modificationName} from "./mods/baseModificationUtils.js"
 import {createElementWithString} from "../ui/utils/dom-utils.js"
-import BAMTrack from "./bamTrack.js"
+import {COVERAGE_TRACK_HEIGHT} from "./bamConstants.js"
 
 
 const alignmentStartGap = 5
@@ -227,7 +227,7 @@ class AlignmentTrack extends TrackBase {
             this.colorBy = this.hasPairs ? "unexpectedPair" : "none"
         }
 
-        let pixelTop = options.pixelTop - BAMTrack.coverageTrackHeight
+        let pixelTop = options.pixelTop - COVERAGE_TRACK_HEIGHT
         if (this.top) {
             ctx.translate(0, this.top)
         }

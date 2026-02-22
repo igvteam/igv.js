@@ -6,7 +6,6 @@ import {ColorTable, PaletteColorTable} from "../util/colorPalletes.js"
 import SampleInfo from "../sample/sampleInfo.js"
 import {makeVCFChords, sendChords} from "../jbrowse/circularViewUtils.js"
 import {FileUtils, IGVColor, StringUtils} from "../../node_modules/igv-utils/src/index.js"
-import CNVPytorTrack from "../cnvpytor/cnvpytorTrack.js"
 import {doSortByAttributes} from "../sample/sampleUtils.js"
 import {packFeatures} from "../feature/featureUtils.js"
 import {createElementWithString} from "../ui/utils/dom-utils.js"
@@ -952,6 +951,7 @@ class VariantTrack extends TrackBase {
         setTimeout(async () => {
             try {
                 const newConfig = Object.assign({}, this.config)
+                const {default: CNVPytorTrack} = await import('../cnvpytor/cnvpytorTrack.js')
                 Object.setPrototypeOf(this, CNVPytorTrack.prototype)
 
                 this.init(newConfig)

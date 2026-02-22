@@ -2,7 +2,6 @@ import BaseFeatureSource from "./baseFeatureSource.js"
 import {igvxhr} from "../../node_modules/igv-utils/src/index.js"
 import {buildOptions} from "../util/igvUtils.js"
 import getDataWrapper from "./dataWrapper.js"
-import FeatureSource from "./featureSource.js"
 
 /**
  * A feature source for a "list" file.  A list file is a text file with two columns, chromosome and URL.  It was
@@ -57,6 +56,7 @@ class ListFeatureSource extends BaseFeatureSource {
         const options = buildOptions(this.config)
         const data = await igvxhr.loadByteArray(this.config.url, options)
         const dataWrapper = getDataWrapper(data)
+        const {default: FeatureSource} = await import('./featureSource.js')
 
         let line
         while ((line = dataWrapper.nextLine()) !== undefined) {

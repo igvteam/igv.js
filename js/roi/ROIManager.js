@@ -5,6 +5,7 @@ import {inferFileFormat} from "../util/fileFormatUtils.js"
 import ROIMenu from "./ROIMenu.js"
 import ROITable from "./ROITable.js"
 import {FileUtils} from "../../node_modules/igv-utils/src/index.js"
+import {createRegionKey, parseRegionKey} from "./roiUtils.js"
 
 class ROIManager {
 
@@ -379,21 +380,8 @@ function locusChangeHandler() {
     this.renderAllROISets()
 }
 
-function createRegionKey(chr, start, end) {
-    return `${chr}-${start}-${end}`
-}
-
 function createSelector(regionKey) {
     return `[data-region="${regionKey}"]`
-}
-
-function parseRegionKey(regionKey) {
-    let regionParts = regionKey.split('-')
-    let ee = parseInt(regionParts.pop())
-    let ss = parseInt(regionParts.pop())
-    let chr = regionParts.join('-')
-
-    return {chr, start: ss, end: ee, locus: `${chr}:${ss}-${ee}`, bedRecord: `${chr}\t${ss}\t${ee}`}
 }
 
 export {createRegionKey, parseRegionKey}

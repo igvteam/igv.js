@@ -1,5 +1,6 @@
 import BamSource from "./bamSource.js"
 import TrackBase from "../trackBase.js"
+import {COVERAGE_TRACK_HEIGHT} from "./bamConstants.js"
 import IGVGraphics from "../igv-canvas.js"
 import {createCheckbox} from "../igv-icons.js"
 import {PaletteColorTable} from "../util/colorPalletes.js"
@@ -18,7 +19,7 @@ class BAMTrack extends TrackBase {
         showCoverage: true,
         showAlignments: true,
         height: 300,
-        coverageTrackHeight: 50,
+        coverageTrackHeight: COVERAGE_TRACK_HEIGHT,
         baseModificationThreshold: 0
     }
 
