@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>igv.js Dev</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f5f5f5;
+      color: #111;
+      padding: 2rem 1rem 4rem;
+    }
+
+    .container {
+      max-width: 1120px;
+      margin: 0 auto;
+    }
+
+    header {
+      margin-bottom: 2.5rem;
+    }
+
+    .eyebrow {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #888;
+      margin-bottom: 0.4rem;
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    section {
+      margin-bottom: 2.5rem;
+    }
+
+    section + section {
+      padding-top: 2rem;
+      border-top: 1px solid #e0e0e0;
+    }
+
+    .section-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #888;
+      margin-bottom: 1rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .card {
+      display: block;
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      padding: 0.9rem 1rem;
+      text-decoration: none;
+      color: #111;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: background 0.12s, border-color 0.12s;
+    }
+
+    .card:hover {
+      background: #f0f0f0;
+      border-color: #ccc;
+    }
+
+    .search-wrap {
+      margin-bottom: 2rem;
+    }
+
+    #search {
+      width: 100%;
+      max-width: 400px;
+      padding: 0.55rem 0.85rem;
+      font-size: 0.9rem;
+      border: 1px solid #d0d0d0;
+      border-radius: 6px;
+      background: #fff;
+      color: #111;
+      outline: none;
+      transition: border-color 0.12s;
+    }
+
+    #search:focus {
+      border-color: #999;
+    }
+
+    section.hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <p class="eyebrow">igv.js</p>
+      <h1>Dev</h1>
+    </header>
+
+    <div class="search-wrap">
+      <input id="search" type="search" placeholder="Filter dev pages…" autocomplete="off" spellcheck="false">
+    </div>
+
+    <section>
+      <p class="section-label">Dev</p>
+      <div class="grid">
+        <a class="card" href="igvjs.html" target="_blank">Igvjs</a>
+      </div>
+    </section>
+
+    <section>
+      <p class="section-label">Alignment</p>
+      <div class="grid">
+        <a class="card" href="alignment/bam.html" target="_blank">BAM</a>
+        <a class="card" href="alignment/bam-groupby.html" target="_blank">BAM Groupby</a>
+        <a class="card" href="alignment/bam_non-actg.html" target="_blank">BAM Non Actg</a>
+        <a class="card" href="alignment/bamCSI.html" target="_blank">BamCSI</a>
+        <a class="card" href="alignment/bamNonIndexed.html" target="_blank">BamNonIndexed</a>
+        <a class="card" href="alignment/basemods/baseMods.html" target="_blank">BaseMods</a>
+        <a class="card" href="alignment/cram.html" target="_blank">CRAM</a>
+        <a class="card" href="alignment/deepcoverage.html" target="_blank">Deepcoverage</a>
+        <a class="card" href="alignment/giab.html" target="_blank">Giab</a>
+        <a class="card" href="alignment/giab-rna.html" target="_blank">Giab RNA</a>
+        <a class="card" href="alignment/highlightReads.html" target="_blank">HighlightReads</a>
+        <a class="card" href="alignment/basemods/ont.html" target="_blank">ONT</a>
+        <a class="card" href="alignment/pairedColorOptions.html" target="_blank">PairedColorOptions</a>
+        <a class="card" href="alignment/rna-seq.html" target="_blank">RNA Seq</a>
+        <a class="card" href="alignment/small_sequence.html" target="_blank">Small Sequence</a>
+        <a class="card" href="alignment/tlen.html" target="_blank">Tlen</a>
+        <a class="card" href="alignment/yc_tags.html" target="_blank">Yc Tags</a>
+      </div>
+    </section>
+
+    <section>
+      <p class="section-label">Annotation</p>
+      <div class="grid">
+        <a class="card" href="annotation/bigbed.html" target="_blank">Bigbed</a>
+        <a class="card" href="annotation/clinvar.html" target="_blank">Clinvar</a>
+        <a class="card" href="annotation/csi-gtf.html" target="_blank">CSI GTF</a>
+        <a class="card" href="annotation/gff-color.html" target="_blank">GFF Color</a>
+        <a class="card" href="annotation/gff-eden.html" target="_blank">GFF Eden</a>
+        <a class="card" href="annotation/gff-ensembl.html" target="_blank">GFF Ensembl</a>
+        <a class="card" href="annotation/gff-multiline.html" target="_blank">GFF Multiline</a>
+        <a class="card" href="annotation/gff-ncbi.html" target="_blank">GFF Ncbi</a>
+        <a class="card" href="annotation/gffTags.html" target="_blank">GffTags</a>
+        <a class="card" href="annotation/gffWithScore.html" target="_blank">GffWithScore</a>
+        <a class="card" href="annotation/gtf.html" target="_blank">GTF</a>
+        <a class="card" href="annotation/gtf-wustl.html" target="_blank">GTF Wustl</a>
+        <a class="card" href="annotation/searchableGFF.html" target="_blank">SearchableGFF</a>
+        <a class="card" href="annotation/trackLine.html" target="_blank">TrackLine</a>
+        <a class="card" href="annotation/ucscFormats.html" target="_blank">UcscFormats</a>
+        <a class="card" href="annotation/webservice.html" target="_blank">Webservice</a>
+      </div>
+    </section>
+
+    <section>
+      <p class="section-label">API</p>
+      <div class="grid">
+        <a class="card" href="api/getUserDefinedROIs.html" target="_blank">GetUserDefinedROIs</a>
+        <a class="card" href="api/setCustomCursorGuideMouseHandler.html" target="_blank">SetCustomCursorGuideMouseHandler</a>
+      </div>
+    </section>
+
+    <section>
+      <p class="section-label">Arc</p>
+      <div class="grid">
+        <a class="card" href="arc/rnaStruct.html" target="_blank">RnaStruct</a>
+      </div>
+    </section>
+
+    <section>
+      <p class="section-label">cBio</p>
+      <div class="grid">
+        <a class="card" href="cbio/cBio.html" target="_blank">CBio</a>
+        <a class="card" href="cbio/cBioMut.html" target="_blank">CBioMut</a>
+      </div>
+    </section>
+
+    <section>
+      <p class="section-label">CNVpytor</p>
+      <div class="grid">
+        <a class="card" href="cnvpytor/cnvpytorTrackIndexed.html" target="_blank">CnvpytorTrackIndexed</a>
+        <a class="card" href="cnvpytor/cnvpytorTrackNoIndex.html" target="_blank">CnvpytorTrackNoIndex</a>
+        <a class="card" href="cnvpytor/cnvpytorTrackVCF.html" target="_blank">CnvpytorTrackVCF</a>
+        <a class="card" href="cnvpytor/cnvpytorTrackVCF_large.html" target="_blank">CnvpytorTrackVCF Large</a>
+        <a class="card" href="cnvpytor/old/indexed_auto_update.html" target="_blank">Indexed Auto Update</a>
+        <a class="card" href="cnvpytor/old/indexed_explicit_update.html" target="_blank">Indexed Explicit Update</a>
+        <a class="card" href="cnvpytor/old/not_indexed.html" target="_blank">Not Indexed</a>
+      </div>
+    </section>
+
+    <section>
+      <p class="section-label">Color</p>
+      <div class="grid">
+        <a class="card" href="color/bam-colorBy.html" target="_blank">BAM ColorBy</a>
+        <a class="card" href="color/gff-colorBy.html" target="_blank">GFF ColorBy</a>
+        <a class="card" href="color/variant-colorBy.html" target="_blank">Variant ColorBy</a>
+      </div>
+    </section>
+
+    <section>
+      <p class="section-label">Data URI</p>
+      <div class="grid">
+        <a class="card" href="datauri/dataSessionURI.html" target="_blank">DataSessionURI</a>
+        <a class="card" href="datauri/dataURI.html" target="_blank">DataURI</a>
+        <a class="card" href="datauri/dataURI_pacbio.html" target="_blank">DataURI Pacbio</a>
+        <a class="card" href="datauri/ucsc-interact3.html" target="_blank">Ucsc Interact3</a>
+      </div>
+    </section>
+
+    <section>
+      <p class="section-label">Events</p>
+      <div class="grid">
+        <a class="card" href="events/custom-track-click.html" target="_blank">Custom Track Click</a>
+        <a class="card" href="events/custom-track-popover.html" target="_blank">Custom Track Popover</a>
+        <a class="card" href="events/locus-change.html" target="_blank">Locus Change</a>
+        <a class="card" href="events/track-reorder.html" target="_blank">Track Reorder</a>
+      </div>
+    </section>
+
+    <section>
+      <p class="section-label">Gcnv</p>
+      <div class="grid">
+        <a class="card" href="gcnv/gcnv.html" target="_blank">Gcnv</a>
+      </div>
+    </section>
+
+    <section>
+      <p class="section-label">GWAS</p>
+      <div class="grid">
+        <a class="card" href="gwas/gwas.html" target="_blank">GWAS</a>
+        <a class="card" href="gwas/gwas-bed.html" target="_blank">GWAS Bed</a>
+        <a class="card" href="gwas/gwas-indexed.html" target="_blank">GWAS Indexed</a>
+        <a class="card" href="gwas/gwas-specify-columns.html" target="_blank">GWAS Specify Columns</a>
+      </div>
+    </section>
+
+    <section>
+      <p class="section-label">Hi-C</p>
+      <div class="grid">
+        <a class="card" href="hic/hic.html" target="_blank">HIC</a>
+      </div>
+    </section>
+
+    <section>
+      <p class="section-label">htsget</p>
+      <div class="grid">
+        <a class="card" href="htsget/htsget.html" target="_blank">Htsget</a>
+        <a class="card" href="htsget/htsget-bam.html" target="_blank">Htsget BAM</a>
+      </div>
+    </section>
+
+    <section>
+      <p class="section-label">Interact</p>
+      <div class="grid">
+        <a class="card" href="interact/arcs.html" target="_blank">Arcs</a>
+        <a class="card" href="interact/bedpe-10xSVs.html" target="_blank">Bedpe 10xSVs</a>
+        <a class="card" href="interact/bedpe-color.html" target="_blank">Bedpe Color</a>
+        <a class="card" href="interact/bedpe-ctcf.html" target="_blank">Bedpe Ctcf</a>
+        <a class="card" href="interact/bedpe-hiccups.html" target="_blank">Bedpe Hiccups</a>
+        <a class="card" href="interact/bedpe-inter.html" target="_blank">Bedpe Inter</a>
+        <a class="card" href="interact/bedpe-loops.html" target="_blank">Bedpe Loops</a>
+        <a class="card" href="interact/chia-pet-cis.html" target="_blank">Chia Pet Cis</a>
+        <a class="card" href="interact/embedded.html" target="_blank">Embedded</a>
+        <a class="card" href="interact/encode-interact.html" target="_blank">Encode Interact</a>
+        <a class="card" href="interact/encode-tsv.html" target="_blank">Encode TSV</a>
+        <a class="card" href="interact/svg-ellipse.html" target="_blank">SVG Ellipse</a>
+        <a class="card" href="interact/ucsc-interact.html" target="_blank">Ucsc Interact</a>
+        <a class="card" href="interact/ucsc-interact2.html" target="_blank">Ucsc Interact2</a>
+        <a class="card" href="interact/ucsc-interact3.html" target="_blank">Ucsc Interact3</a>
+      </div>
+    </section>
+
+    <section>
+      <p class="section-label">Jbrowse</p>
+      <div class="grid">
+        <a class="card" href="jbrowse/chia-pet.html" target="_blank">Chia Pet</a>
+        <a class="card" href="jbrowse/circular-view.html" target="_blank">Circular View</a>
+        <a class="card" href="jbrowse/skbr3-vcf.html" target="_blank">Skbr3 VCF</a>
+      </div>
+    </section>
+
+    <section>
+      <p class="section-label">Junction</p>
+      <div class="grid">
+        <a class="card" href="junction/fusionJunction.html" target="_blank">FusionJunction</a>
+        <a class="card" href="junction/spliceJunctions.html" target="_blank">SpliceJunctions</a>
+      </div>
+    </section>
+
+    <section>
+      <p class="section-label">Misc</p>
+      <div class="grid">
+        <a class="card" href="misc/custom-track.html" target="_blank">Custom Track</a>
+        <a class="card" href="misc/customSearchService.html" target="_blank">CustomSearchService</a>
+        <a class="card" href="misc/embedFeatures.html" target="_blank">EmbedFeatures</a>
+        <a class="card" href="misc/functional-url.html" target="_blank">Functional Url</a>
+        <a class="card" href="misc/igv-links.html" target="_blank">Igv Links</a>
+        <a class="card" href="misc/interactive-filtering.html" target="_blank">Interactive Filtering</a>
+        <a class="card" href="misc/maf_tcga.html" target="_blank">MAF Tcga</a>
+        <a class="card" href="misc/multiple-browsers.html" target="_blank">Multiple Browsers</a>
+        <a class="card" href="misc/overhanging_softclips.html" target="_blank">Overhanging Softclips</a>
+        <a class="card" href="misc/reports.html" target="_blank">Reports</a>
+        <a class="card" href="misc/s3.html" target="_blank">S3</a>
+        <a class="card" href="misc/tabs.html" target="_blank">Tabs</a>
+        <a class="card" href="misc/track_load_error.html" target="_blank">Track Load Error</a>
+        <a class="card" href="misc/ws.html" target="_blank">WS</a>
+        <a class="card" href="misc/xmlSessions.html" target="_blank">XmlSessions</a>
+      </div>
+    </section>
+
+    <section>
+      <p class="section-label">QTL</p>
+      <div class="grid">
+        <a class="card" href="qtl/custom_qtl.html" target="_blank">Custom QTL</a>
+        <a class="card" href="qtl/gtex.html" target="_blank">Gtex</a>
+        <a class="card" href="qtl/xqtl.html" target="_blank">Xqtl</a>
+      </div>
+    </section>
+
+    <section>
+      <p class="section-label">ROI</p>
+      <div class="grid">
+        <a class="card" href="roi/roi.html" target="_blank">ROI</a>
+        <a class="card" href="roi/roi-api.html" target="_blank">ROI API</a>
+        <a class="card" href="roi/roi-bigbed.html" target="_blank">ROI Bigbed</a>
+        <a class="card" href="roi/roi_session.html" target="_blank">ROI Session</a>
+      </div>
+    </section>
+
+    <section>
+      <p class="section-label">Sample Info</p>
+      <div class="grid">
+        <a class="card" href="sampleInfo/sampleinfo-config.html" target="_blank">Sampleinfo Config</a>
+        <a class="card" href="sampleInfo/sampleinfo-load.html" target="_blank">Sampleinfo Load</a>
+        <a class="card" href="sampleInfo/seg.html" target="_blank">SEG</a>
+        <a class="card" href="sampleInfo/segMut.html" target="_blank">SegMut</a>
+        <a class="card" href="sampleInfo/segVcf.html" target="_blank">SegVcf</a>
+        <a class="card" href="sampleInfo/vcf.html" target="_blank">VCF</a>
+      </div>
+    </section>
+
+    <section>
+      <p class="section-label">SEG</p>
+      <div class="grid">
+        <a class="card" href="seg/copyNumber.html" target="_blank">CopyNumber</a>
+        <a class="card" href="seg/segBig.html" target="_blank">SegBig</a>
+        <a class="card" href="seg/sortedSeg.html" target="_blank">SortedSeg</a>
+      </div>
+    </section>
+
+    <section>
+      <p class="section-label">Sessions</p>
+      <div class="grid">
+        <a class="card" href="sessions/sessionTestHarness.html" target="_blank">SessionTestHarness</a>
+      </div>
+    </section>
+
+    <section>
+      <p class="section-label">Shoebox</p>
+      <div class="grid">
+        <a class="card" href="shoebox/shoebox.html" target="_blank">Shoebox</a>
+      </div>
+    </section>
+
+    <section>
+      <p class="section-label">UCSC</p>
+      <div class="grid">
+        <a class="card" href="ucsc/localFile/browser-mockup.html" target="_blank">Browser Mockup</a>
+        <a class="card" href="ucsc/localFile/file-picker.html" target="_blank">File Picker</a>
+        <a class="card" href="ucsc/genark.html" target="_blank">Genark</a>
+        <a class="card" href="ucsc/hub.html" target="_blank">Hub</a>
+        <a class="card" href="ucsc/manyContigsHub.html" target="_blank">ManyContigsHub</a>
+        <a class="card" href="ucsc/plainTwobit.html" target="_blank">PlainTwobit</a>
+        <a class="card" href="ucsc/slowHub.html" target="_blank">SlowHub</a>
+        <a class="card" href="ucsc/twobit.html" target="_blank">Twobit</a>
+        <a class="card" href="ucsc/old/ucscMockup.html" target="_blank">UcscMockup</a>
+      </div>
+    </section>
+
+    <section>
+      <p class="section-label">UI</p>
+      <div class="grid">
+        <a class="card" href="ui/example.html" target="_blank">Example</a>
+        <a class="card" href="ui/table.html" target="_blank">Table</a>
+      </div>
+    </section>
+
+    <section>
+      <p class="section-label">Variant</p>
+      <div class="grid">
+        <a class="card" href="variant/1kg_phase3.html" target="_blank">1kg Phase3</a>
+        <a class="card" href="variant/adjacent_snps.html" target="_blank">Adjacent Snps</a>
+        <a class="card" href="variant/cram-vcf.html" target="_blank">CRAM VCF</a>
+        <a class="card" href="variant/gatk-gcvf.html" target="_blank">Gatk Gcvf</a>
+        <a class="card" href="variant/hubFormats.html" target="_blank">HubFormats</a>
+        <a class="card" href="variant/indel.html" target="_blank">Indel</a>
+        <a class="card" href="variant/noheader.html" target="_blank">Noheader</a>
+        <a class="card" href="variant/sortByGenotype.html" target="_blank">SortByGenotype</a>
+        <a class="card" href="variant/vcf_bnd.html" target="_blank">VCF BND</a>
+        <a class="card" href="variant/vcf_cnv.html" target="_blank">VCF CNV</a>
+        <a class="card" href="variant/vcf_indels.html" target="_blank">VCF Indels</a>
+        <a class="card" href="variant/vcf_svs.html" target="_blank">VCF SVS</a>
+        <a class="card" href="variant/vcf_tra.html" target="_blank">VCF TRA</a>
+        <a class="card" href="variant/vcf_vt.html" target="_blank">VCF Vt</a>
+      </div>
+    </section>
+
+    <section>
+      <p class="section-label">WIG</p>
+      <div class="grid">
+        <a class="card" href="wig/bedgraph.html" target="_blank">Bedgraph</a>
+        <a class="card" href="wig/custom_decoder.html" target="_blank">Custom Decoder</a>
+        <a class="card" href="wig/groupAutoscale.html" target="_blank">GroupAutoscale</a>
+        <a class="card" href="wig/merged.html" target="_blank">Merged</a>
+        <a class="card" href="wig/track_metadata.html" target="_blank">Track Metadata</a>
+        <a class="card" href="wig/trackLineWig.html" target="_blank">TrackLineWig</a>
+        <a class="card" href="wig/wgViews.html" target="_blank">WgViews</a>
+        <a class="card" href="wig/wholeLotaWIGs.html" target="_blank">WholeLotaWIGs</a>
+        <a class="card" href="wig/wigs.html" target="_blank">Wigs</a>
+        <a class="card" href="wig/windowFunctions.html" target="_blank">WindowFunctions</a>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const input = document.getElementById('search');
+    const sections = Array.from(document.querySelectorAll('section'));
+
+    input.addEventListener('input', () => {
+      const q = input.value.trim().toLowerCase();
+      sections.forEach(section => {
+        const cards = Array.from(section.querySelectorAll('.card'));
+        let visible = 0;
+        cards.forEach(card => {
+          const match = !q || card.textContent.toLowerCase().includes(q);
+          card.style.display = match ? '' : 'none';
+          if (match) visible++;
+        });
+        section.classList.toggle('hidden', visible === 0);
+      });
+    });
+  </script>
+</body>
+</html>

@@ -141,17 +141,15 @@ npm run test
 ```
 
 
-### Examples
+### Examples & Dev
 
-To run the examples install [http-server](https://www.npmjs.com/package/http-server).
-
-Start  http-server from the project root directory
+Serve from the project root and navigate to the `examples/` or `dev/` folder in your browser.
 
 ```bash
-npx http-server 
+npx serve
 ```
 
-Then open [http://localhost:8080/examples](http://localhost:8080/examples) in a web browser.
+The `dev/` dashboard can be regenerated with `npm run build:dev-dashboard`.
 
 
 # Supported Browsers

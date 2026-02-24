@@ -16,7 +16,8 @@
     "build": "node scripts/updateVersion.cjs && node scripts/compileSass.cjs && node scripts/generateEmbedCss.js && npx rollup --config && node scripts/copyArtifacts.cjs",
     "build_iife": "node scripts/updateVersion.cjs && node scripts/compileSass.cjs && node scripts/generateEmbedCss.js && npx rollup --config rollup.config.iife.js && node scripts/copyArtifacts.cjs",
     "updateCSS": "node scripts/compileSass.cjs && node scripts/generateEmbedCss.js",
-    "test": "mocha -ui tdd"
+    "test": "mocha -ui tdd",
+    "build:dev-dashboard": "node scripts/buildDevDashboard.cjs"
   },
   "author": {
     "name": "Jim Robinson"
