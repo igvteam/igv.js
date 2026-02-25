@@ -143,13 +143,20 @@ npm run test
 
 ### Examples & Dev
 
-Serve from the project root and navigate to the `examples/` or `dev/` folder in your browser.
+Each folder (`examples/` and `dev/`) contains a **dashboard** HTML file that makes it easy to explore the files in that folder. The dashboard file has the same name as the folder: `examples.html` in `examples/`, and `dev.html` in `dev/`.
 
-```bash
-npx serve
-```
+To view the dashboards:
 
-The `dev/` dashboard can be regenerated with `npm run build:dev-dashboard`.
+1. From the project root, run:
+   ```bash
+   npx serve .
+   ```
+2. In your browser, go to the URL shown in the terminal (e.g. `http://localhost:3000`), then navigate to `/examples/` or `/dev/`.
+3. Open the dashboard file for that folder: `examples.html` or `dev.html`.
+
+For example: `http://localhost:3000/examples/examples.html` for examples, or `http://localhost:3000/dev/dev.html` for dev.
+
+Whenever a file is added, removed, or deleted from the `dev/` folder, the dashboard can be updated with `npm run build:dev-dashboard`.
 
 
 # Supported Browsers
