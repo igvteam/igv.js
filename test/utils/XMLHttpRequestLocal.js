@@ -42,6 +42,7 @@ class XMLHttpRequestLocal {
             const stats = fs.statSync(this.path)
             const fileSizeInBytes = stats.size
             this.responseHeaders.set('content-length', fileSizeInBytes)
+            this.status = 200;
             if (typeof this.onload === 'function') {
                 this.onload();
                 return
