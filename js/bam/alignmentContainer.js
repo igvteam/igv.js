@@ -725,7 +725,7 @@ function getGroupValue(al, groupBy, expectedPairOrientation) {
         case 'pairOrientation':
             return orientationTypes[expectedPairOrientation][al.pairOrientation] || ""
         case 'chimeric':
-            return al.tags()['SA'] ? "chimeric" : ""
+            return al.getTag('SA') ? "chimeric" : ""
         case 'supplementary':
             return al.isSupplementary ? "supplementary" : ""
         case 'readOrder':
@@ -737,9 +737,9 @@ function getGroupValue(al, groupBy, expectedPairOrientation) {
                 return ""
             }
         case 'phase':
-            return al.tags()['HP'] || ""
+            return al.getTag('HP') || ""
         case 'tag':
-            return al.tags()[tag] || ""
+            return al.getTag(tag) || ""
         // Add cases for other options as needed
         case 'base':
 

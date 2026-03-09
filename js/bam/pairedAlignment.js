@@ -65,13 +65,13 @@ class PairedAlignment {
         }
     }
 
-    popupData(genomicLocation, hiddenTags, showTags) {
+    async popupData(genomicLocation, hiddenTags, showTags) {
 
-        let nameValues = this.firstAlignment.popupData(genomicLocation, hiddenTags, showTags)
+        let nameValues = await this.firstAlignment.popupData(genomicLocation, hiddenTags, showTags)
 
         if (this.secondAlignment) {
             nameValues.push("-------------------------------")
-            nameValues = nameValues.concat(this.secondAlignment.popupData(genomicLocation, hiddenTags, showTags))
+            nameValues = nameValues.concat(await this.secondAlignment.popupData(genomicLocation, hiddenTags, showTags))
         }
         return nameValues
     }
@@ -104,47 +104,35 @@ class PairedAlignment {
         return this.firstAlignment.hasTag(str) || (this.secondAlignment && this.secondAlignment.hasTag(str))
     }
 
+    getTag(tagName) {
+        const firstTag = this.firstAlignment.getTag(tagName)
+        const secondTag = this.secondAlignment ? this.secondAlignment.getTag(tagName) : undefined
+        if (firstTag !== undefined && secondTag !== undefined && firstTag !== secondTag) {
+            return `${firstTag} / ${secondTag}`
+        }
+        return firstTag !== undefined ? firstTag : secondTag
+    }
+
     getGroupValue({option, tag}) {
         switch (option) {
             case "strand":
-                return this.isNegativeStrand() ? '-' : '+'
+                return this.firstAlignment.strand + (this.secondAlignment ? this.secondAlignment.strand : '')
             case "FIRST_IN_PAIR_STRAND":
-                if (this.isPaired()) {
-                    if (this.isFirstOfPair()) {
-                        return this.isNegativeStrand() ? '-' : '+'
-                    } else if (this.isSecondOfPair()) {
-                        return this.isNegativeStrand() ? '+' : '-'
-                    } else {
-                        return
-                    }
-                } else {
-                    return
-                }
+                return this.firstAlignment.isFirstOfPair() ? this.firstAlignment.strand : (this.secondAlignment ? this.secondAlignment.strand : '')
             case "START":
                 return this.start
             case "INSERT_SIZE":
                 return this.fragmentLength
             case "MATE_CHR":
-                return this.mate ? this.mate.chr : undefined
+                return undefined
             case "MQ":
-                return this.mq
+                return this.firstAlignment.mq
             case "ALIGNED_READ_LENGTH":
-                return this.lengthOnRef
-            case "TAG": {
-                return this.tags()[tag]
-            }
+                return this.end - this.start
+            case "TAG":
+                return this.getTag(tag)
             case 'PHASE':
-                return this.tags()["HP"]
-            case 'READ_ORDER':
-                if (this.isPaired() && this.isFirstOfPair()) {
-                    return "FIRST"
-                } else if (this.isPaired() && this.isSecondOfPair()) {
-                    return "SECOND"
-                } else {
-                    return ""
-                }
-
-
+                return this.getTag("HP")
             default:
                 return
         }

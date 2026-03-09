@@ -126,7 +126,7 @@ suite("testBAM", function () {
         assert.equal(insertions[0].len, 3)
         assert.equal(insertions[0].type, 'I')
 
-        const tags = firstAlignment.tags()
+        const tags = firstAlignment.tagDict
         assert.equal(tags["BQ"], "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@TPEO@@KPXPZJKS@@@@@@@@@@@@@@@@@@@@@@@@@@@")
         assert.equal(tags["AM"], 29)
         assert.equal(tags["MQ"], 29)
@@ -155,7 +155,7 @@ suite("testBAM", function () {
         const alignmentContainer = await bamReader.readAlignments("1", 119930, 119940)
         const alignment = alignmentContainer.alignments[0].firstAlignment
 
-        const tags = alignment.tags()
+        const tags = alignment.tagDict
         assert.ok(floatEqual(tags["pa"], 228.71))
         assert.equal(tags["X0"], 10)
         assert.equal(tags["RG"], "SRR360773")

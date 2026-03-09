@@ -26,7 +26,7 @@ class BamFilter {
         if (this.supplementary && alignment.isSupplementary()) return false
         if (alignment.mq < this.mq) return false
         if (this.readgroups) {
-            const rg = alignment.tags()['RG']
+            const rg = alignment.getTag('RG')
             return this.readgroups.has(rg)
         }
         return true

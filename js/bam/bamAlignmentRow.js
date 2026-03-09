@@ -58,7 +58,7 @@ class BamAlignmentRow {
             case "START":
                 return alignment.start
             case "TAG": {
-                return alignment.tags()[tag]
+                return alignment.getTag(tag)
             }
             case "READ_NAME":
                 return alignment.readName

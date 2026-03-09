@@ -1442,7 +1442,7 @@ class AlignmentTrack extends TrackBase {
                 break
 
             case "tag":
-                const tagValue = alignment.tags()[tag]
+                const tagValue = alignment.getTag(tag)
                 if (tagValue !== undefined) {
 
                     // If the tag value is yc can be interpreted as a color, use it
