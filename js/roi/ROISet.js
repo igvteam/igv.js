@@ -29,6 +29,12 @@ class ROISet {
             // This is unusual, but permitted
             this.featureSource = config.featureSource
         } else if (config.features) {
+            // Normalize features: use "description" as "name" if name is not already set
+            for (let feature of config.features) {
+                if (feature.description && !feature.name) {
+                    feature.name = feature.description
+                }
+            }
             this.featureSource = new DynamicFeatureSource(config.features, genome)
         } else if (config.format) {
             this.featureSource = FeatureSource(config, genome)
