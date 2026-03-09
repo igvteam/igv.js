@@ -108,7 +108,7 @@ suite("testCRAM", function () {
         assert.equal(insertions[0].len, 3)
         assert.equal(insertions[0].type, 'I')
 
-        const tags = firstAlignment.tags()
+        const tags = firstAlignment.tagDict
         assert.equal(tags["BQ"], "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@TPEO@@KPXPZJKS@@@@@@@@@@@@@@@@@@@@@@@@@@@")
         assert.equal(tags["AM"], 29)
         assert.equal(tags["MQ"], 29)

@@ -59,7 +59,7 @@ const makePairedAlignmentChords = (alignments) => {
 const makeSupplementalAlignmentChords = (alignments) => {
 
     const makeChords = (a) => {
-        const sa = a.tags()['SA']
+        const sa = a.getTag('SA')
         const supAl = createSupplementaryAlignments(sa)
         let n = 0
         for (let s of supAl) {

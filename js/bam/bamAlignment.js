@@ -98,16 +98,11 @@ class BamAlignment {
     }
 
     hasTag(tag) {
-        const tmpTags = this.tagDict || decodeTags(this.tagBA)
-        return tmpTags.hasOwnProperty(tag)
-    }
-
-    tags() {
-        return this.tagDict
+        return this.tagDict.hasOwnProperty(tag)
     }
 
     getTag(key) {
-        return this.tags()[key]
+        return this.tagDict[key]
     }
 
 
@@ -237,7 +232,7 @@ class BamAlignment {
 
         }
 
-        const tagDict = this.tags()
+        const tagDict = this.tagDict
 
         if (tagDict.hasOwnProperty('SA')) {
             nameValues.push('<hr/>')
@@ -403,7 +398,7 @@ class BamAlignment {
             case 'pairOrientation':
                 return orientationTypes[expectedPairOrientation][al.pairOrientation] || ""
             case 'chimeric':
-                return al.tags()['SA'] ? "chimeric" : ""
+                return al.getTag('SA') ? "chimeric" : ""
             case 'supplementary':
                 return al.isSupplementary ? "supplementary" : ""
             case 'readOrder':
@@ -415,9 +410,9 @@ class BamAlignment {
                     return ""
                 }
             case 'phase':
-                return al.tags()['HP'] || ""
+                return al.getTag('HP') || ""
             case 'tag':
-                return al.tags()[tag] || ""
+                return al.getTag(tag) || ""
             // Add cases for other options as needed
             default:
                 return undefined
