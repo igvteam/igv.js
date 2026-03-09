@@ -611,8 +611,13 @@ class TrackViewport extends Viewport {
     }
 
     clearCache() {
-        this.featureCache = undefined
-        if (this.canvas) this.canvas._data = undefined
+        this.featureCache = undefined;
+        if (this.canvas) {
+            if (this.canvas.parentNode) {
+                this.canvas.parentNode.removeChild(this.canvas);
+            }
+            this.canvas = undefined;
+        }
     }
 
     async getFeatures(track, chr, start, end, bpPerPixel) {
