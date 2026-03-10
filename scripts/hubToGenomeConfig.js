@@ -8,7 +8,7 @@
  */
 
 import {convertToHubURL} from "../js/ucsc/ucscUtils.js"
-import {loadHub} from "../js/ucsc/hub/hubParser.js"
+import {loadHub} from "../js/ucsc/hub/hub.js"
 
 if (process.argv.length !== 3) {
     console.log("Usage: node hubToGenomeConfig.js <hub accession or url to hub.text>")

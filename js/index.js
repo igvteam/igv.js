@@ -12,7 +12,7 @@ import TrackBase from "./trackBase.js"
 import Browser from "./browser.js"
 import AlertDialog from "./ui/components/alertDialog.js"
 import {registerFileFormats} from "./util/fileFormats.js"
-import {loadHub} from "./ucsc/hub/hubParser.js"
+import {loadHub} from "./ucsc/hub/hub.js"
 import {createIcon} from "./ui/utils/icons.js"
 import createWebSocketClient from "./websocket/websocketClient.js"
 

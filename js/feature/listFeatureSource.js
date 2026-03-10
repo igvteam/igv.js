@@ -2,7 +2,6 @@ import BaseFeatureSource from "./baseFeatureSource.js"
 import {igvxhr} from "../../node_modules/igv-utils/src/index.js"
 import {buildOptions} from "../util/igvUtils.js"
 import getDataWrapper from "./dataWrapper.js"
-import FeatureSource from "./featureSource.js"
 
 /**
  * A feature source for a "list" file.  A list file is a text file with two columns, chromosome and URL.  It was
@@ -11,9 +10,10 @@ import FeatureSource from "./featureSource.js"
 
 class ListFeatureSource extends BaseFeatureSource {
 
-    constructor(config, genome) {
+    constructor(config, genome, featureSourceFactory) {
         super(genome)
         this.config = config
+        this.featureSourceFactory = featureSourceFactory
         this.featureSourceMap = null
         this.header = null
     }
@@ -72,7 +72,7 @@ class ListFeatureSource extends BaseFeatureSource {
                         sourceConfig.format = "vcf"
                         sourceConfig.indexURL = path + ".tbi"
                     }
-                    this.featureSourceMap.set(chr, FeatureSource(sourceConfig, this.genome))
+                    this.featureSourceMap.set(chr, this.featureSourceFactory(sourceConfig, this.genome))
                 }
             }
         }

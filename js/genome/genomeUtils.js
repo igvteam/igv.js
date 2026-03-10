@@ -1,6 +1,6 @@
 import {igvxhr, StringUtils} from "../../node_modules/igv-utils/src/index.js"
 import {convertToHubURL} from "../ucsc/ucscUtils.js"
-import {loadHub} from "../ucsc/hub/hubParser.js"
+import {loadHub} from "../ucsc/hub/hub.js"
 
 const DEFAULT_GENOMES_URL = "https://igv.org/genomes/genomes3.json"
 const BACKUP_GENOMES_URL = "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/genomes/web/genomes.json"

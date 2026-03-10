@@ -1,7 +1,7 @@
 import * as DOMUtils from "../ui/utils/dom-utils.js"
 import { StringUtils } from '../../node_modules/igv-utils/src/index.js'
 
-import { createRegionKey, parseRegionKey } from './ROIManager.js'
+import { createRegionKey, parseRegionKey } from './roiUtils.js'
 import RegionTableBase from '../ui/regionTableBase.js'
 import {parseLocusString} from "../search.js"
 import {appleCrayonRGB} from "../util/colorPalletes.js"

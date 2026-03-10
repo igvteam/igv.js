@@ -6,7 +6,7 @@ import {ColorTable, PaletteColorTable} from "../util/colorPalletes.js"
 import SampleInfo from "../sample/sampleInfo.js"
 import {makeVCFChords, sendChords} from "../jbrowse/circularViewUtils.js"
 import {FileUtils, IGVColor, StringUtils} from "../../node_modules/igv-utils/src/index.js"
-import CNVPytorTrack from "../cnvpytor/cnvpytorTrack.js"
+import trackClasses from "../util/trackClassRegistry.js"
 import {doSortByAttributes} from "../sample/sampleUtils.js"
 import {packFeatures} from "../feature/featureUtils.js"
 import {createElementWithString} from "../ui/utils/dom-utils.js"
@@ -952,13 +952,13 @@ class VariantTrack extends TrackBase {
         setTimeout(async () => {
             try {
                 const newConfig = Object.assign({}, this.config)
-                Object.setPrototypeOf(this, CNVPytorTrack.prototype)
+                Object.setPrototypeOf(this, trackClasses.CNVPytorTrack.prototype)
 
                 this.init(newConfig)
                 await this.postInit()
 
                 this.trackView.clearCachedFeatures()
-                this.trackView.setTrackHeight(this.config.height || CNVPytorTrack.DEFAULT_TRACK_HEIGHT)
+                this.trackView.setTrackHeight(this.config.height || trackClasses.CNVPytorTrack.DEFAULT_TRACK_HEIGHT)
                 this.trackView.checkContentHeight()
                 this.trackView.updateViews()
 
@@ -1025,3 +1025,6 @@ const SV_COLOR_TABLE = new ColorTable({
 
 
 export default VariantTrack
+
+trackClasses.VariantTrack = VariantTrack
+
