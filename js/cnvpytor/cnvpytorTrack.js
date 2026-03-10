@@ -4,7 +4,7 @@ import {CNVpytorVCF} from "./cnvpytorVCF.js"
 import FeatureSource from '../feature/featureSource.js'
 import {createCheckbox} from "../igv-icons.js"
 import IGVGraphics from "../igv-canvas.js"
-import VariantTrack from "../variant/variantTrack.js"
+import trackClasses from "../util/trackClassRegistry.js"
 
 class CNVPytorTrack extends TrackBase {
 
@@ -662,7 +662,7 @@ class CNVPytorTrack extends TrackBase {
     async convertToVariant() {
 
         if (this.variantState) {
-            Object.setPrototypeOf(this, VariantTrack.prototype)
+            Object.setPrototypeOf(this, trackClasses.VariantTrack.prototype)
             this.init(this.variantState)
             await this.postInit()
             this.trackView.clearCachedFeatures()
@@ -693,3 +693,6 @@ function autoscale(chr, featureArrays) {
 }
 
 export default CNVPytorTrack
+
+trackClasses.CNVPytorTrack = CNVPytorTrack
+

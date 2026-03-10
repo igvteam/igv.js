@@ -22,7 +22,7 @@ function FeatureSource(config, genome) {
         return new GenbankFeatureSource(config, genome)
     } else if ("vcf.list" === format) {
         // This is a text file with two columns:   <chr>  <url to vcf>
-        return new ListFeatureSource(config, genome)
+        return new ListFeatureSource(config, genome, FeatureSource)
     } else if ("hic" === format) {
         return new HicSource(config, genome)
     } else {

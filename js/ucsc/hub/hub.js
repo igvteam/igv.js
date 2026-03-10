@@ -8,6 +8,7 @@
 
 import TrackDbHub from "./trackDbHub.js"
 import {loadStanzas} from "./hubParser.js"
+import {igvxhr} from "../../../node_modules/igv-utils/src/index.js"
 
 const idMappings = new Map([
     ["hg38", "GCF_000001405.40"],
@@ -344,4 +345,77 @@ isPcr dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
 
 }
 
+const hubCache = new Map()
+
+async function loadHub(url) {
+    if (hubCache.has(url)) {
+        return hubCache.get(url)
+    }
+
+    const stanzas = await loadStanzas(url)
+    if (stanzas.length < 1) {
+        throw new Error("Empty hub file")
+    }
+
+    const hubStanza = stanzas[0]
+    if (hubStanza.type !== "hub") {
+        throw new Error("First stanza must be a hub stanza")
+    }
+
+    let genomeStanzas
+    let trackStanzas
+    if (hubStanza.getProperty("useOneFile") === "on") {
+        // This is a "onefile" hub, all stanzas are in the same file
+        if (stanzas[1].type !== "genome") {
+            throw new Error("Unexpected hub file -- expected 'genome' stanza but found " + stanzas[1].type)
+        }
+        const genomeStanza = stanzas[1]
+        genomeStanzas = [genomeStanza]
+        trackStanzas = stanzas.slice(2)
+
+        // If this is an assembly check chromSizes. This file can be very large, and not needed if whole genome view
+        // is not enabled.  Remove it if > 100 kb
+        if (genomeStanza.hasOwnProperty("chromSizes")) {
+            const chromSizes = genomeStanza.getProperty("chromSizes")
+            try {
+                const contentLength = await igvxhr.getContentLength(chromSizes)
+                if (contentLength > 100000) {
+                    genomeStanza.removeProperty("chromSizes")
+                }
+            } catch (e) {
+                console.error(`Error getting content length for chromSizes ${chromSizes}`, e)
+            }
+
+        }
+
+    } else {
+        if (!hubStanza.hasProperty("genomesFile")) {
+            throw new Error("hub.txt must specify 'genomesFile'")
+        }
+        genomeStanzas = await loadStanzas(hubStanza.getProperty("genomesFile"))
+    }
+
+    // Load group files for all genomes, if any.
+    const uniqGroupURLs = new Set()
+    genomeStanzas.forEach(s => {
+        const groupURL = s.getProperty("groups")
+        if (groupURL) uniqGroupURLs.add(groupURL)
+
+    })
+    const groupStanzas = []
+    const groupPromises = Array.from(uniqGroupURLs).map(async url => {
+        const stanza = await loadStanzas(url)
+        return stanza
+    })
+    const groupResults = await Promise.all(groupPromises)
+    groupResults.forEach(stanza => groupStanzas.push(...stanza))
+
+    const hub = new Hub(url, hubStanza, genomeStanzas, trackStanzas, groupStanzas)
+
+    hubCache.set(url, hub)
+
+    return hub
+}
+
 export default Hub
+export {loadHub}

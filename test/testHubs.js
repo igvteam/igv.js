@@ -1,7 +1,8 @@
 import "./utils/mockObjects.js"
 import {assert} from 'chai'
 import {convertToHubURL} from "../js/ucsc/ucscUtils.js"
-import {loadStanzas, loadHub} from "../js/ucsc/hub/hubParser.js"
+import {loadStanzas} from "../js/ucsc/hub/hubParser.js"
+import {loadHub} from "../js/ucsc/hub/hub.js"
 import TrackDbHub from "../js/ucsc/hub/trackDbHub.js"
 import {parseMetadata} from "../js/ucsc/hub/trackDbHub.js"
 

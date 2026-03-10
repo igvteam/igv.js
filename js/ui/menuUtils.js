@@ -2,7 +2,6 @@ import * as DOMUtils from "./utils/dom-utils.js"
 import Panel from "./components/panel.js"
 import Dialog from "./components/dialog.js"
 import {colorPalettes} from "../util/colorPalletes.js"
-import TrackView from "../trackView.js"
 
 const colorPickerTrackTypeSet = new Set(['bedtype', 'alignment', 'annotation', 'variant', 'wig', 'interact', 'shoebox'])
 
