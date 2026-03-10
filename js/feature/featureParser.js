@@ -24,6 +24,7 @@ import DecodeError from "./decode/decodeError.js"
 import GFFHelper from "./gff/gffHelper.js"
 
 import {getFormat} from "../util/fileFormats.js"
+import {decodeLongrange} from "./decode/longrange.js"
 
 /**
  *  Parser for column style (tab delimited, etc) text file formats (bed, gff, vcf, etc).
@@ -97,7 +98,7 @@ class FeatureParser {
             } else {
                 // All directives that could change the format, and thus decoder, should have been read by now.
                 // Set the decoder, unless it is explicitly set in the track configuration (not common)
-                if(!this.config.decode) {
+                if (!this.config.decode) {
                     this.setDecoder(header.format)
                 }
 
@@ -288,6 +289,10 @@ class FeatureParser {
                 this.decode = decodeInteract
                 this.delimiter = this.config.delimiter || /\s+/
                 break
+            case "longrange":
+                this.decode = decodeLongrange
+                this.delimiter = "\t"
+                break
             case "snp":
                 this.decode = decodeSNP
                 this.delimiter = "\t"
@@ -359,6 +364,8 @@ function parseTrackLine(line) {
     }
     if ("interact" == properties["type"]) {
         properties["format"] = "interact"
+    } else if ("longrange" == properties["longrange"]) {
+        properties["format"] = "longrange"
     } else if ("gcnv" === properties["type"]) {
         properties["format"] = "gcnv"
     }

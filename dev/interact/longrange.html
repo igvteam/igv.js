@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href=https://igv.org/web/img/favicon.ico rel="shortcut icon">
+    <title>IGV - Dev</title>
+</head>
+
+<body>
+
+<h1>longrange format</h1>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js"
+
+    const options =
+        {
+            genome: "hg38",
+            tracks: [
+                {
+                    "type": "wig",
+                    "format": "bigwig",
+                    "graphType": "dynseq",
+                    "windowFunction": "max",
+                    "url": "https://human-dev-multiome-atlas.s3.amazonaws.com/tracks/Adrenal_c0/average_shaps.counts.bw",
+                    "name": "AG_c0: adrenal cortex 1 SHAP (counts)",
+                    "metadata": {
+                        "organ": "Adrenal",
+                        "cluster": "AG_c0: adrenal cortex 1",
+                        "content": "deepshap_counts"
+                    }
+                },
+                {
+                    "type": "interact",
+                    "format": "longrange",
+                    "url": "https://human-dev-multiome-atlas.s3.amazonaws.com/tracks/Adrenal_c2/Adrenal_c2_ABC_threshold0.013.longrange.sorted.gz",
+                    "indexURL": "https://human-dev-multiome-atlas.s3.amazonaws.com/tracks/Adrenal_c2/Adrenal_c2_ABC_threshold0.013.longrange.sorted.gz.tbi",
+                    "name": "AG_c2: adrenal cortex 3 ABC Loops",
+                    "showOnHubLoad": false,
+                    "height": 250,
+                    "visibilityWindow": -1,
+                    "metadata": {
+                        "organ": "Adrenal",
+                        "cluster": "AG_c2: adrenal cortex 3",
+                        "content": "abc_loops"
+                    }
+                },
+                {
+                    "type": "wig",
+                    "format": "bigwig",
+                    "url": "https://human-dev-multiome-atlas.s3.amazonaws.com/tracks/Adrenal_c1/Adrenal_c1.pval.signal.bw",
+                    "name": "AG_c1: adrenal cortex 2 Obs (signal p-value)",
+                    "windowFunction": "max",
+                    "color": "#876941",
+                    "metadata": {
+                        "organ": "Adrenal",
+                        "cluster": "AG_c1: adrenal cortex 2",
+                        "content": "signal_pval"
+                    }
+                }
+            ]
+        }
+
+    const igvDiv = document.getElementById("igvDiv")
+
+    igv.createBrowser(igvDiv, options)
+
+</script>
+
+</body>
+
+</html>

@@ -11,7 +11,7 @@ declare class Opaque<N extends string> {
 
 export type TrackType =
     "annotation" | "wig" | "alignment" | "variant" | "mut" | "seg" |
-    "gwas" | "interact" | 'interaction' | "qtl" | "junction" | "cnvpytor" | "merged" | "arc" |
+    "gwas" | "interact" | 'interaction' | "qtl" | "junction" | "cnvpytor" | "merged" | "arc" | "longrange" |
     /* undocumented options */
     "snp" | "eqtl";
 
@@ -384,7 +384,7 @@ export namespace Tracks {
     });
 
 
-    export type InteractFormat = "interact" | "bedpe" | "bigInteract" | "bb" | "hic";
+    export type InteractFormat = "interact" | "bedpe" | "bigInteract" | "bb" | "hic" | "longrange";
 
     export type InteractTrackOptions = {
         arcType?: "nested" | "proportional" | "inView" | "partialInView";
