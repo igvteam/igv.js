@@ -319,7 +319,7 @@ class WigTrack extends TrackBase {
                         }
                         const color = this._colorScale.getColor(f.value)
                         IGVGraphics.fillRect(ctx, x, 0, width, pixelHeight, {fillStyle: color})
-                    } else if (this.graphType === "dynseq") {
+                    } else if (this.graphType === "dynseq" && bpPerPixel < 2) {
                         // Dynamic sequence rendering - render bases as glyphs with heights based on wig values
                         this.renderDynSeq(ctx, f, x, width, y, y0, pixelHeight)
                     } else {
