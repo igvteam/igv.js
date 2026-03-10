@@ -296,7 +296,7 @@ class BamAlignment {
 
     readBaseAt(genomicLocation) {
 
-        const block = blockAtGenomicLocation(this.blocks, genomicLocation)
+        const block = this.blockAtGenomicLocation(genomicLocation)
         if (block) {
             if ("*" === this.seq) {
                 return "*"
@@ -313,7 +313,7 @@ class BamAlignment {
 
     readBaseQualityAt(genomicLocation) {
 
-        const block = blockAtGenomicLocation(this.blocks, genomicLocation)
+        const block = this.blockAtGenomicLocation(genomicLocation)
         if (block) {
             if ("*" === this.qual) {
                 return 30
@@ -382,45 +382,8 @@ class BamAlignment {
         return this.baseModificationSets
     }
 
-    getGroupValue(groupBy, tag, expectedPairOrientation) {
-
-        const al = this
-        switch (groupBy) {
-            // case 'HAPLOTYPE':
-            //     return al.getHaplotypeName();
-            case 'strand':
-                return al.strand ? '+' : '-'
-            case 'firstOfPairStrand':
-                const strand = al.firstOfPairStrand
-                return strand === undefined ? "" : strand ? '+' : '-'
-            case 'mateChr':
-                return (al.mate && al.isMateMapped()) ? al.mate.chr : ""
-            case 'pairOrientation':
-                return orientationTypes[expectedPairOrientation][al.pairOrientation] || ""
-            case 'chimeric':
-                return al.getTag('SA') ? "chimeric" : ""
-            case 'supplementary':
-                return al.isSupplementary ? "supplementary" : ""
-            case 'readOrder':
-                if (al.isPaired() && al.isFirstOfPair()) {
-                    return "first"
-                } else if (al.isPaired() && al.isSecondOfPair()) {
-                    return "second"
-                } else {
-                    return ""
-                }
-            case 'phase':
-                return al.getTag('HP') || ""
-            case 'tag':
-                return al.getTag(tag) || ""
-            // Add cases for other options as needed
-            default:
-                return undefined
-        }
-    }
-
     positionToReadIndex(position) {
-        const block = blockAtGenomicLocation(this.blocks, position)
+        const block = this.blockAtGenomicLocation(position)
         if (block) {
             return (position - block.start) + block.seqOffset
         } else {
@@ -428,110 +391,106 @@ class BamAlignment {
         }
     }
 
+    blockAtGenomicLocation(genomicLocation) {
+
+        const blocks = this.blocks
+        for (let i = 0; i < blocks.length; i++) {
+            const block = blocks[i]
+            if (genomicLocation >= block.start && genomicLocation < block.start + block.len) {
+                return block
+            }
+        }
+        return undefined
+    }
+
+    /** Return the insertion at the specified genomic location, if it exists. Insertions are considered to be at the
+     /* position of the first inserted base, so for example an insertion of "AAA" after position 100
+     /* would be considered to be at position 101.
+     */
+    insertionAtGenomicLocation(genomicLocation) {
+        if (this.insertions) {
+            for (let insertion of this.insertions) {
+                const ins_start = insertion.start
+                if (genomicLocation === ins_start) {
+                    return insertion
+                }
+            }
+        }
+    }
+
+    getGroupValue(groupBy, expectedPairOrientation) {
+
+        let tag, chr, pos
+        if (groupBy.startsWith("tag:")) {
+            tag = groupBy.substring(4)
+            groupBy = "tag"
+        } else if (groupBy.startsWith("base:") || groupBy.startsWith("insertion:")) {
+            const tokens = groupBy.split(":")
+            if (tokens.length === 3) {
+                groupBy = tokens[0]
+                chr = tokens[1]
+                pos = Number.parseInt(tokens[2].replaceAll(",", "")) - 1
+            }
+        }
+
+        switch (groupBy) {
+
+            case 'strand':
+                return this.strand ? '+' : '-'
+            case 'firstOfPairStrand': {
+                const strand = this.firstOfPairStrand
+                return strand === undefined ? "" : strand ? '+' : '-'
+            }
+            case 'mateChr':
+                return (this.mate && this.isMateMapped()) ? this.mate.chr : ""
+            case 'pairOrientation':
+                return orientationTypes[expectedPairOrientation][this.pairOrientation] || ""
+            case 'chimeric':
+                return this.hasTag('SA') ? "chimeric" : ""
+            case 'supplementary':
+                return this.isSupplementary() ? "supplementary" : ""
+            case 'readOrder':
+                if (this.isPaired() && this.isFirstOfPair()) {
+                    return "first"
+                } else if (this.isPaired() && this.isSecondOfPair()) {
+                    return "second"
+                } else {
+                    return ""
+                }
+            case 'phase':
+                return this.getTag('HP') || ""
+            case 'tag':
+                return this.getTag(tag) || ""
+            case 'base':
+                if (this.chr === chr &&
+                    this.start <= pos &&
+                    this.end > pos) {
+                    const baseAtPos = this.readBaseAt(pos)
+                    if (baseAtPos) {
+                        return baseAtPos
+                    } else {
+                        return "GAP"
+                    }
+                } else {
+                    return ""
+                }
+            case 'insertion':
+                if (this.chr === chr &&
+                    this.start <= pos &&
+                    this.end > pos) {
+                    const insertion = this.insertionAtGenomicLocation(pos)
+                    return insertion ? this.seq.substring(insertion.seqOffset, insertion.seqOffset + insertion.len) : ""
+                } else {
+                    return ""
+                }
+            default:
+                return undefined
+        }
+    }
 
 }
 
 const EMPTY_SET = new Set()
-
-function blockAtGenomicLocation(blocks, genomicLocation) {
-
-    for (let i = 0; i < blocks.length; i++) {
-        const block = blocks[i]
-        if (genomicLocation >= block.start && genomicLocation < block.start + block.len) {
-            return block
-        }
-    }
-    return undefined
-}
-
-function decodeTags(ba) {
-
-    let p = 0
-    const len = ba.length
-    const tags = {}
-
-    while (p < len) {
-        const tag = String.fromCharCode(ba[p]) + String.fromCharCode(ba[p + 1])
-        p += 2
-
-        const type = String.fromCharCode(ba[p++])
-        let value
-        if (type === 'A') {
-            value = String.fromCharCode(ba[p])
-            p++
-        } else if (type === 'i' || type === 'I') {
-            value = readInt(ba, p)
-            p += 4
-        } else if (type === 'c') {
-            value = readInt8(ba, p)
-            p++
-        } else if (type === 'C') {
-            value = readUInt8(ba, p)
-            p++
-        } else if (type === 's' || type === 'S') {
-            value = readShort(ba, p)
-            p += 2
-        } else if (type === 'f') {
-            value = readFloat(ba, p)
-            p += 4
-        } else if (type === 'Z') {
-            value = ''
-            for (; ;) {
-                var cc = ba[p++]
-                if (cc === 0) {
-                    break
-                } else {
-                    value += String.fromCharCode(cc)
-                }
-            }
-        } else if (type === 'B') {
-            //‘cCsSiIf’, corresponding to int8 , uint8 t, int16 t, uint16 t, int32 t, uint32 t and float
-            const elementType = String.fromCharCode(ba[p++])
-            let elementSize = ELEMENT_SIZE[elementType]
-            if (elementSize === undefined) {
-                tags[tag] = `Error: unknown element type '${elementType}'`
-                break
-            }
-            const numElements = readInt(ba, p)
-            p += 4
-            const pEnd = p + numElements * elementSize
-            value = []
-            const dataView = new DataView(ba.buffer)
-            while (p < pEnd) {
-                switch (elementType) {
-                    case 'c':
-                        value.push(dataView.getInt8(p))
-                        break
-                    case 'C':
-                        value.push(dataView.getUint8(p))
-                        break
-                    case 's':
-                        value.push(dataView.getInt16(p))
-                        break
-                    case 'S':
-                        value.push(dataView.getUint16(p))
-                        break
-                    case 'i':
-                        value.push(dataView.getInt32(p))
-                        break
-                    case 'I':
-                        value.push(dataView.getUint32(p))
-                        break
-                    case 'f':
-                        value.push(dataView.getFloat32(p))
-                }
-                p += elementSize
-            }
-        } else {
-            //'Unknown type ' + type;
-            value = 'Error unknown type: ' + type
-            tags[tag] = value
-            break
-        }
-        tags[tag] = value
-    }
-    return tags
-}
 
 
 function readInt(ba, offset) {

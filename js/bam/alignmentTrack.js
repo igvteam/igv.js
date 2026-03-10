@@ -120,12 +120,16 @@ class AlignmentTrack extends TrackBase {
 
         this._groupByTags = []
         this._groupByPositions = []
+        this._groupByInsertionPositions = []
         if (config.groupBy) {
             this.groupBy = config.groupBy
             if (config.groupBy.startsWith("base:")) {
                 this._groupByPositions.push(config.groupBy.substring(5))
             }
-            if (config.groupBy.startsWith("tag:")) {
+            else if (config.groupBy.startsWith("insertion:")) {
+                this._groupByInsertionPositions.push(config.groupBy.substring(5))
+            }
+            else if (config.groupBy.startsWith("tag:")) {
                 this._groupByTags.push(config.groupBy.substring(4))
             }
         }
@@ -782,6 +786,9 @@ class AlignmentTrack extends TrackBase {
         for (let groupByPos of this._groupByPositions) {
             groupByMenuItems.push({key: `base:${groupByPos}`, label: `base:${groupByPos}`})
         }
+        for (let groupByPos of this._groupByInsertionPositions) {
+            groupByMenuItems.push({key: `insertion:${groupByPos}`, label: `base:${groupByPos}`})
+        }
 
         groupByMenuItems.push({key: 'tag', label: 'tag...'})
 
@@ -1107,6 +1114,19 @@ class AlignmentTrack extends TrackBase {
             click: () => {
                 this._groupByPositions.push(position)
                 this.groupBy = `base:${position}`
+                const alignmentContainers = this.getCachedAlignmentContainers()
+                for (let ac of alignmentContainers) {
+                    ac.pack(this)
+                }
+                this.trackView.checkContentHeight()
+                this.trackView.repaintViews()
+            }
+        })
+        list.push({
+            label: `Group by insertion @${position}`,
+            click: () => {
+                this._groupByInsertionPositions.push(position)
+                this.groupBy = `insertion:${position}`
                 const alignmentContainers = this.getCachedAlignmentContainers()
                 for (let ac of alignmentContainers) {
                     ac.pack(this)

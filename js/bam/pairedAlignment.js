@@ -1,3 +1,5 @@
+import orientationTypes from "./orientationTypes.js"
+
 class PairedAlignment {
 
     constructor(firstAlignment) {
@@ -93,7 +95,8 @@ class PairedAlignment {
     }
 
     get firstOfPairStrand() {
-        return this.firstAlignment.firstOfPairStrand
+        return this.firstAlignment.isFirstOfPair() ? this.firstAlignment.strand :
+            (this.secondAlignment && this.setSecondAlignment.isFirstOfPair()) ? this.secondAlignment.strand : ""
     }
 
     get pairOrientation() {
@@ -113,30 +116,80 @@ class PairedAlignment {
         return firstTag !== undefined ? firstTag : secondTag
     }
 
-    getGroupValue({option, tag}) {
-        switch (option) {
-            case "strand":
-                return this.firstAlignment.strand + (this.secondAlignment ? this.secondAlignment.strand : '')
-            case "FIRST_IN_PAIR_STRAND":
-                return this.firstAlignment.isFirstOfPair() ? this.firstAlignment.strand : (this.secondAlignment ? this.secondAlignment.strand : '')
-            case "START":
-                return this.start
-            case "INSERT_SIZE":
-                return this.fragmentLength
-            case "MATE_CHR":
-                return undefined
-            case "MQ":
-                return this.firstAlignment.mq
-            case "ALIGNED_READ_LENGTH":
-                return this.end - this.start
-            case "TAG":
-                return this.getTag(tag)
-            case 'PHASE':
-                return this.getTag("HP")
-            default:
-                return
+    getAlignmentAtGenomicLocation(genomicLocation) {
+        if (this.firstAlignment.containsLocation(genomicLocation)) {
+            return this.firstAlignment
+        } else if (this.secondAlignment && this.secondAlignment.containsLocation(genomicLocation)) {
+            return this.secondAlignment
+        } else {
+            return undefined
         }
     }
+
+    getGroupValue(groupBy, expectedPairOrientation) {
+
+        let tag, chr, pos
+        if (groupBy.startsWith("tag:")) {
+            tag = groupBy.substring(4)
+            groupBy = "tag"
+        } else if (groupBy.startsWith("base:") || groupBy.startsWith("insertion:")) {
+            const tokens = groupBy.split(":")
+            if (tokens.length === 3) {
+                groupBy = tokens[0]
+                chr = tokens[1]
+                pos = Number.parseInt(tokens[2].replaceAll(",", "")) - 1
+            }
+        }
+
+        switch (groupBy) {
+
+            case 'strand':
+                return this.firstAlignment.strand + (this.secondAlignment ? this.secondAlignment.strand : '')
+            case 'firstOfPairStrand':
+                return this.firstOfPairStrand
+            case 'mateChr':
+                return ''
+            case 'pairOrientation':
+                return orientationTypes[expectedPairOrientation][this.pairOrientation] || ""
+            case 'chimeric':
+                return this.hasTag('SA') ? "chimeric" : ""
+            case 'supplementary':
+                return this.firstAlignment.isSupplementary() ||
+                (this.secondAlignment && this.secondAlignment.isSupplementary()) ? "supplementary" : ""
+            case 'readOrder':
+                    return ""
+            case 'phase':
+                return this.getTag('HP') || ""
+            case 'tag':
+                return this.getTag(tag) || ""
+            case 'base':
+                if (chr && pos) {
+                    const alignment = this.getAlignmentAtGenomicLocation(pos)
+                    if (alignment) {
+                        const baseAtPos = alignment.readBaseAt(pos)
+                        if (baseAtPos) {
+                            return baseAtPos
+                        } else {
+                            return "GAP"
+                        }
+                    }
+                }
+                return ""
+            case 'insertion':
+                if (chr && pos) {
+                    const alignment = this.getAlignmentAtGenomicLocation(pos)
+                    if (alignment) {
+                        const insertion = alignment.insertionAtGenomicLocation(pos)
+                        return insertion ? alignment.seq.substring(insertion.seqOffset, insertion.seqOffset + insertion.len) : ""
+                    }
+                }
+                return ""
+
+            default:
+                return ""
+        }
+    }
+
 }
 
 export default PairedAlignment

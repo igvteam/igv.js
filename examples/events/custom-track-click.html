@@ -66,27 +66,7 @@
         .then(browser => {
             const genesInList = {}
 
-            browser.on('trackclick', function (track, popoverData, genomicLocation, features) {
-                var symbol = null
-                popoverData.forEach(function (nameValue) {
-                    if (nameValue.name && nameValue.name.toLowerCase() === 'name') {
-                        symbol = nameValue.value
-                    }
-                })
 
-                if (symbol && !genesInList[symbol]) {
-                    genesInList[symbol] = true
-                    $("#geneList").append('<li><a href="https://uswest.ensembl.org/Multi/Search/Results?q=' + symbol + '">' + symbol + '</a></li>')
-                }
-
-                console.log("Clicked features: ")
-                for(let f of features) {
-                    console.log(f)
-                }
-
-                // Prevent default pop-over behavior
-                return false
-            })
         })
 </script>
 
