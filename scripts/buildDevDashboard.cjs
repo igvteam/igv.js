@@ -159,6 +159,14 @@ ${cardsHtml}
       letter-spacing: -0.02em;
     }
 
+    .header-message {
+      margin-top: 0.75rem;
+      font-size: 0.95rem;
+      color: #555;
+      line-height: 1.5;
+      max-width: 600px;
+    }
+
     section {
       margin-bottom: 2.5rem;
     }
@@ -232,6 +240,9 @@ ${cardsHtml}
     <header>
       <p class="eyebrow">igv.js</p>
       <h1>Dev</h1>
+      <p class="header-message">Development and test pages for igv.js. Browse by category or use the search box to
+        find a specific example.  To browse the source look the folder "dev" at the repository root.
+        <b>Note these pages are not maintained.</b></p>
     </header>
 
     <div class="search-wrap">
