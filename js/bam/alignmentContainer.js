@@ -1,7 +1,6 @@
 import PairedAlignment from "./pairedAlignment.js"
 import BaseModificationCounts from "./mods/baseModificationCounts.js"
 import BamAlignmentRow from "./bamAlignmentRow.js"
-import orientationTypes from "./orientationTypes.js"
 import {isNumber} from "../util/igvUtils.js"
 
 const alignmentSpace = 2
@@ -147,7 +146,7 @@ class AlignmentContainer {
             const groupedAlignments = new Map()
             if (groupBy) {
                 for (let a of alignments) {
-                    const group = getGroupValue(a, groupBy, expectedPairOrientation) || ""
+                    const group = a.getGroupValue(groupBy, expectedPairOrientation) || ""
                     if (!groupedAlignments.has(group)) {
                         groupedAlignments.set(group, [])
                     }
@@ -179,8 +178,8 @@ class AlignmentContainer {
         this.coverageMap.incCounts(alignment)   // Count coverage before any downsampling
 
         const baseModificationSets = alignment.getBaseModificationSets()
-        if(baseModificationSets) {
-            for(let bms of baseModificationSets) {
+        if (baseModificationSets) {
+            for (let bms of baseModificationSets) {
                 this.baseModificationKeys.add(bms.key)
             }
         }
@@ -266,7 +265,7 @@ class AlignmentContainer {
     }
 
     sortRows(options) {
-        if(this.packedGroups) {
+        if (this.packedGroups) {
             for (let group of this.packedGroups.values()) {
                 group.sortRows(options, this)
             }
@@ -595,7 +594,7 @@ class Group {
 
 
     constructor(name) {
-        this.name = this.name
+        this.name = name
     }
 
     push(row) {
@@ -697,74 +696,6 @@ function binarySearch(array, pred, min) {
     return hi
 }
 
-function getGroupValue(al, groupBy, expectedPairOrientation) {
-
-    let tag, chr, pos
-    if (groupBy.startsWith("tag:")) {
-        tag = groupBy.substring(4)
-        groupBy = "tag"
-    } else if (groupBy.startsWith("base:")) {
-        const tokens = groupBy.split(":")
-        if (tokens.length === 3) {
-            groupBy = "base"
-            chr = tokens[1]
-            pos = Number.parseInt(tokens[2].replaceAll(",", "")) - 1
-        }
-    }
-
-    switch (groupBy) {
-        // case 'HAPLOTYPE':
-        //     return al.getHaplotypeName();
-        case 'strand':
-            return al.strand ? '+' : '-'
-        case 'firstOfPairStrand':
-            const strand = al.firstOfPairStrand
-            return strand === undefined ? "" : strand ? '+' : '-'
-        case 'mateChr':
-            return (al.mate && al.isMateMapped()) ? al.mate.chr : ""
-        case 'pairOrientation':
-            return orientationTypes[expectedPairOrientation][al.pairOrientation] || ""
-        case 'chimeric':
-            return al.getTag('SA') ? "chimeric" : ""
-        case 'supplementary':
-            return al.isSupplementary ? "supplementary" : ""
-        case 'readOrder':
-            if (al.isPaired() && al.isFirstOfPair()) {
-                return "first"
-            } else if (al.isPaired() && al.isSecondOfPair()) {
-                return "second"
-            } else {
-                return ""
-            }
-        case 'phase':
-            return al.getTag('HP') || ""
-        case 'tag':
-            return al.getTag(tag) || ""
-        // Add cases for other options as needed
-        case 'base':
-
-            //    1: alignments with a base at the position
-            //    2: alignments with a gap at the position
-            //    3: alignment that do not overlap the position (or are on a different chromosome)
-
-            if (al.chr === chr &&
-                al.start <= pos &&
-                al.end > pos) {
-
-                const baseAtPos = al.readBaseAt(pos)
-                if (baseAtPos) {
-                    return baseAtPos
-                } else {
-                    return "GAP"
-                }
-            } else { // does not overlap position
-                return ""
-            }
-
-        default:
-            return undefined
-    }
-}
 
 function getGroupComparator(groupName, expectedPairOrientation) {
     switch (groupName) {

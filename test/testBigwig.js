@@ -28,7 +28,7 @@ suite("testBigWig", function () {
      */
     test("chromTree", async function () {
 
-        this.timeout(10000)
+        this.timeout(30000)
 
         const url = "https://data.broadinstitute.org/igvdata/test/data/bb/chromTreeTest.bigwig"
         const bwReader = new BWReader({url: url})
