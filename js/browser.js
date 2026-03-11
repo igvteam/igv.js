@@ -122,22 +122,11 @@ class Browser {
         // Events
 
         this.on('trackremoved', () => {
-
-            const found = this.findTracks(track => typeof track.getSamples === 'function')
-
-            if (0 === found.length) {
-
-                // sample info
+            if (!this.hasSampleTracks()) {
                 this.sampleInfoControl.setButtonVisibility(false)
-
-                // sample names
-                this.sampleNameViewportWidth = undefined
-                this.showSampleNames = false
-                this.sampleNameControl.setState(this.showSampleNames)
-                this.sampleNameControl.hide()
-
-                this.layoutChange()
+                this.showSampleNames = this.config.showSampleNames || false
             }
+            this.updateSampleNameState()
         })
 
         this.on('columnlayoutchange', () => {
@@ -233,6 +222,34 @@ class Browser {
         this.sliderDialog = new SliderDialog(this.root)
         this.sliderDialog.container.id = `igv-slider-dialog-${DOMUtils.guid()}`
 
+    }
+
+    hasSampleTracks() {
+        return this.findTracks(track => typeof track.getSamples === 'function').length > 0
+    }
+
+    updateSampleNameState() {
+        const hasTracks = this.hasSampleTracks()
+        const showButton = hasTracks && this.config.showSampleNameButton !== false
+        const showNames = this.showSampleNames && hasTracks
+
+        if (showButton) {
+            this.sampleNameControl.show()
+        } else {
+            this.sampleNameControl.hide()
+        }
+        this.sampleNameControl.setState(showNames)
+
+        const column = this.columnContainer.querySelector('.igv-sample-name-column')
+        if (column) {
+            column.style.display = showNames ? 'flex' : 'none'
+        }
+
+        if (!hasTracks) {
+            this.sampleNameViewportWidth = undefined
+        }
+
+        this.layoutChange()
     }
 
     getSampleNameViewportWidth() {
@@ -464,8 +481,6 @@ class Browser {
         this.navbar.sampleInfoControl.setButtonVisibility(false)
 
         this.showSampleNames = session.showSampleNames || false
-        this.navbar.sampleNameControl.setState(this.showSampleNames === true)
-
         if (session.sampleNameViewportWidth) {
             this.sampleNameViewportWidth = session.sampleNameViewportWidth
         }
@@ -1000,18 +1015,13 @@ class Browser {
 
 
         if (typeof track.hasSamples === 'function' && track.hasSamples()) {
-
             if (this.sampleInfo.hasAttributes()) {
                 this.sampleInfoControl.setButtonVisibility(true)
             }
-
-            if (this.config.showSampleNameButton !== false) {
-                if (this.config.showSampleNames && !this.showSampleNames) {
-                    this.showSampleNames = true
-                    this.sampleNameControl.setState(true)
-                }
-                this.sampleNameControl.show()
+            if (this.config.showSampleNames) {
+                this.showSampleNames = true
             }
+            this.updateSampleNameState()
         }
 
         track.trackView.enableTrackSelection(this.navbar.getEnableTrackSelection())
