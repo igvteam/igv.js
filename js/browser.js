@@ -132,8 +132,8 @@ class Browser {
 
                 // sample names
                 this.sampleNameViewportWidth = undefined
-                this.showSampleNames = false
-                this.sampleNameControl.setState(this.showSampleNames)
+                // this.showSampleNames = false
+                // this.sampleNameControl.setState(this.showSampleNames)
                 this.sampleNameControl.hide()
 
                 this.layoutChange()
