@@ -1006,6 +1006,10 @@ class Browser {
             }
 
             if (this.config.showSampleNameButton !== false) {
+                if (this.config.showSampleNames && !this.showSampleNames) {
+                    this.showSampleNames = true
+                    this.sampleNameControl.setState(true)
+                }
                 this.sampleNameControl.show()
             }
         }
