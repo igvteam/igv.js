@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <title>Sample Names Button Test (#2074)</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        #controls { margin-bottom: 10px; }
+        button { margin-right: 10px; padding: 8px 16px; cursor: pointer; }
+        #status { margin-top: 10px; padding: 10px; background: #f0f0f0; font-size: 14px; }
+    </style>
+</head>
+
+<body>
+
+<h3>Issue #2074 - Sample Names Button Test</h3>
+<div id="controls">
+    <button id="removeBtn">Remove All Variant Tracks</button>
+    <button id="addBtn">Add Variant Track</button>
+</div>
+<div id="status">
+    Steps to reproduce:<br>
+    1. On load, sample names should be visible (showSampleNames: true)<br>
+    2. Click "Remove All Variant Tracks"<br>
+    3. Click "Add Variant Track"<br>
+    4. Verify: sample names button should be enabled and sample names visible<br>
+    <br>
+    Bug behavior: after step 3, the button appears but is disabled
+</div>
+
+<div id="igvDiv" style="padding-top: 10px; padding-bottom: 20px;"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js"
+
+    const variantTrackConfig = {
+        type: "variant",
+        url: "ALL.apol1.sample.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf",
+        name: "1KG APOL1 Genotypes",
+        height: 300
+    }
+
+    const options = {
+        genome: "hg19",
+        locus: "chr22:36,647,000-36,657,000",
+        showSampleNames: true,
+        tracks: [
+            {...variantTrackConfig}
+        ]
+    }
+
+    const browser = await igv.createBrowser(document.getElementById('igvDiv'), options)
+
+    document.getElementById('removeBtn').addEventListener('click', async () => {
+        const variantTracks = browser.findTracks(t => t.type === 'variant')
+        for (const track of variantTracks) {
+            await browser.removeTrack(track)
+        }
+        document.getElementById('status').innerText = 'All variant tracks removed. Now click "Add Variant Track".'
+    })
+
+    document.getElementById('addBtn').addEventListener('click', async () => {
+        await browser.loadTrack({...variantTrackConfig})
+        document.getElementById('status').innerText =
+            'Variant track added. Check: is the sample names button enabled and are sample names visible?'
+    })
+
+</script>
+
+</body>
+</html>
