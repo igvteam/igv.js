@@ -32,8 +32,8 @@ suite("testTabix", function () {
 
         const source = new TextFeatureSource({
                 format: "gtf",
-                url: "test/data/tabix/sorted.genes.gtf.gz",
-                indexURL: "test/data/tabix/sorted.genes.gtf.gz.tbi"
+                url: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/tabix/sorted.genes.gtf.gz",
+                indexURL: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/tabix/sorted.genes.gtf.gz.tbi"
             },
             createGenome('ucsc'))
 

@@ -2,13 +2,14 @@ import { assert } from 'chai';
 import "./utils/mockObjects.js"
 import HicFile from '../node_modules/hic-straw/src/hicFile.js'
 import NodeLocalFile from '../node_modules/hic-straw/src/io/nodeLocalFile.mjs'
+import RemoteFile from "hic-straw/src/io/remoteFile.js"
 
 suite('HicFile', function () {
 
-    test('local file read header', async function () {
+    test('read header', async function () {
 
-        const file = new NodeLocalFile({
-            "path": "test/data/hic/test_chr22.hic",
+        const file = new RemoteFile({
+            "url": "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/hic/test_chr22.hic",
         })
         const hicFile = new HicFile({file: file})
 
@@ -16,10 +17,10 @@ suite('HicFile', function () {
         assert.equal(hicFile.magic, "HIC")
     })
 
-    test('local file read matrix', async function () {
+    test('read matrix', async function () {
 
-        const file = new NodeLocalFile({
-            "path": "test/data/hic/test_chr22.hic",
+        const file = new RemoteFile({
+            "url": "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/hic/test_chr22.hic",
         })
         const hicFile = new HicFile({file: file})
         const matrix = await hicFile.getMatrix(22, 22)
@@ -27,10 +28,10 @@ suite('HicFile', function () {
     })
 
 
-    test('local file read norm vector index', async function () {
+    test('read norm vector index', async function () {
 
-        const file = new NodeLocalFile({
-            "path": "test/data/hic/test_chr22.hic"
+        const file = new RemoteFile({
+            "url": "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/hic/test_chr22.hic",
         })
         const hicFile = new HicFile({file: file})
 
@@ -41,10 +42,10 @@ suite('HicFile', function () {
 
     // getNormalizationVector(type, chrIdx, unit, binSize)
 
-    test('local file read norm vector', async function () {
+    test('read norm vector', async function () {
 
-        const file = new NodeLocalFile({
-            "path": "test/data/hic/test_chr22.hic",
+        const file = new RemoteFile({
+            "url": "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/hic/test_chr22.hic",
         })
         const hicFile = new HicFile({file: file})
 

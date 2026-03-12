@@ -10,7 +10,7 @@ suite("hub.txt", function () {
 
     test("get genome configs", async function () {
 
-        const hubFile = "test/data/hubs/hub.txt"
+        const hubFile = "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/hubs/hub.txt"
         const hub = await loadHub(hubFile)
         assert.ok(hub.hubStanza)
         // assert.ok(hub.genomeStanza);

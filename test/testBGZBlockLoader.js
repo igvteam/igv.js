@@ -1,16 +1,15 @@
 import "./utils/mockObjects.js"
 import BGZBlockLoader, {inflateBlocks, findBlockBoundaries} from "../js/bam/bgzBlockLoader.js"
 import {assert} from 'chai'
-import fs from 'fs'
 
 const inflatedBlockSize = 65536
 
 suite("test BGZBlockLoader", function () {
 
     test("inflate blocks", async function () {
-        const path = "test/data/tabix/sorted.genes.gtf.gz"
-        const b = fs.readFileSync(path)
-        const arrayBuffer = b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength)
+        const url = "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/tabix/sorted.genes.gtf.gz"
+        const response = await fetch(url)
+        const arrayBuffer = await response.arrayBuffer()
 
         // Block positions: 113873, 118394, 122728, 127139, 131295
         // Inflate all blocks
@@ -34,7 +33,7 @@ suite("test BGZBlockLoader", function () {
     test("load individual blocks", async function () {
 
         const config = {
-            url: "test/data/tabix/sorted.genes.gtf.gz"
+            url: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/tabix/sorted.genes.gtf.gz"
         }
 
         const positions = [113873, 118394, 122728, 127139, 131295]
@@ -52,7 +51,7 @@ suite("test BGZBlockLoader", function () {
         const startBlock = 113873
         const endBlock = 131295
         const config = {
-            url: "test/data/tabix/sorted.genes.gtf.gz"
+            url: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/tabix/sorted.genes.gtf.gz"
         }
 
         const loader = new BGZBlockLoader(config)
@@ -68,7 +67,7 @@ suite("test BGZBlockLoader", function () {
     test("cache - inner overlap", async function () {
 
         const config = {
-            url: "test/data/tabix/sorted.genes.gtf.gz"
+            url: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/tabix/sorted.genes.gtf.gz"
         }
 
         const loader = new BGZBlockLoader(config)
@@ -92,7 +91,7 @@ suite("test BGZBlockLoader", function () {
 
 
         const config = {
-            url: "test/data/tabix/sorted.genes.gtf.gz"
+            url: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/tabix/sorted.genes.gtf.gz"
         }
 
         const loader = new BGZBlockLoader(config)
@@ -115,7 +114,7 @@ suite("test BGZBlockLoader", function () {
     test("cache - overlap right", async function () {
 
         const config = {
-            url: "test/data/tabix/sorted.genes.gtf.gz"
+            url: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/tabix/sorted.genes.gtf.gz"
         }
 
         const loader = new BGZBlockLoader(config)
@@ -140,7 +139,7 @@ suite("test BGZBlockLoader", function () {
     test("cache - outer overlap", async function () {
 
         const config = {
-            url: "test/data/tabix/sorted.genes.gtf.gz"
+            url: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/tabix/sorted.genes.gtf.gz"
         }
 
         const loader = new BGZBlockLoader(config)
