@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>igv.js</title>
+</head>
+
+<body>
+
+<h1>BigWig as lines</h1>
+
+<p>
+    Two BigWig tracks together, displayed as lines of different width
+</p>
+
+
+<div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+<script type="module">
+
+    import igv from "../dist/igv.esm.js"
+
+    const config  =
+        {
+            genome: "hg19",
+            locus: "chr4:40,174,668-40,221,204",
+            tracks: [
+                {
+                    name: "Merged",
+                    type: "merged",
+                    alpha: 0.75,
+                    tracks: [
+                        {
+                            "type": "wig",
+                            "format": "bigwig",
+                            "url": "https://www.encodeproject.org/files/ENCFF000ASJ/@@download/ENCFF000ASJ.bigWig",
+                            "color": "red",
+                            "graphType": "line",
+                            "lineWidth": 3
+                        },
+                        {
+                            "type": "wig",
+                            "format": "bigwig",
+                            "url": "https://www.encodeproject.org/files/ENCFF351WPV/@@download/ENCFF351WPV.bigWig",
+                            "color": "green",
+                            "graphType": "line",
+                            "lineWidth": 1
+                        }
+                    ]
+                },
+            ]
+        }
+
+    var igvDiv = document.getElementById("igvDiv")
+
+    igv.createBrowser(igvDiv, config)
+        .then(function (browser) {
+            console.log("Created IGV browser")
+        })
+
+
+</script>
+
+</body>
+
+</html>

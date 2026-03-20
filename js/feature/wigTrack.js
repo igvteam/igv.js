@@ -20,6 +20,7 @@ class WigTrack extends TrackBase {
         logScale: false,
         windowFunction: 'mean',
         graphType: 'bar',
+        lineWidth: 2,
         normalize: undefined,
         scaleFactor: undefined,
         overflowColor: `rgb(255, 32, 255)`,
@@ -71,6 +72,8 @@ class WigTrack extends TrackBase {
         if ("heatmap" === config.graphType && !config.height) {
             this.height = 20
         }
+
+        this.lineWidth = config.lineWidth || WigTrack.defaults.lineWidth // Set lineWidth from config
     }
 
     async postInit() {
@@ -292,11 +295,11 @@ class WigTrack extends TrackBase {
                     const color = options.alpha ? IGVColor.addAlpha(this.getColorForFeature(f), options.alpha) : this.getColorForFeature(f)
 
                     if (this.graphType === "line") {
+                        const lineWidth = this.lineWidth
+                        const properties = {"fillStyle": color, "strokeStyle": color, "lineWidth": lineWidth};
+
                         if (lastY !== undefined) {
-                            IGVGraphics.strokeLine(ctx, lastPixelEnd, lastY, x, y, {
-                                "fillStyle": color,
-                                "strokeStyle": color
-                            })
+                            IGVGraphics.strokeLine(ctx, lastPixelEnd, lastY, x, y, properties)
                         }
                         IGVGraphics.strokeLine(ctx, x, y, x + width, y, {"fillStyle": color, "strokeStyle": color})
                     } else if (this.graphType === "points") {
