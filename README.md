@@ -121,6 +121,14 @@ npm install
 npm run build
 ```
 
+**Note**: igv.js has a large history with many commits which can make cloning and building the entire history time consuming.  
+To clone just the latest commit, use the ```--depth``` option, for example
+
+```
+git clone --depth 1 https://github.com/igvteam/igv.js.git
+```
+
+
 This creates a dist folder with the following files
 
 * igv.js - UMDS file for script include, AMD, or CJS modules.  A script include will define an "igv" global.
