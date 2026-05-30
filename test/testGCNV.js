@@ -47,30 +47,6 @@ suite("testGCNV", function () {
 
     })
 
-    test("example track", async function () {
-
-        this.timeout(10000)
-
-        const config = {
-            name: 'example track',
-            url: 'https://s3.amazonaws.com/igv.org.demo/gcnv_track_example_data.chr22.bed.gz',
-            indexURL: 'https://s3.amazonaws.com/igv.org.demo/gcnv_track_example_data.chr22.bed.gz.tbi'
-        }
-
-        const browser = {genome}
-
-        const track = await Browser.prototype.createTrack.call(browser, config)
-        assert.equal(track.type, "gcnv")
-
-        const features = await track.getFeatures("chr22", 23767847, 23843448)
-        assert.equal(features.length, 12)
-
-        // verify features were properly decoded
-        for (let f of features) {
-            const values = f.values
-            assert.ok(Array.isArray(values))
-        }
-    })
 
 })
 

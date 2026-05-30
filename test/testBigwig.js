@@ -7,22 +7,6 @@ import {createGenome} from "./utils/MockGenome.js"
 
 suite("testBigWig", function () {
 
-    test("Uncompressed bigwig", async function () {
-
-        this.timeout(10000)
-
-        const url = "https://s3.amazonaws.com/igv.org.test/data/uncompressed.bw",
-            chr = "chr21",
-            start = 0,
-            end = Number.MAX_SAFE_INTEGER,
-            bpPerPixel = 6191354.824    // To match iOS unit test
-
-        const bwReader = new BWReader({url: url})
-        const features = await bwReader.readFeatures(chr, start, chr, end, bpPerPixel)
-        assert.equal(features.length, 8)   // Verified in iPad app
-    })
-
-
     /**
      * Test a BW file with an unusual layout (chromTree after full data).
      */

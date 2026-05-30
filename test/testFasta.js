@@ -10,8 +10,8 @@ suite("testFasta", function () {
         this.timeout(100000)
 
         const fasta = new FastaSequence({
-                fastaURL: "https://igv-genepattern-org.s3.amazonaws.com/test/fasta/chr22.fa",
-                indexURL: "https://igv-genepattern-org.s3.amazonaws.com/test/fasta/chr22.fa.fai?"
+            "fastaURL": "https://igv.org/genomes/data/hg19/hg19.fasta",
+            "indexURL": "https://igv.org/genomes/data/hg19/hg19.fasta.fai",
             }
         )
         await fasta.init()

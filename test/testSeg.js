@@ -17,7 +17,7 @@ suite("testSeg", function () {
 
         await genome.loadChromosome("chr1")
 
-        const url = "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz"
+        const url = "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/gbm/GBM-TP.seg.gz"
         const featureSource = FeatureSource(
             {format: 'seg', url: url, indexURL: url + ".tbi"},
             genome)
@@ -41,7 +41,7 @@ suite("testSeg", function () {
 
         const genome = createGenome("ucsc")
 
-        const url = "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz"
+        const url = "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/gbm/GBM-TP.seg.gz"
         const featureSource = FeatureSource(
             {format: 'seg', url: url, indexed: false},
             genome)
@@ -65,7 +65,7 @@ suite("testSeg", function () {
         this.timeout(100000)
 
         const genome = createGenome("ucsc")
-        const url = "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz"
+        const url = "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/gbm/GBM-TP.seg.gz"
         const featureSource = FeatureSource({
             format: 'seg',
             url: url,
