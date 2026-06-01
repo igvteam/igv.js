@@ -12,8 +12,8 @@ Buffer.isBuffer = function isBuffer (b) {
 // Need an actual genome object for this test, not a mock object
 const genome = await Genome.createGenome({
     id: "hg19",
-    "fastaURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/seq/hg19/hg19.fasta",
-    "indexURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/seq/hg19/hg19.fasta.fai",
+    "fastaURL": "https://igv.org/genomes/data/hg19/hg19.fasta",
+    "indexURL": "https://igv.org/genomes/data/hg19/hg19.fasta.fai",
 
 })
 

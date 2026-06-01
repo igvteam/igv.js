@@ -19,17 +19,6 @@
       "height": 300,
       "name": "HG02450",
       "coverageTrackHeight": 50
-    },
-    {
-      "name": "Refseq Genes",
-      "url": "https://s3.amazonaws.com/igv.org.genomes/hg19/refGene.txt.gz",
-      "order": 1000000,
-      "indexed": false,
-      "sourceType": "file",
-      "format": "refgene",
-      "type": "annotation",
-      "height": 50,
-      "maxRows": 500
     }
   ]
 }

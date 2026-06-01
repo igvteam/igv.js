@@ -16,7 +16,7 @@
 <h4>This example configures a search object as described
     <a href="https://github.com/igvteam/igv.js/wiki/Browser-Creation#search-object-details">here</a>
     to use the Ensembl web service to provide annotation search capability for Macaca Fasciularis. To test search for
-    'OLIG3'
+    'OLIG3'.
 </h4>
 
 Configuration object:
@@ -42,16 +42,7 @@ Configuration object:
                 chromosomeField: 'seq_region_name',
                 displayName: 'display_name'
             },
-            genome: "macFas5",
-            tracks: [
-                {
-                    name: "Annotations",
-                    type: "annotation",
-                    format: "gtf",
-                    url: 'https://s3.amazonaws.com/igv.org.genomes/Macaca_fascicularis_5.0/Macaca_fascicularis.Macaca_fascicularis_5.0.100.gtf.gz',
-                    indexURL: 'https://s3.amazonaws.com/igv.org.genomes/Macaca_fascicularis_5.0/Macaca_fascicularis.Macaca_fascicularis_5.0.100.gtf.gz.tbi',
-                }
-            ]
+            genome: "macFas5"
         }
 
 
