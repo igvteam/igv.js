@@ -508,8 +508,14 @@ interface CreateOptExtras {
 
     search?: {
         url: string;
-        chromosomeField: string;
-        displayName: string;
+        coords?: 0 | 1;
+        chromosomeField?: string;
+        startField?: string;
+        endField?:  string;
+        resultsField?:  string;
+        geneField?: string;
+        snpField?:  string;
+        timeout?: number;
     };
 }
 
