@@ -201,7 +201,7 @@
             </p>
             <div class="control-group">
                 <label for="sessionFile">Select Session JSON File:</label>
-                <input type="file" id="sessionFile" accept=".json">
+                <input type="file" id="sessionFile" accept=".json,.xml">
             </div>
             <button id="loadSessionBtn">Load Session from File</button>
             <button id="loadLastSessionBtn" class="secondary">Load Last Saved Session</button>
@@ -386,6 +386,7 @@
 
         // Load session from file
         document.getElementById("loadSessionBtn").addEventListener("click", async () => {
+
             const fileInput = document.getElementById("sessionFile")
             
             if (!fileInput.files || fileInput.files.length === 0) {
@@ -396,15 +397,9 @@
             const file = fileInput.files[0]
             
             try {
-                const text = await file.text()
-                const session = JSON.parse(text)
-                
-                await browser.loadSessionObject(session)
+                await browser.loadSession({file: file})
                 console.log("Session loaded successfully from file:", file.name)
                 updateTrackList()
-                
-                // Display loaded session
-                document.getElementById("sessionOutput").textContent = text
                 
                 // Clear input
                 fileInput.value = ""

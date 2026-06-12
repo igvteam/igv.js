@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<Session genome="hg38" locus="chr19:11100234-11100234" version="8">
+  <Resources>
+     <Resource path="https://hgdownload.soe.ucsc.edu/goldenPath/hg38/database/ncbiRefSeqHgmd.txt.gz" type="refgene" />
+    <Resource path="https://hgdownload.soe.ucsc.edu/goldenPath/hg38/database/ncbiRefSeq.txt.gz" type="refgene" />
+   </Resources>
+  <Panel name="DataPanel" height="552" width="2086">
+  </Panel>
+  <Panel name="FeaturePanel" height="160" width="2086">
+     <Track name="Refseq HGMD" attributeKey="ncbiRefSeqHgmd.txt.gz" clazz="org.broad.igv.track.FeatureTrack" id="https://hgdownload.soe.ucsc.edu/goldenPath/hg38/database/ncbiRefSeqHgmd.txt.gz" url="https://hgdownload.soe.ucsc.edu/goldenPath/hg38/database/ncbiRefSeqHgmd.txt.gz" visible="true" format="refgene" height="35" type="annotation" infoURL="https://www.ncbi.nlm.nih.gov/gene/?term=$$" />
+    <Track name="Refseq Genes" attributeKey="ncbiRefSeq.txt.gz" clazz="org.broad.igv.track.FeatureTrack" id="https://hgdownload.soe.ucsc.edu/goldenPath/hg38/database/ncbiRefSeq.txt.gz" url="https://hgdownload.soe.ucsc.edu/goldenPath/hg38/database/ncbiRefSeq.txt.gz" visible="true" format="refgene" height="35" type="annotation" infoURL="https://www.ncbi.nlm.nih.gov/gene/?term=$$" />
+  </Panel>
+  <PanelLayout dividerFractions="0.651685393258427" />
+  <HiddenAttributes>
+    <Attribute name="DATA FILE" />
+    <Attribute name="DATA TYPE" />
+    <Attribute name="NAME" />
+  </HiddenAttributes>
+</Session>

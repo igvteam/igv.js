@@ -25,6 +25,9 @@ class XMLSession {
                 indexURL: r.getAttribute("index"),
                 order: idx
             }
+            if (r.hasAttribute("format")) {
+                config.format = r.getAttribute("format")
+            }
             resourceMap.set(config.url, config)
             if (!hasTrackElements) {
                 tracks.push(config)
@@ -113,6 +116,13 @@ function extractTrackAttributes(track, config) {
 
 
     config.name = track.getAttribute("name")
+
+    if(track.hasAttribute("type")) {
+         config.type = track.getAttribute("type")
+    }
+    if(track.hasAttribute("format")) {
+        config.format = track.getAttribute("format")
+    }
 
     const color = track.getAttribute("color")
     if (color) {
