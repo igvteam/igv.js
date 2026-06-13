@@ -515,7 +515,6 @@ interface CreateOptExtras {
         resultsField?:  string;
         geneField?: string;
         snpField?:  string;
-        timeout?: number;
     };
 }
 
