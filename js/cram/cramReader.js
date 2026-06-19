@@ -163,6 +163,9 @@ class CramReader {
 
                     const alignment = decodeCramRecord(record, header.chrNames)
 
+                    // Convert qual to regular array -- this was a breaking change somewhere between 5.X and 8.3.0
+                    if(alignment.qual) alignment.qual = Array.from(alignment.qual)
+
                     if (this.filter.pass(alignment)) {
                         alignmentContainer.push(alignment)
                     }

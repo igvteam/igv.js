@@ -32,6 +32,8 @@ suite("testTwobit", function () {
 
     test("twobit .bpt index", async function () {
 
+        this.timeout(20000)
+
         const url = "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/twobit/GCA_004363605.1.2bit.bpt"
         const bpTree = await BPTree.loadBpTree(url, {}, 0)
         assert.ok(bpTree)

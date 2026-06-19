@@ -7,6 +7,9 @@ const inflatedBlockSize = 65536
 suite("test BGZBlockLoader", function () {
 
     test("inflate blocks", async function () {
+
+        this.timeout(20000)
+
         const url = "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/tabix/sorted.genes.gtf.gz"
         const response = await fetch(url)
         const arrayBuffer = await response.arrayBuffer()
