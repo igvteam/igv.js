@@ -169,7 +169,7 @@ class TrackDbHub {
      */
     #getTrackConfig(t) {
 
-        const format = typeFormatMap.get(t.format) || t.format
+        const format = typeFormatMap.get(t.format.toLowerCase()) || t.format
 
         const config = {
             "id": t.getProperty("track"),
@@ -270,14 +270,9 @@ class TrackDbHub {
             config.visibilityWindow = maxWindowToDraw
         }
 
-        // IGV does not support "maxWindowCoverage" in the same way as UCSC. Use to limit visibility window
-        if (t.hasProperty("maxWindowCoverage")) {
-            let maxWindowToDraw = parseInt(t.getProperty("maxWindowCoverage"), 10)
-            if (maxWindowToDraw > Number.MAX_SAFE_INTEGER) {
-                maxWindowToDraw = Number.MAX_SAFE_INTEGER
-            }
-            config.visibilityWindow = maxWindowToDraw
-        }
+        // TODO - support "maxWindowCoverage"
+        // if (t.hasProperty("maxWindowCoverage")) {
+        // }
 
         return config
     }
