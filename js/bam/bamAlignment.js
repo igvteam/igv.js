@@ -265,7 +265,9 @@ class BamAlignment {
         nameValues.push('<hr/>')
         nameValues.push({name: 'Genomic Location: ', value: StringUtils.numberFormatter(1 + genomicLocation)})
         nameValues.push({name: 'Read Base:', value: readBase})
-        nameValues.push({name: 'Base Quality:', value: this.readBaseQualityAt(genomicLocation)})
+
+        let quality = this.readBaseQualityAt(genomicLocation)
+        nameValues.push({name: 'Base Quality:', value: 255 === quality ? "unknown" : quality})
 
         const bmSets = this.getBaseModificationSets()
         if (bmSets) {
@@ -316,13 +318,13 @@ class BamAlignment {
         const block = this.blockAtGenomicLocation(genomicLocation)
         if (block) {
             if ("*" === this.qual) {
-                return 30
+                return undefined
             } else {
                 const idx = block.seqIndexAt(genomicLocation)
                 if (idx >= 0 && this.qual && idx < this.qual.length) {
                     return this.qual[idx]
                 } else {
-                    return 30
+                    return undefined
                 }
             }
         } else {
