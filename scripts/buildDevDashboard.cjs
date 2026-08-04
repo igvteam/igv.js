@@ -51,6 +51,7 @@ function toSectionLabel(dirname) {
         'cbio': 'cBio',
         'cnvpytor': 'CNVpytor',
         'datauri': 'Data URI',
+        'encode': 'ENCODE',
         'gwas': 'GWAS',
         'hic': 'Hi-C',
         'htsget': 'htsget',

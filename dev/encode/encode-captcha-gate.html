@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>IGV - ENCODE CAPTCHA gate</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            color: #111;
+            padding: 1.5rem;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+
+        h2 { font-size: 1rem; margin: 2rem 0 0.5rem; }
+
+        p, li { line-height: 1.5; font-size: 0.9rem; }
+
+        pre, code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.8rem; }
+
+        pre {
+            background: #f5f5f5;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 0.75rem;
+            overflow-x: auto;
+        }
+
+        table { border-collapse: collapse; width: 100%; margin-top: 0.5rem; }
+
+        th, td {
+            border: 1px solid #e0e0e0;
+            padding: 0.4rem 0.6rem;
+            font-size: 0.85rem;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th { background: #f5f5f5; font-weight: 600; }
+
+        .verdict { font-weight: 600; }
+
+        .pass { color: #1a7f37; }
+
+        .fail { color: #b42318; }
+
+        .pending { color: #888; }
+
+        .note {
+            background: #fffbe6;
+            border: 1px solid #f0e0a0;
+            border-radius: 4px;
+            padding: 0.75rem;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        #igvDiv { padding-top: 1rem; }
+    </style>
+</head>
+
+<body>
+
+<h1>ENCODE CAPTCHA gate</h1>
+
+<p>
+    ENCODE fronts <code>www.encodeproject.org</code> with an AWS WAF that inspects the <b>Origin</b> of every request.
+    Approved origins (<code>https://igv.org</code>, <code>https://aidenlab.org</code>, …) are served. Everything else
+    that looks like a real browser gets a CAPTCHA challenge, returned with the misleading status
+    <code>405 Method Not Allowed</code> and the header <code>x-amzn-waf-action: captcha</code>.
+</p>
+
+<p>
+    <code>localhost</code> is not on the approved list and never will be, so <b>no ENCODE-hosted track can be loaded by
+    any igv.js-based app running locally</b>. This page reproduces that.
+</p>
+
+<p>This page is currently served from origin <code id="origin"></code>.</p>
+
+<div class="note">
+    <b>Expected result when served from localhost:</b> the control fetch succeeds, the ENCODE fetches fail, and the
+    ENCODE tracks below never draw while the genome, refseq annotations, and the non-ENCODE bigWig do.
+    <b>Served from <code>https://igv.org</code>, everything succeeds</b> — that asymmetry is the whole bug.
+    <br><br>
+    Note that the challenge response <i>is</i> readable from page JavaScript: measured against the live host it carries
+    <code>access-control-allow-origin: *</code> and, better still,
+    <code>access-control-expose-headers: x-amzn-waf-action</code>. So a fetch here can read both the <code>405</code>
+    and the header naming the real cause — this is not a CORS failure, and the information needed to report
+    <i>"the provider blocked us"</i> instead of <i>"405"</i> is available in the browser.
+</div>
+
+<h2>1. Raw fetch probes</h2>
+
+<table>
+    <thead>
+    <tr>
+        <th style="width: 22%">Host</th>
+        <th style="width: 18%">Gated?</th>
+        <th style="width: 15%">Result</th>
+        <th>Detail</th>
+    </tr>
+    </thead>
+    <tbody id="probeBody"></tbody>
+</table>
+
+<h2>2. The same thing through igv.js</h2>
+
+<p>
+    Three tracks are loaded below: two ENCODE-hosted bigWigs (from the Spacewalk session in the write-up) and one
+    bigWig from a host that does not gate. Load errors are reported here and in the console.
+</p>
+
+<table>
+    <thead>
+    <tr>
+        <th style="width: 40%">Track</th>
+        <th style="width: 15%">Result</th>
+        <th>Detail</th>
+    </tr>
+    </thead>
+    <tbody id="trackBody"></tbody>
+</table>
+
+<div id="igvDiv"></div>
+
+<h2>3. Reproducing it outside the browser</h2>
+
+<p>
+    <code>curl</code> is waved through by default because it does not claim to be a browser — which is why this
+    looks like a CORS problem at first. You have to send a browser User-Agent <i>and</i> a non-approved Origin
+    together to see the gate fire:
+</p>
+
+<pre id="curlRepro"></pre>
+
+<script type="module">
+
+    import igv from "../../js/index.js"
+
+    const ENCODE_BIGWIG_1 = "https://www.encodeproject.org/files/ENCFF809PHW/@@download/ENCFF809PHW.bigWig"
+    const ENCODE_BIGWIG_2 = "https://www.encodeproject.org/files/ENCFF091XDV/@@download/ENCFF091XDV.bigWig"
+    const UNGATED_BIGWIG = "https://human-dev-multiome-atlas.s3.amazonaws.com/tracks/Adrenal_c1/Adrenal_c1.pval.signal.bw"
+
+    document.getElementById("origin").textContent = window.location.origin
+
+    document.getElementById("curlRepro").textContent =
+        `U=${ENCODE_BIGWIG_1}\n` +
+        `UA='Mozilla/5.0 (Macintosh) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36'\n` +
+        `\n` +
+        `# Waved through - curl is not a browser\n` +
+        `curl -sI "$U" | head -1\n` +
+        `# HTTP/2 307\n` +
+        `\n` +
+        `# The real thing - browser User-Agent plus this page's origin\n` +
+        `curl -sI -H 'Origin: ${window.location.origin}' -H "User-Agent: $UA" "$U" \\\n` +
+        `  | grep -iE '^HTTP|waf-action'\n` +
+        `# HTTP/2 405\n` +
+        `# x-amzn-waf-action: captcha`
+
+    // ---- Section 1: raw fetch probes ------------------------------------------------------------
+
+    const probes = [
+        {label: "www.encodeproject.org", gated: "yes - Origin gated", url: ENCODE_BIGWIG_1, expect: "fail"},
+        {label: "www.encodeproject.org", gated: "yes - Origin gated", url: ENCODE_BIGWIG_2, expect: "fail"},
+        {label: "s3.amazonaws.com", gated: "no - control", url: UNGATED_BIGWIG, expect: "pass"}
+    ]
+
+    const probeBody = document.getElementById("probeBody")
+
+    for (const probe of probes) {
+        const row = probeBody.insertRow()
+        row.insertCell().innerHTML = `<code>${probe.label}</code><br><code style="color:#888">${probe.url.substring(probe.url.lastIndexOf("/") + 1)}</code>`
+        row.insertCell().textContent = probe.gated
+        const resultCell = row.insertCell()
+        const detailCell = row.insertCell()
+        resultCell.className = "verdict pending"
+        resultCell.textContent = "…"
+
+        // A range request, exactly as a bigWig reader would issue it.
+        fetch(probe.url, {headers: {Range: "bytes=0-64"}})
+            .then(response => {
+                const wafAction = response.headers.get("x-amzn-waf-action")
+                if (wafAction) {
+                    resultCell.className = "verdict fail"
+                    resultCell.textContent = "BLOCKED"
+                    detailCell.innerHTML = `HTTP <code>${response.status}</code>, <code>x-amzn-waf-action: ${wafAction}</code> — the WAF challenge.`
+                } else if (response.ok) {
+                    resultCell.className = "verdict pass"
+                    resultCell.textContent = "OK"
+                    detailCell.innerHTML = `HTTP <code>${response.status}</code>, ${response.headers.get("content-length") || "?"} bytes.`
+                } else {
+                    resultCell.className = "verdict fail"
+                    resultCell.textContent = "FAILED"
+                    detailCell.innerHTML = `HTTP <code>${response.status} ${response.statusText}</code>.`
+                }
+            })
+            .catch(error => {
+                resultCell.className = "verdict fail"
+                resultCell.textContent = "BLOCKED"
+                detailCell.innerHTML =
+                    `<code>${error.name}: ${error.message}</code><br>` +
+                    `The fetch rejected outright, so no status or headers reached this page. ` +
+                    `Check the Network tab for the real response — expect <code>405</code> with ` +
+                    `<code>x-amzn-waf-action: captcha</code>.`
+                console.log(`Probe failed: ${probe.url}`, error)
+            })
+    }
+
+    // ---- Section 2: the same URLs through igv.js -------------------------------------------------
+
+    const tracks = [
+        {name: "Homo sapiens 22Rv1 CTCF (ENCFF809PHW)", url: ENCODE_BIGWIG_1, format: "bigwig", color: "rgb(0,0,150)"},
+        {name: "Homo sapiens 22Rv1 CTCF (ENCFF091XDV)", url: ENCODE_BIGWIG_2, format: "bigwig", color: "rgb(0,0,150)"},
+        {name: "Control - not an ENCODE host", url: UNGATED_BIGWIG, format: "bigwig", color: "rgb(0,150,0)"}
+    ]
+
+    const trackBody = document.getElementById("trackBody")
+
+    const browser = await igv.createBrowser(document.getElementById("igvDiv"), {
+        genome: "hg38",
+        locus: "chr8:127,736,588-127,739,371"
+    })
+
+    for (const track of tracks) {
+        const row = trackBody.insertRow()
+        row.insertCell().textContent = track.name
+        const resultCell = row.insertCell()
+        const detailCell = row.insertCell()
+        resultCell.className = "verdict pending"
+        resultCell.textContent = "…"
+
+        try {
+            await browser.loadTrack(track)
+            resultCell.className = "verdict pass"
+            resultCell.textContent = "LOADED"
+            detailCell.textContent = "Track loaded and drawn."
+        } catch (error) {
+            resultCell.className = "verdict fail"
+            resultCell.textContent = "FAILED"
+            detailCell.innerHTML =
+                `<code>${error.message}</code><br>` +
+                `Note how little this says about the actual cause — a data provider refused the request ` +
+                `because this page's origin is not on its approved list.`
+            console.log(`Track load failed: ${track.url}`, error)
+        }
+    }
+
+</script>
+
+</body>
+
+</html>

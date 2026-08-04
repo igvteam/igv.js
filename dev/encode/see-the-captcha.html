@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>IGV - See the ENCODE CAPTCHA</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            color: #111;
+            padding: 1.5rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 { font-size: 1.6rem; margin-bottom: 0.5rem; }
+
+        h2 { font-size: 1.05rem; margin: 2.25rem 0 0.5rem; }
+
+        p, li { line-height: 1.55; font-size: 0.92rem; }
+
+        code, pre { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.8rem; }
+
+        pre {
+            background: #f5f5f5;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 0.75rem;
+            overflow-x: auto;
+            max-height: 320px;
+        }
+
+        .cta {
+            display: inline-block;
+            background: #b42318;
+            color: #fff;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            padding: 0.7rem 1.2rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 0.25rem 0.5rem 0.25rem 0;
+        }
+
+        .cta:hover { background: #91170f; }
+
+        .cta.secondary { background: #444; }
+
+        .cta.secondary:hover { background: #222; }
+
+        .note {
+            background: #fffbe6;
+            border: 1px solid #f0e0a0;
+            border-radius: 4px;
+            padding: 0.75rem;
+            font-size: 0.88rem;
+            line-height: 1.55;
+            margin: 1rem 0;
+        }
+
+        iframe {
+            width: 100%;
+            height: 520px;
+            border: 2px solid #b42318;
+            border-radius: 6px;
+            background: #fff;
+            margin-top: 0.75rem;
+        }
+
+        .hidden { display: none; }
+
+        .url {
+            word-break: break-all;
+            background: #f5f5f5;
+            padding: 0.4rem 0.6rem;
+            border-radius: 4px;
+            display: inline-block;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>The ENCODE CAPTCHA, actually presented</h1>
+
+<p>
+    Every discussion of this problem so far has been about a <code>405</code> status and an
+    <code>x-amzn-waf-action: captcha</code> header. But there is a real, human-facing CAPTCHA behind those — an AWS WAF
+    "Human Verification" page with an actual puzzle widget. This page puts it on your screen.
+</p>
+
+<p>The URL being requested is an ordinary ENCODE bigWig, the kind any igv.js track config would point at:</p>
+
+<p><code class="url" id="targetUrl"></code></p>
+
+<div class="note">
+    <b>Use a private/incognito window.</b> Once you solve a WAF challenge, AWS stores an <code>aws-waf-token</code> for
+    the host and waves you through for a while — so on a second visit you may get the file instead of the puzzle. A
+    fresh private window is the reliable way to see it. If you get a file download rather than a challenge, that is
+    what happened.
+</div>
+
+<h2>1. Click through to it directly</h2>
+
+<p>
+    This is a plain top-level navigation — no igv.js, no JavaScript, no <code>Origin</code> header at all. The WAF
+    challenges it purely because the request comes from something that looks like a browser. Opens in a new tab.
+</p>
+
+<p>
+    <a class="cta" id="directLink" href="#" target="_blank" rel="noopener">Open the ENCODE file in a new tab</a>
+</p>
+
+<h2>2. Or watch it render right here</h2>
+
+<p>
+    The challenge response sets no <code>X-Frame-Options</code> and no framing CSP, so it will render inline. Click
+    below and the AWS WAF puzzle loads in the frame — the same widget, live from
+    <code>captcha.awswaf.com</code>. You can actually solve it.
+</p>
+
+<p>
+    <button class="cta" id="loadFrame">Present the CAPTCHA below</button>
+    <button class="cta secondary" id="clearFrame">Clear</button>
+</p>
+
+<iframe id="captchaFrame" class="hidden" title="ENCODE WAF challenge"></iframe>
+
+<h2>3. What igv.js gets instead of your data</h2>
+
+<p>
+    This is the point of the whole exercise. When a bigWig reader issues its range request, <b>this HTML is the
+    response body</b> — served where the first bytes of a binary file should be. The reader has no idea it is looking
+    at a CAPTCHA page; it tries to parse it as a bigWig header, finds a bad magic number, and reports something
+    unrelated to what actually happened.
+</p>
+
+<p>
+    <button class="cta secondary" id="showBody">Fetch the response body igv.js would receive</button>
+</p>
+
+<pre id="bodyOut" class="hidden"></pre>
+
+<p id="statusLine"></p>
+
+<script type="module">
+
+    // An ordinary ENCODE-hosted bigWig - the same file referenced from the Spacewalk session
+    // in the "url mapping and the ENCODE gate" write-up.
+    const ENCODE_BIGWIG = "https://www.encodeproject.org/files/ENCFF809PHW/@@download/ENCFF809PHW.bigWig"
+
+    document.getElementById("targetUrl").textContent = ENCODE_BIGWIG
+    document.getElementById("directLink").href = ENCODE_BIGWIG
+
+    const frame = document.getElementById("captchaFrame")
+
+    document.getElementById("loadFrame").addEventListener("click", () => {
+        frame.src = ENCODE_BIGWIG
+        frame.classList.remove("hidden")
+        frame.scrollIntoView({behavior: "smooth", block: "center"})
+    })
+
+    document.getElementById("clearFrame").addEventListener("click", () => {
+        frame.removeAttribute("src")
+        frame.classList.add("hidden")
+    })
+
+    document.getElementById("showBody").addEventListener("click", async () => {
+        const out = document.getElementById("bodyOut")
+        const status = document.getElementById("statusLine")
+        out.classList.remove("hidden")
+        out.textContent = "Fetching…"
+        status.textContent = ""
+
+        try {
+            // A range request, exactly as a bigWig reader would issue it.
+            const response = await fetch(ENCODE_BIGWIG, {headers: {Range: "bytes=0-65535"}})
+            const wafAction = response.headers.get("x-amzn-waf-action")
+            const text = await response.text()
+
+            out.textContent = text
+            status.innerHTML = wafAction
+                ? `HTTP <code>${response.status}</code>, <code>x-amzn-waf-action: ${wafAction}</code>. ` +
+                  `Those ${text.length} bytes of HTML are what the bigWig reader was handed in place of your data.`
+                : `HTTP <code>${response.status}</code> — no WAF challenge on this request. ` +
+                  `You are probably carrying an <code>aws-waf-token</code> from a previous visit; try a private window.`
+        } catch (error) {
+            out.textContent = `${error.name}: ${error.message}`
+            status.textContent =
+                "The fetch rejected outright, so nothing reached this page - check the Network tab for the real response."
+        }
+    })
+
+</script>
+
+</body>
+
+</html>
