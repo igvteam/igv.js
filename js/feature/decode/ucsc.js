@@ -53,6 +53,7 @@ function decodeBed(tokens, header, maxColumnCount = Number.MAX_SAFE_INTEGER) {
 
         if (tokens.length > 4 && columnCount++ < maxColumnCount) {
             feature.score = tokens[4] === '.' ? 0 : Number(tokens[4])
+            feature.value = feature.score
             if (isNaN(feature.score)) {
                 return feature
             }
