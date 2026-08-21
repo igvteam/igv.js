@@ -81,8 +81,12 @@ class WigTrack extends TrackBase {
         if (this.disposed) return   // This track was removed during async load
         if (header) this.setTrackProperties(header)
 
-        this._initialColor = this.color || this.constructor.defaultColor
-        this._initialAltColor = this.altColor || this.constructor.defaultColor
+        if(typeof this.color === 'function') {
+            this.getColorForFeature = this.color
+        } else {
+            this._initialColor = this.color || this.constructor.defaultColor
+            this._initialAltColor = this.altColor || this.constructor.defaultColor
+        }
 
     }
 

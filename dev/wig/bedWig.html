@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <link href=https://igv.org/web/img/favicon.ico rel="shortcut icon">
+    <title>IGV - Dev</title>
+
+</head>
+
+<body>
+
+<button id="log-state">Log Session</button>
+<button id="bookmark">Bookmark</button>
+
+<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
+
+</div>
+
+<script type="module">
+
+    import igv from "../../js/index.js"
+
+    const div = document.getElementById("myDiv")
+    const options = {
+        queryParametersSupported: true,
+        genome: 'hg19',
+        locus: 'chr1:1-1,053,335',
+        tracks: [
+            {
+                name: 'All pos bars',
+                type: 'wig',
+                format: 'bed',
+                url: '../../test/data/bed/5_columns.bed',
+                indexed: false,
+                graphType: 'points',
+                pointSize: 10,
+                windowFunction: 'none',
+                min: 0,
+                max: 200,
+                color: (f) => {
+                    if(f.name && f.name.startsWith('OR')) {
+                        return 'rgb(255, 0, 0'
+                    } else {
+                        return 'blue'
+                    }
+                }
+            }
+        ]
+    }
+
+    igv.createBrowser(div, options).then(function (browser) {
+
+        document.getElementById("log-state").addEventListener("click", () => console.log(browser.toJSON()))
+
+        document.getElementById('bookmark').addEventListener('click', () => {
+            const path = window.location.href.slice()
+            const idx = path.indexOf("?")
+            const url = (idx > 0 ? path.substring(0, idx) : path) + "?sessionURL=blob:" + browser.compressedSession()
+            window.history.pushState({}, "IGV", url)
+        })
+
+    })
+
+
+</script>
+
+</body>
+
+</html>
+
