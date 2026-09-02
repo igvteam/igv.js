@@ -73,6 +73,11 @@ class WigTrack extends TrackBase {
             this.height = 20
         }
 
+        // If graph type is "points", set windowFunction to 'none' unless explicitly set.
+        if("points" === config.graphType && !config.windowFunction) {
+            this.windowFunction = "none"
+        }
+
         this.lineWidth = config.lineWidth || WigTrack.defaults.lineWidth // Set lineWidth from config
     }
 
@@ -533,6 +538,12 @@ class WigTrack extends TrackBase {
                         name: "Value:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;",
                         value: StringUtils.numberFormatter(selectedFeature.value.toFixed(4))
                     })
+                    if(selectedFeature.name) {
+                        popupData.push({
+                            name: "Name:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;",
+                            value: selectedFeature.name,
+                        })
+                    }
                 }
             }
             if (displayFeatures.length < features.length) {
