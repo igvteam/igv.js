@@ -371,7 +371,7 @@ class TrackBase {
      */
     extractPopupData(feature, genomeId) {
 
-        const filteredProperties = new Set(['row', 'color', 'chr', 'start', 'end', 'cdStart', 'cdEnd', 'strand', 'alpha'])
+        const filteredProperties = new Set(['row', 'color', 'chr', 'start', 'end', 'cdStart', 'cdEnd', 'strand', 'alpha', 'implicitExons'])
         const data = []
 
         let alleles, alleleFreqs

@@ -1,4 +1,5 @@
 import {IGVColor} from "../../node_modules/igv-utils/src/index.js"
+import {createImplicitExons, findUTRs} from "../feature/exonUtils.js"
 
 function getDecoder(definedFieldCount, fieldCount, autoSql, format) {
 //biggenepred
@@ -65,6 +66,16 @@ function getDecoder(definedFieldCount, fieldCount, autoSql, format) {
                     }
                 }
             }
+
+            // If exons are not explicitly defined the coding start and end still define coding and
+            // non-coding (UTR) regions.  Create implicit exons to represent them.
+            if (!feature.exons) {
+                const exons = createImplicitExons(feature)
+                if (exons) {
+                    feature.exons = exons
+                    feature.implicitExons = true
+                }
+            }
         }
     }
 
@@ -108,24 +119,6 @@ function getDecoder(definedFieldCount, fieldCount, autoSql, format) {
         return feature
     }
 
-}
-
-function findUTRs(exons, cdStart, cdEnd) {
-
-    for (let exon of exons) {
-        const end = exon.end
-        const start = exon.start
-        if (end < cdStart || start > cdEnd) {
-            exon.utr = true
-        } else {
-            if (cdStart >= start && cdStart <= end) {
-                exon.cdStart = cdStart
-            }
-            if (cdEnd >= start && cdEnd <= end) {
-                exon.cdEnd = cdEnd
-            }
-        }
-    }
 }
 
 export default getDecoder

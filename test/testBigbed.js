@@ -61,6 +61,20 @@ suite("testBigBed", function () {
         assert.equal(f.start, 773975)
         assert.equal(f.geneSymbol, 'HEATR2')
         assert.equal(f.spID, 'Q86Y56-3')
+
+        // No exons are defined, thickStart & thickEnd imply a non-coding start and end surrounding a coding middle
+        assert.deepEqual(f.exons, [
+            {start: 773975, end: 776710, utr: true},
+            {start: 776710, end: 791816},
+            {start: 791816, end: 792642, utr: true}
+        ])
+        assert.ok(f.implicitExons)
+
+        //chr7	54028	73584	uc003sii.2	0	-	54028	54028	255,0,0	.	AL137655
+        // thickStart === thickEnd, the feature is entirely non-coding
+        const nc = features[0]
+        assert.equal(nc.name, 'uc003sii.2')
+        assert.deepEqual(nc.exons, [{start: 54028, end: 73584, utr: true}])
     })
 
 

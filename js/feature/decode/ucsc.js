@@ -3,6 +3,7 @@ import DecodeError from "./decodeError.js"
 
 import {parseAttributeString} from "../gff/parseAttributeString.js"
 import GFFHelper from "../gff/gffHelper.js"
+import {createImplicitExons, findUTRs} from "../exonUtils.js"
 
 
 /**
@@ -108,6 +109,16 @@ function decodeBed(tokens, header, maxColumnCount = Number.MAX_SAFE_INTEGER) {
             if (exons.length > 0) {
                 findUTRs(exons, feature.cdStart, feature.cdEnd)
                 feature.exons = exons
+            }
+        }
+
+        // If exons are not explicitly defined (columns 10-12) the coding start and end (columns 7-8) still
+        // define coding and non-coding (UTR) regions.  Create implicit exons to represent them.
+        if (!feature.exons) {
+            const exons = createImplicitExons(feature)
+            if (exons) {
+                feature.exons = exons
+                feature.implicitExons = true
             }
         }
 
@@ -390,25 +401,6 @@ function decodeExons(exonCount, startsString, endsString, frameOffsetsString) {
         exons.push(exon)
     }
     return exons
-
-}
-
-function findUTRs(exons, cdStart, cdEnd) {
-
-    for (let exon of exons) {
-        const end = exon.end
-        const start = exon.start
-        if (end < cdStart || start > cdEnd) {
-            exon.utr = true
-        } else {
-            if (cdStart >= start && cdStart <= end) {
-                exon.cdStart = cdStart
-            }
-            if (cdEnd >= start && cdEnd <= end) {
-                exon.cdEnd = cdEnd
-            }
-        }
-    }
 
 }
 

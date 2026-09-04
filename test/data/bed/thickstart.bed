@@ -1,0 +1,6 @@
+chr1	1000	2000	utr_both	0	+	1200	1800
+chr1	3000	4000	utr_right	0	+	3000	3800
+chr1	5000	6000	utr_left	0	-	5200	6000
+chr1	7000	8000	all_coding	0	+	7000	8000
+chr1	9000	10000	non_coding	0	+	9000	9000
+chr1	11000	12000	no_thick	0	+	0	0

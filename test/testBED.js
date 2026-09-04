@@ -363,6 +363,50 @@ suite("testBed", function () {
         assert.equal(23, features.length)   // # of features over this region
     })
 
+    test("Implicit exons from thickStart/thickEnd", async function () {
+
+        const config = {
+            format: "bed",
+            indexed: false,
+            url: "test/data/bed/thickstart.bed"
+        }
+        const reader = new FeatureFileReader(config)
+        const features = await reader.readFeatures("chr1", 0, Number.MAX_VALUE)
+        assert.equal(features.length, 6)
+
+        const byName = new Map(features.map(f => [f.name, f]))
+
+        // Coding region in the middle -- 3 implicit exons, utr / coding / utr
+        const utrBoth = byName.get("utr_both")
+        assert.deepEqual(utrBoth.exons, [
+            {start: 1000, end: 1200, utr: true},
+            {start: 1200, end: 1800},
+            {start: 1800, end: 2000, utr: true}
+        ])
+        assert.ok(utrBoth.implicitExons)
+
+        // Coding region flush with the feature start -- 2 implicit exons
+        assert.deepEqual(byName.get("utr_right").exons, [
+            {start: 3000, end: 3800},
+            {start: 3800, end: 4000, utr: true}
+        ])
+
+        // Coding region flush with the feature end -- 2 implicit exons
+        assert.deepEqual(byName.get("utr_left").exons, [
+            {start: 5000, end: 5200, utr: true},
+            {start: 5200, end: 6000}
+        ])
+
+        // Entirely coding -- no exons needed
+        assert.isUndefined(byName.get("all_coding").exons)
+
+        // thickStart === thickEnd, feature is entirely non-coding
+        assert.deepEqual(byName.get("non_coding").exons, [{start: 9000, end: 10000, utr: true}])
+
+        // Coding region outside the feature bounds (thickStart/thickEnd not set) -- ignored
+        assert.isUndefined(byName.get("no_thick").exons)
+    })
+
     test("gffTags/nameField", async function () {
         const config = {
             type: "annotation",
