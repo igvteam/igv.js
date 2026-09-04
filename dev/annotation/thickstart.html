@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>BED thickStart / thickEnd</title>
+</head>
+<body>
+<h3>8 column bed -- implicit coding / non-coding blocks from thickStart & thickEnd</h3>
+<p>
+    The coding start and end (columns 7 & 8) define coding and non-coding (UTR) regions even if exons are not
+    explicitly defined (columns 10-12).  The last track repeats the first feature with the exon columns filled
+    in, it should render identically.
+</p>
+<div id="myDiv"></div>
+<script type="module">
+
+    import igv from "../../js/index.js"
+
+    //                                                thickStart  thickEnd
+    const bed8 = `chr1\t1000\t2000\tutr_both\t0\t+\t1200\t1800
+chr1\t3000\t4000\tutr_right\t0\t+\t3000\t3800
+chr1\t5000\t6000\tutr_left\t0\t-\t5200\t6000
+chr1\t7000\t8000\tall_coding\t0\t+\t7000\t8000
+chr1\t9000\t10000\tnon_coding\t0\t+\t9000\t9000
+chr1\t11000\t12000\tno_thick\t0\t+\t0\t0
+`
+    // The first feature above, with the exon (block) columns explicitly defined -- the reference rendering
+    const bed12 = `chr1\t1000\t2000\tbed12_ref\t0\t+\t1200\t1800\t0\t1\t1000\t0
+`
+
+    const dataURL = (text) => "data:application/octet-stream;base64," + btoa(text)
+
+    const browser = await igv.createBrowser(document.getElementById("myDiv"), {
+        reference: {
+            id: "hg19-sizes",
+            name: "hg19 (chrom sizes only)",
+            format: "chromsizes",
+            fastaURL: "../../test/data/fasta/hg19.chrom.sizes"
+        },
+        locus: "chr1:500-12500",
+        tracks: [
+            {
+                name: "bed 8 column",
+                type: "annotation",
+                format: "bed",
+                displayMode: "EXPANDED",
+                url: dataURL(bed8)
+            },
+            {
+                name: "bed 12 column (reference)",
+                type: "annotation",
+                format: "bed",
+                displayMode: "EXPANDED",
+                url: dataURL(bed12)
+            }
+        ]
+    })
+    window.igvBrowser = browser
+
+</script>
+</body>
+</html>
