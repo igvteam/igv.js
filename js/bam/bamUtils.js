@@ -52,7 +52,7 @@ const BamUtils = {
 
         const magic = readInt(ba, 0)
         if (magic !== BAM1_MAGIC_NUMBER) {
-            throw new Error('BAM header errror: bad magic number.  This could be caused by either a corrupt or missing file.')
+            throw new Error('BAM header error: bad magic number.  This could be caused by either a corrupt or missing file.')
         }
 
         const samHeaderLen = readInt(ba, 4)
