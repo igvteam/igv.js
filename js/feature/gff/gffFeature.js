@@ -121,7 +121,7 @@ class GFFTranscript extends GFFFeature {
             } else {
                 let exon = this.findExonContaining({start: lastStart, end: lastEnd})
                 if (!exon) {
-                    this.exons.push({start: lastStart, end: lastEnd, psuedo: true})
+                    this.exons.push({start: lastStart, end: lastEnd, pseudo: true})
                 }
                 lastStart = part.start
                 lastEnd = part.end
@@ -129,7 +129,7 @@ class GFFTranscript extends GFFFeature {
         }
         let exon = this.findExonContaining({start: lastStart, end: lastEnd})
         if (!exon) {
-            this.exons.push({start: lastStart, end: lastEnd, psuedo: true})
+            this.exons.push({start: lastStart, end: lastEnd, pseudo: true})
             this.start = Math.min(this.start, lastStart)
             this.end = Math.max(this.end, lastEnd)
         }
