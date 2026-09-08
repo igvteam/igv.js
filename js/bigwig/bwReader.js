@@ -7,6 +7,7 @@ import {parseAutoSQL} from "../util/ucscUtils.js"
 import Trix from "./trix.js"
 import BPTree from "./bpTree.js"
 import ChromTree from "./chromTree.js"
+import ChunkLoader from "./chunkLoader.js"
 
 
 const BIGWIG_MAGIC_LTH = 0x888FFC26 // BigWig Magic Low to High
@@ -32,6 +33,11 @@ class BWReader {
             new DataBuffer(BGZip.decodeDataURI(this.path).buffer) :
             igvxhr
 
+        // The header and index (R-tree and B+ tree) reads are small and scattered.  They are made through a
+        // chunk caching loader so that adjacent reads -- a tree node header and its body, sibling nodes, the
+        // file header and the chromosome tree that follows it -- are coalesced into a single http request.
+        this.indexLoader = isDataURL(this.path) ? this.loader : new ChunkLoader()
+
         const trixURL = config.trixURL || config.searchTrix
         if (trixURL) {
             this._trix = new Trix(`${trixURL}x`, trixURL)
@@ -46,6 +52,7 @@ class BWReader {
     async preload() {
         const data = await igvxhr.loadArrayBuffer(this.path)
         this.loader = new DataBuffer(data)
+        this.indexLoader = this.loader
         for (let rpTree of this.rpTreeCache.values()) {
             rpTree.loader = this.loader
         }
@@ -53,6 +60,9 @@ class BWReader {
             for (let bpTree of this._searchTrees) {
                 bpTree.loader = this.loader
             }
+        }
+        if (this.chromTree) {
+            this.chromTree.bpTree.loader = this.loader
         }
     }
 
@@ -278,7 +288,7 @@ class BWReader {
             this._searchTrees = []
             for (let offset of this.header.extraIndexOffsets) {
                 const type = undefined
-                const bpTree = await BPTree.loadBpTree(this.path, this.config, offset, type, this.loader)
+                const bpTree = await BPTree.loadBpTree(this.path, this.config, offset, type, this.indexLoader)
                 this._searchTrees.push(bpTree)
             }
         }
@@ -310,7 +320,7 @@ class BWReader {
         if (this.header) {
             return this.header
         } else {
-            let data = await this.loader.loadArrayBuffer(this.path, buildOptions(this.config, {
+            let data = await this.indexLoader.loadArrayBuffer(this.path, buildOptions(this.config, {
                 range: {
                     start: 0,
                     size: BBFILE_HEADER_SIZE
@@ -368,7 +378,7 @@ class BWReader {
                 start: startOffset,
                 size: size
             }
-            data = await this.loader.loadArrayBuffer(this.path, buildOptions(this.config, {range: range}))
+            data = await this.indexLoader.loadArrayBuffer(this.path, buildOptions(this.config, {range: range}))
             const extHeaderParser = new BinaryParser(new DataView(data), this.littleEndian)
 
             // Load zoom headers, store in order of decreasing reduction level (increasing resolution)
@@ -397,7 +407,7 @@ class BWReader {
                 this.totalSummary = new BWTotalSummary(extHeaderParser)
             }
 
-            this.chromTree = new ChromTree(this.path, this.config, header.chromTreeOffset, this.loader)
+            this.chromTree = new ChromTree(this.path, this.config, header.chromTreeOffset, this.indexLoader)
             await this.chromTree.init()
 
             // Estimate feature density from dataCount (bigbed only)
@@ -417,7 +427,7 @@ class BWReader {
     }
 
     async #readDataCount(offset) {
-        const data = await this.loader.loadArrayBuffer(this.path, buildOptions(this.config, {
+        const data = await this.indexLoader.loadArrayBuffer(this.path, buildOptions(this.config, {
             range: {
                 start: offset,
                 size: 4
@@ -430,7 +440,7 @@ class BWReader {
 
     async loadExtendedHeader(offset) {
 
-        let data = await this.loader.loadArrayBuffer(this.path, buildOptions(this.config, {
+        let data = await this.indexLoader.loadArrayBuffer(this.path, buildOptions(this.config, {
             range: {
                 start: offset,
                 size: BBFILE_EXTENDED_HEADER_HEADER_SIZE
@@ -443,7 +453,7 @@ class BWReader {
         if (extraIndexCount === 0) return
 
         let sz = extraIndexCount * (2 + 2 + 8 + 4 + 10 * (2 + 2))
-        data = await this.loader.loadArrayBuffer(this.path, buildOptions(this.config, {
+        data = await this.indexLoader.loadArrayBuffer(this.path, buildOptions(this.config, {
             range: {
                 start: extraIndexListOffset,
                 size: sz
@@ -484,7 +494,7 @@ class BWReader {
         if (rpTree) {
             return rpTree
         } else {
-            rpTree = new RPTree(this.path, this.config, offset, this.loader)
+            rpTree = new RPTree(this.path, this.config, offset, this.indexLoader)
             await rpTree.init()
             this.rpTreeCache.set(offset, rpTree)
             return rpTree

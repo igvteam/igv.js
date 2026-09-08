@@ -1,6 +1,6 @@
-import {igvxhr} from "../../node_modules/igv-utils/src/index.js"
 import BinaryParser from "../binary.js"
 import {buildOptions} from "../util/igvUtils.js"
+import ChunkLoader from "./chunkLoader.js"
 
 const RPTREE_HEADER_SIZE = 48
 const RPTREE_NODE_LEAF_ITEM_SIZE = 32   // leaf item size
@@ -17,7 +17,7 @@ export default class RPTree {
         this.path = path
         this.config = config
         this.startOffset = startOffset
-        this.loader = loader || igvxhr
+        this.loader = loader || new ChunkLoader()
     }
 
 

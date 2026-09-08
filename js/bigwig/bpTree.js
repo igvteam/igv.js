@@ -1,6 +1,6 @@
-import {igvxhr} from "../../node_modules/igv-utils/src/index.js"
 import {buildOptions} from "../util/igvUtils.js"
 import BinaryParser from "../binary.js"
+import ChunkLoader from "./chunkLoader.js"
 
 /**
  * A UCSC BigBed B+ tree, used to support searching the "extra indexes".
@@ -27,7 +27,7 @@ export default class BPTree {
         if(type) {
             this.type = type
         }
-        this.loader = loader || igvxhr
+        this.loader = loader || new ChunkLoader()
     }
 
     async init() {
