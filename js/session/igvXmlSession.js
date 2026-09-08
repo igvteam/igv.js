@@ -1,3 +1,5 @@
+import {inferFileFormat} from "../util/fileFormatUtils.js"
+
 /**
  * Minimal support for the legacy IGV desktop session format.
  */
@@ -19,6 +21,7 @@ class XMLSession {
         this.tracks = tracks
 
         const resourceMap = new Map()
+        this.resourceConfigs = []
         Array.from(resourceElements).forEach(function (r, idx) {
             var config = {
                 url: r.getAttribute("path"),
@@ -29,10 +32,11 @@ class XMLSession {
                 config.format = r.getAttribute("format")
             }
             resourceMap.set(config.url, config)
+            this.resourceConfigs.push(config)
             if (!hasTrackElements) {
                 tracks.push(config)
             }
-        })
+        }, this)
 
         // Check for optional Track section
         if (hasTrackElements) {
@@ -80,6 +84,50 @@ class XMLSession {
                 }
             })
         }
+    }
+
+    /**
+     * Resolve the format of resources whose type could not be determined from the session file.  The XML session
+     * format is a legacy of IGV desktop and does not explicitly identify sample info resources, so as with IGV
+     * desktop a format is inferred from the file name, and failing that the file contents.  Sample info is the
+     * fallback for a tab delimited text file of otherwise unknown format -- we can never know for sure.
+     *
+     * This is a separate, asynchronous step as it can require reading the first bytes of the resource.
+     *
+     * @returns {Promise<XMLSession>}
+     */
+    async init() {
+
+        for (const config of this.resourceConfigs) {
+
+            if (!config.format && !config.type && config.url) {
+                try {
+                    const format = await inferFileFormat(config, {sampleInfoFallback: true})
+                    if (format) {
+                        config.format = format
+                    }
+                } catch (e) {
+                    console.warn(`Error inferring format for session resource ${config.url}`, e)
+                }
+            }
+
+            if (config.format && config.format.toLowerCase() === "sampleinfo") {
+                // Sample info is not a track
+                const idx = this.tracks.indexOf(config)
+                if (idx >= 0) {
+                    this.tracks.splice(idx, 1)
+                }
+                if (this.sampleinfo) {
+                    this.sampleinfo.push({url: config.url})
+                } else {
+                    this.sampleinfo = [{url: config.url}]
+                }
+            }
+        }
+
+        this.resourceConfigs = undefined
+
+        return this
     }
 
     processRootNode(xmlDoc, knownGenomes) {

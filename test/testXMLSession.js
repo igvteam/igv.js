@@ -40,5 +40,26 @@ suite("testXMLSession", function () {
         assert.equal(firstTrack.windowFunction, "mean")
     })
 
+    /**
+     * The XML session format does not identify sample info resources.  A "Resource" with no track type is tested
+     * for sample info as a last resort, after all other format tests fail.
+     */
+    test("sample info resource", async function () {
+
+        const sessionPath = "test/data/session/session-sampleinfo.xml"
+
+        const xmlString = await igvxhr.loadString(sessionPath, {})
+        const sessionObject = await new XMLSession(xmlString, knownGenomes).init()
+
+        assert.ok(sessionObject)
+
+        // The sample info resource is not a track
+        assert.equal(sessionObject.tracks.length, 1)
+        assert.equal(sessionObject.tracks[0].url, "test/data/seg/chr_17_only.seg")
+        assert.equal(sessionObject.tracks[0].format, "seg")
+
+        assert.equal(sessionObject.sampleinfo.length, 1)
+        assert.equal(sessionObject.sampleinfo[0].url, "test/data/sample/GBM.txt")
+    })
 
 })

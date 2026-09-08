@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<Session version='1' genome='hg19' locus='chr17'>
+    <Resources>
+        <Resource path='test/data/seg/chr_17_only.seg'/>
+        <Resource path='test/data/sample/GBM.txt'/>
+    </Resources>
+    <HiddenAttributes>
+        <Attribute name='Sample'/>
+        <Attribute name='NAME'/>
+        <Attribute name='DATAFILE'/>
+        <Attribute name='DATATYPE'/>
+    </HiddenAttributes>
+</Session>

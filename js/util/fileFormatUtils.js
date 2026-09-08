@@ -76,7 +76,15 @@ function compareArrays(a, b) {
 
 }
 
-async function inferFileFormat(config) {
+/**
+ * Attempt to infer the file format from the file name, or failing that the first bytes of the file.
+ *
+ * @param config
+ * @param sampleInfoFallback  If true, and no other format can be determined, test the contents for a possible
+ *                            sample info file.  See "maybeSampleInfo".
+ * @returns {Promise<string|undefined>}
+ */
+async function inferFileFormat(config, {sampleInfoFallback = false} = {}) {
 
     let format
 
@@ -88,7 +96,7 @@ async function inferFileFormat(config) {
 
     // Try determining from first few bytes of file
     if (!format) {
-        format = await inferFileFormatFromContents(config)
+        format = await inferFileFormatFromContents(config, {sampleInfoFallback})
     }
     return format
 
@@ -164,10 +172,12 @@ function inferIndexPath(url, extension) {
 /**
  * Attempt to infer the file format from the first 1000 bytes.
  *
- * @param {url}
+ * @param config
+ * @param sampleInfoFallback  If true, and no other format can be determined, test the contents for a possible
+ *                            sample info file.  See "maybeSampleInfo".
  * @returns {Promise<void>}
  */
-async function inferFileFormatFromContents(config) {
+async function inferFileFormatFromContents(config, {sampleInfoFallback = false} = {}) {
 
     const url = config.url
     let options = buildOptions(config, {range: {start: 0, size: 1000}})
@@ -253,8 +263,50 @@ async function inferFileFormatFromContents(config) {
         return "hiccups"
     }
 
+    // Last resort -- test for a sample info file.  This is only done on request as there is no definitive test,
+    // sample info files are just tab delimited text with no required header or extension.
+    if (sampleInfoFallback && maybeSampleInfo(bytes)) {
+        return "sampleinfo"
+    }
+
     // Format unknown
     return null
+}
+
+/**
+ * Minimal validation of a sample info file, ported from the IGV desktop class FileFormatUtils.  Sample info files
+ * have no distinguishing extension, magic number, or header line, so the best that can be done is verify that the
+ * contents are (1) text, and (2) tab delimited.  We can never know for sure.  This test should only be applied
+ * after all other format tests have failed.
+ *
+ * @param bytes  The first bytes of the file, a Uint8Array
+ * @returns {boolean}
+ */
+function maybeSampleInfo(bytes) {
+
+    // Trailing nulls are tolerated (padding), nulls elsewhere indicate a binary file
+    let end = bytes.length
+    while (end > 0 && bytes[end - 1] === 0) end--
+    for (let i = 0; i < end; i++) {
+        if (bytes[i] === 0) return false
+    }
+
+    // These bytes are a partial read of the file, the last line is likely incomplete and might be truncated in the
+    // middle of a multi-byte character.  Drop it before validating the encoding.
+    const lastEOL = end > 0 ? bytes.lastIndexOf(10, end - 1) : -1
+    if (lastEOL > 0) end = lastEOL
+
+    let contents
+    try {
+        contents = new TextDecoder("utf-8", {fatal: true}).decode(bytes.subarray(0, end))
+    } catch (e) {
+        return false   // Not UTF-8, so not a text file
+    }
+
+    // Look for tab characters, there needs to be at least 2 (a header line and a data line, minimum 2 columns each)
+    const firstTab = contents.indexOf('\t')
+    if (firstTab < 0) return false
+    return contents.indexOf('\t', firstTab + 1) > 0
 }
 
 
@@ -275,6 +327,7 @@ async function inferFileFormatFromContents(config) {
 // }
 
 export {inferFileFormatFromContents}
+export {maybeSampleInfo}
 export {inferIndexPath}
 export {inferFileFormat}
 export {knownFileExtensions}

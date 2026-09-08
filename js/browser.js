@@ -424,7 +424,7 @@ class Browser {
             if (filename.endsWith(".xml")) {
                 const knownGenomes = GenomeUtils.KNOWN_GENOMES
                 const string = await igvxhr.loadString(urlOrFile)
-                config = new XMLSession(string, knownGenomes)
+                config = await new XMLSession(string, knownGenomes).init()
 
             } else if (filename.endsWith("hub.txt")) {
                 const hub = await loadHub(urlOrFile, options)
