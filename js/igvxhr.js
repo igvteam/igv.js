@@ -423,7 +423,7 @@ var igv = (function (igv) {
 
 
     function isAmazonV4Signed(url) {
-        return url.indexOf("X-Amz-Signature") > -1;
+        return url.indexOf("X-Amz-Signature") > -1 || url.indexOf("X-Goog-Signature") > -1;
     }
 
     /**
