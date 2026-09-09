@@ -29,7 +29,7 @@ class FeatureFileReader {
         this.config = config || {}
         this.genome = genome
         this.indexURL = config.indexURL
-        this.indexed = config.indexed || this.indexURL !== undefined
+        this.indexed = config.indexed || !!this.indexURL
         this.queryable = this.indexed
 
         if (FileUtils.isFile(this.config.url)) {

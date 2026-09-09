@@ -25,8 +25,12 @@ class XMLSession {
         Array.from(resourceElements).forEach(function (r, idx) {
             var config = {
                 url: r.getAttribute("path"),
-                indexURL: r.getAttribute("index"),
                 order: idx
+            }
+            // NOTE: getAttribute returns null for missing attributes.  Only set "indexURL" if actually present,
+            // a null value is interpreted as "indexed" by some readers.
+            if (r.hasAttribute("index")) {
+                config.indexURL = r.getAttribute("index")
             }
             if (r.hasAttribute("format")) {
                 config.format = r.getAttribute("format")
