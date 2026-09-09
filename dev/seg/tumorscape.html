@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Seg Big</title>
+
+</head>
+
+<body>
+
+<h1>Tumorscape copy number</h1>
+
+
+<p>Session from the Tumorscape portal using deprecated http:// urls.</p>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js"
+
+    var options =
+        {
+            genome: "hg19",
+            locus: "chr11:118,345,794-118,354,209",
+            tracks: [
+                {
+                    "url": "http://www.broadinstitute.org/igvdata/tcga/tcgascape/150601_regpeel/acute_myeloid_leukemia.seg.gz",
+                }
+            ],
+            sampleinfo: [
+                {
+                    "url": "http://www.broadinstitute.org/igvdata/tcga/tcgascape/150601_regpeel/sample_info.txt"
+                }
+            ]
+        }
+
+    var igvDiv = document.getElementById("igvDiv")
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser")
+            window.igvBrowser = browser
+        })
+
+
+</script>
+
+</body>
+
+</html>
+</title>
+</head>
+<body>
+
+</body>
+</html>
