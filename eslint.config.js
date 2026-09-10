@@ -29,8 +29,16 @@ export default [
             'no-cond-assign': 'off',
             'no-constant-condition': ['error', {checkLoops: false}],
             'no-control-regex': 'off',
+            // Stylistic here: declarations in an unbraced `case` are used
+            // throughout and are not a defect.
+            'no-case-declarations': 'off',
             'require-atomic-updates': 'off',
             'no-inner-declarations': 'off'
         }
+    },
+    {
+        // Ported from Python; reuses `var` names freely within a function.
+        files: ['js/cnvpytor/**'],
+        rules: {'no-redeclare': 'off'}
     }
 ]

@@ -229,7 +229,7 @@ class GFFTranscript extends GFFFeature {
         } else {
             // utr.utr = true
             // exons.push(utr)
-            console.error("No exon found spanning " + cds.start + "-" + cds.end)
+            console.error("No exon found spanning " + utr.start + "-" + utr.end)
         }
 
         // Expand feature --  for transcripts not explicitly represented in the file

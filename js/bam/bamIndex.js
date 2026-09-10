@@ -114,7 +114,7 @@ class BamIndex {
             this.tabix = tabix
 
         } else {
-            throw new Error(indexURL + " is not a " + (tabix ? "tabix" : "bai") + " file")
+            throw new Error("Not a " + (tabix ? "tabix" : "bai") + " index file")
         }
 
 

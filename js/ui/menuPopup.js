@@ -221,7 +221,7 @@ function createMenuElements(itemList, popover) {
         } else if (typeof item === 'string') {
             el = DOMUtils.div({class: 'context-menu'})
             el.innerHTML = item
-        } else if (typeof item === 'Node') {
+        } else if (item instanceof Node) {
             el = item
         } else {
             if (typeof item.init === 'function') {
@@ -271,7 +271,6 @@ function createMenuElements(itemList, popover) {
                     e.stopPropagation()
                 })
 
-                // eslint-disable-next-line no-inner-declarations
                 function handleClick(e) {
                     item.click()
                     DOMUtils.hide(popover)

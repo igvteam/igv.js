@@ -138,7 +138,7 @@ class AEDParser {
                 // We are at the end of the line
                 if (quotedString) {
                     token += '\n' // Add newline to the token
-                    line = nextLine() // Keep going
+                    line = dataWrapper.nextLine() // Keep going
                 } else {
                     // We can end the loop
                     break

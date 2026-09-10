@@ -287,7 +287,7 @@ class TrackBase {
                             max = Number(tokens[1])
                         }
                         if (Number.isNaN(max) || Number.isNaN(min)) {
-                            console.warn(`Unexpected viewLimits value in track line: ${properties["viewLimits"]}`)
+                            console.warn(`Unexpected viewLimits value in track line: ${properties[key]}`)
                         } else {
                             tracklineConfg.autoscale = false
                             tracklineConfg.dataRange = {min, max}
@@ -295,6 +295,7 @@ class TrackBase {
                             this.viewLimitMax = max
                         }
                     }
+                    break
                 case "name":
                     tracklineConfg[key] = properties[key]
                     break
@@ -520,7 +521,7 @@ class TrackBase {
      * @returns {*|string|string}
      */
     getColorForFeature(f) {
-        return (typeof this.color === "function") ? this.color(feature) : this.color
+        return (typeof this.color === "function") ? this.color(f) : this.color
     }
 
     numericDataMenuItems() {

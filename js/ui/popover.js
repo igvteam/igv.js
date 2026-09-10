@@ -147,7 +147,7 @@ function createMenuElements(itemList, popover) {
         if (typeof item === 'string') {
             element = DOMUtils.div();
             element.innerHTML = item;
-        } else if (typeof item === 'Node') {
+        } else if (item instanceof Node) {
             element = item;
         } else {
             if (typeof item.init === 'function') {
@@ -173,7 +173,6 @@ function createMenuElements(itemList, popover) {
                     e.stopPropagation();
                 })
 
-                // eslint-disable-next-line no-inner-declarations
                 function handleClick(e) {
                     item.click();
                     DOMUtils.hide(popover);

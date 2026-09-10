@@ -97,10 +97,11 @@ class CachedSequence {
         if (this.#currentQuery && this.#currentQuery[0].contains(chr, start, end)) {
             return this.#currentQuery[1]
         } else {
-            const queryPromise = new Promise(async (resolve, reject) => {
-                interval.features = await this.sequenceReader.readSequence(chr, qstart, qend)
-                resolve(interval)
-            })
+            const queryPromise = this.sequenceReader.readSequence(chr, qstart, qend)
+                .then(features => {
+                    interval.features = features
+                    return interval
+                })
             this.#currentQuery = [interval, queryPromise]
             return queryPromise
         }

@@ -9,7 +9,7 @@ const downsample = (input, max) => {
             } else {
                 const samplingProb = max / (i + 1)
                 if (Math.random() < samplingProb) {
-                    const idx = Math.floor((RAND.nextDouble() * (max - 1)))
+                    const idx = Math.floor((Math.random() * (max - 1)))
                     downsampled[idx] = input[i]
                 }
             }

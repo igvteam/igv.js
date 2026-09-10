@@ -1447,6 +1447,7 @@ class AlignmentTrack extends TrackBase {
                     break
                 }
 
+            // falls through
             case "tlen":
             case "fragmentLength":
 

@@ -85,7 +85,7 @@ class CNVpytorVCF {
         let delete_likelihood_scores = caller == 'ReadDepth' ? true : false;
 
         // Step2: Update the binsize according to user provided bin size
-        var avgbin = this.adjust_bin_size(wigFeatures, delete_likelihood_scores=delete_likelihood_scores)
+        var avgbin = this.adjust_bin_size(wigFeatures, delete_likelihood_scores)
 
         // this is to save objects
         // console.log("avgbin: ", avgbin)

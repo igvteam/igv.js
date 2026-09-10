@@ -179,7 +179,7 @@ function parseLocusString(locus, isSoftclipped = false) {
 
             // Allow negative coordinates only if browser is softclipped, i.e. there is at least alignment track with softclipping on
             if (locusObject.start < 0 && !isSoftclipped) {
-                const delta = -extent.start
+                const delta = -locusObject.start
                 locusObject.start += delta
                 locusObject.end += delta
             }

@@ -217,7 +217,7 @@ class TrackDbHub {
                 max = Number.parseInt(tokens[1])
             }
             if (Number.isNaN(max) || Number.isNaN(min)) {
-                console.warn(`Unexpected viewLimits value in track line: ${properties["viewLimits"]}`)
+                console.warn(`Unexpected viewLimits value in track line: ${t.getProperty("viewLimits")}`)
             } else {
                 config.min = min
                 config.max = max

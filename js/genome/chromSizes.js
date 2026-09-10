@@ -30,6 +30,7 @@ class ChromSizes {
         if(!this.#chromosomeNames) {
             this.#chromosomeNames = Array.from(this.chromosomes.keys())
         }
+        return this.#chromosomeNames
     }
 
     async getSequence(chr, start, end) {

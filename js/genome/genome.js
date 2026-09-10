@@ -259,7 +259,7 @@ class Genome {
     getChromosomeCoordinate(genomeCoordinate) {
 
         if (this.cumulativeOffsets === undefined) {
-            this.cumulativeOffsets = computeCumulativeOffsets.call(this)
+            this.cumulativeOffsets = this.#computeCumulativeOffsets()
         }
 
         let lastChr = undefined
@@ -288,24 +288,24 @@ class Genome {
     getCumulativeOffset(chr) {
 
         if (this.cumulativeOffsets === undefined) {
-            this.cumulativeOffsets = computeCumulativeOffsets.call(this)
+            this.cumulativeOffsets = this.#computeCumulativeOffsets()
         }
 
         const queryChr = this.getChromosomeName(chr)
         return this.cumulativeOffsets[queryChr]
+    }
 
-        function computeCumulativeOffsets() {
+    #computeCumulativeOffsets() {
 
-            let acc = {}
-            let offset = 0
-            for (let name of this.#wgChromosomeNames) {
-                acc[name] = Math.floor(offset)
-                const chromosome = this.getChromosome(name)
-                offset += chromosome.bpLength
-            }
-
-            return acc
+        let acc = {}
+        let offset = 0
+        for (let name of this.#wgChromosomeNames) {
+            acc[name] = Math.floor(offset)
+            const chromosome = this.getChromosome(name)
+            offset += chromosome.bpLength
         }
+
+        return acc
     }
 
     /**

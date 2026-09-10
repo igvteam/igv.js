@@ -135,6 +135,7 @@ class MergedTrack extends TrackBase {
             const g = this.tracks[0].autoscaleGroup
             return (this.tracks.some(t => g !== t.autoscaleGroup)) ? undefined : g
         }
+        return undefined
     }
 
     /**

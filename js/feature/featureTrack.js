@@ -137,6 +137,7 @@ class FeatureTrack extends TrackBase {
             if (this.visibilityWindow === undefined && (this.config.indexed === false || !this.config.indexURL)) {
                 return true
             }
+            return false
         }
     }
 
