@@ -256,7 +256,7 @@ class FastaSequence {
             const currentBlockCompressedPosition = currentBlockInfo[COMPRESSED_POSITION]
 
             const nextBlockNumber = blockIndices[i + 1]
-            let compressedBytes = []
+            let compressedBytes
             if (nextBlockNumber != -1) {  //default : read current entire block only
                 const nextBlockInfo = (this.compressedIndex)[nextBlockNumber]
                 const nextBlockCompressedPosition = nextBlockInfo[COMPRESSED_POSITION]

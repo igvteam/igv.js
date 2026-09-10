@@ -258,7 +258,7 @@ function renderAminoAcidSequence(ctx, strand, leftExon, exon, riteExon, bpStart,
     let bpTripletEnd
 
     let remainder
-    let aminoAcidBackdropColorCounter = 1
+    let aminoAcidBackdropColorCounter
     let colorToggle
     let index
     if ('+' === strand) {
@@ -303,7 +303,6 @@ function renderAminoAcidSequence(ctx, strand, leftExon, exon, riteExon, bpStart,
         }
 
         aminoAcidBackdropColorCounter = 1
-        index = 0
         for (index = 0, bpTripletEnd = ee; bpTripletEnd > ss; index++, bpTripletEnd -= 3) {
             colorToggle = aminoAcidBackdropColorCounter % 2
             bpTripletStart = Math.max(ss, bpTripletEnd - 3)
@@ -407,9 +406,9 @@ function getAminoAcidLetterWithExonGap(strand, phase, phaseExtentStart, phaseExt
 
     let ss
     let ee
-    let stringA = ''
-    let stringB = ''
-    let triplet = ''
+    let stringA
+    let stringB
+    let triplet
 
     const aminoAcidLetters = {left: undefined, rite: undefined}
     if ('+' === strand) {

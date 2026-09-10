@@ -67,7 +67,6 @@ class AEDParser {
         const delimiter = this.delimiter || "\t"
         let i = 0
         let line
-        let wig
 
         while ((line = dataWrapper.nextLine()) !== undefined) {
             i++
@@ -87,7 +86,7 @@ class AEDParser {
                 continue
             }
 
-            const feature = decode.call(this, tokens, wig)
+            const feature = decode.call(this, tokens)
             if (feature) {
                 allFeatures.push(feature)
                 cnt++

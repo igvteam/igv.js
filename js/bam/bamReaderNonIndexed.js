@@ -13,7 +13,6 @@ import FeatureCache from "../feature/featureCache.js"
  */
 class BamReaderNonIndexed {
 
-    chrAliasTable = new Map()
 
     constructor(config, genome) {
         this.config = config
@@ -72,37 +71,6 @@ class BamReaderNonIndexed {
         return alignments
     }
 
-    async #getQueryChr(chr) {
-
-        const ownNames = new Set(this.header.chrNames)
-        if (ownNames.has(chr)) {
-            return chr
-        }
-
-        if (this.chrAliasTable.has(chr)) {
-            return this.chrAliasTable.get(chr)
-        }
-
-        // Try alias
-
-        if (this.genome) {
-            const aliasRecord = await this.genome.getAliasRecord(chr)
-            let alias
-            if (aliasRecord) {
-                const aliases = Object.keys(aliasRecord)
-                    .filter(k => k !== "start" && k !== "end")
-                    .map(k => aliasRecord[k])
-                    .filter(a => ownNames.has(a))
-                if (aliases.length > 0) {
-                    alias = aliases[0]
-                }
-            }
-            this.chrAliasTable.set(chr, alias)  // alias may be undefined => no alias exists. Setting prevents repeated attempts
-            return alias
-        }
-
-        return chr
-    }
 
 }
 

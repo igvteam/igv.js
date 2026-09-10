@@ -3,7 +3,16 @@ import globals from 'globals'
 
 export default [
     {
-        ignores: ['dist/**', 'js/vendor/**', 'examples/**', 'dev/**', 'tmp/**']
+        ignores: [
+            'dist/**',
+            'examples/**',
+            'dev/**',
+            'tmp/**',
+            // Third party / generated, kept as shipped upstream
+            'js/vendor/**',
+            'js/canvas2svg.js',
+            'js/cram/cram-bundle.js'
+        ]
     },
     js.configs.recommended,
     {

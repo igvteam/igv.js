@@ -112,7 +112,7 @@ class Genome {
         // Optionally create the psuedo chromosome "all" to support whole genome view
         this.wholeGenomeView = config.wholeGenomeView !== false && this.#wgChromosomeNames && this.chromosomes.size > 1
         if (this.wholeGenomeView) {
-            const l = this.#wgChromosomeNames.reduce((accumulator, currentValue) => accumulator += this.chromosomes.get(currentValue).bpLength, 0)
+            const l = this.#wgChromosomeNames.reduce((accumulator, currentValue) => accumulator + this.chromosomes.get(currentValue).bpLength, 0)
             this.chromosomes.set("all", new Chromosome("all", 0, l))
         }
     }

@@ -41,7 +41,7 @@ export default class ChromTree {
                     return
                 }
             } catch (error) {
-                throw new Error(error)
+                throw new Error(`Error searching chromosome tree for "${chr}"`, {cause: error})
             }
         }
     }
@@ -111,7 +111,7 @@ export default class ChromTree {
         try {
             return reverseSearch.call(this, this.startOffset + 32, id)
         } catch (error) {
-            throw new Error(error)
+            throw new Error(`Error searching chromosome tree for id ${id}`, {cause: error})
         }
     }
 

@@ -120,9 +120,7 @@ class CachedSequence {
         return typeof this.sequenceReader.getFirstChromosomeName === 'function' ? this.sequenceReader.getFirstChromosomeName() : undefined
     }
 
-    #isIntervalInView(interval) {
-        this.browser.referenceFrameList
-    }
+
 }
 
 

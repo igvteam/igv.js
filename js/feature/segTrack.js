@@ -127,12 +127,7 @@ class SegTrack extends TrackBase {
 
         for (const attribute of [NULL_GROUP, ...this.browser.sampleInfo.attributeNames]) {
 
-            let initialState = false
-            if (NULL_GROUP === attribute) {
-                initialState = (NULL_GROUP === this.groupBy)
-            } else {
-                initialState = (attribute === this.groupBy)
-            }
+            const initialState = (attribute === this.groupBy)
             const element = createCheckbox(attribute, initialState)
 
             menuItems.push(

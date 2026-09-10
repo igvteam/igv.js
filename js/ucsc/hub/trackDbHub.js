@@ -137,16 +137,6 @@ class TrackDbHub {
         return this.groupTrackConfigs
     }
 
-    /**
-     * Return an array of igv track config objects that satisfy the filter
-     */
-    #getTracksConfigs(filter) {
-        return this.trackStanzas.filter(t => {
-            return supportedTypes.has(t.format) && t.hasProperty("bigDataUrl") && (!filter || filter(t))
-        })
-            .map(t => this.#getTrackConfig(t))
-    }
-
 
     /** example
      * track gc5Base

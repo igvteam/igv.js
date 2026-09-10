@@ -10,7 +10,7 @@ function pack(featureList, maxRows) {
     rows.push(-1000)
 
     for (let feature of featureList) {
-        let r = 0
+        let r
         const len = Math.min(rows.length, maxRows)
         for (r = 0; r < len; r++) {
             if (feature.start >= rows[r]) {

@@ -224,7 +224,7 @@ class AlignmentTrack extends TrackBase {
         if (referenceSequence) {
             referenceSequence = referenceSequence.toUpperCase()
         }
-        let alignmentRowYInset = 0
+        let alignmentRowYInset
 
         // Set colorBy default if neccessary
         if (!this.colorBy) {
