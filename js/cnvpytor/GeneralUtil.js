@@ -116,26 +116,4 @@ function linspace(a, b, n) {
     return ret;
 }
 
-export function histogram2d(data1, data2, binsX, binsY) {
-    // Calculate bin sizes
-    const minX = math.min(data1);
-    const maxX = math.max(data1);
-    const minY = math.min(data2);
-    const maxY = math.max(data2);
-    const binSizeX = (maxX - minX) / binsX;
-    const binSizeY = (maxY - minY) / binsY;
-  
-    // Create the histogram array
-    const histogram = math.zeros(binsX, binsY);
-  
-    // Populate the histogram
-    for (let i = 0; i < data1.length; i++) {
-      const xBin = Math.floor((data1[i] - minX) / binSizeX);
-      const yBin = Math.floor((data2[i] - minY) / binSizeY);
-      histogram.set([xBin, yBin], histogram.get([xBin, yBin]) + 1);
-    }
-  
-    return histogram;
-  }
-
 export default { range_function, getDistParams, linspace, GetFit, filterOutliers };
