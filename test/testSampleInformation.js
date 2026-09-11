@@ -43,6 +43,23 @@ suite("test sample info", function () {
     })
 
 
+    test('Sort by attribute retains samples with no value', async function () {
+
+        const sampleInfo = new SampleInfo(browser)
+        await sampleInfo.loadSampleInfoFile('test/data/sample/GBM.txt')
+
+        const known = "FALLS_p_TCGAaffxB4_1_GenomeWideSNP_6_C06_190576"
+        const unknown = "NO_SUCH_SAMPLE"         // no attribute record at all
+        const sampleKeys = [known, unknown]
+
+        for (const direction of [1, -1]) {
+            const sorted = sampleInfo.sortSampleKeysByAttribute(sampleKeys, "Subtype", direction)
+            assert.equal(sorted.length, sampleKeys.length)
+            assert.includeMembers(sorted, sampleKeys)
+            assert.equal(sorted[sorted.length - 1], unknown)   // no-value samples sort last
+        }
+    })
+
     // PLINK support is deprecated
     test('PLINK', async function () {
         const sampleInfo = await loadPlinkFile('test/data/misc/pedigree.fam')

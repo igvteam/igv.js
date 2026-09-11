@@ -144,23 +144,24 @@ class SampleInfo {
     }
 
     sortSampleKeysByAttribute(sampleKeys, attribute, sortDirection) {
-        const numbers = sampleKeys.filter(key => {
-            const attributes = this.getAttributes(key)
-            if (undefined === attributes) {
-                return false
-            }
-            const value = attributes[attribute]
-            return typeof value === 'number'
-        })
 
-        const strings = sampleKeys.filter(key => {
+        // Partition keys into numeric, string, and "no value" groups.  Keys with no value for the attribute
+        // are retained, and always sorted to the end, so that no samples are lost by sorting.
+        const numbers = []
+        const strings = []
+        const noValue = []
+
+        for (const key of sampleKeys) {
             const attributes = this.getAttributes(key)
-            if (undefined === attributes) {
-                return false
+            const value = attributes ? attributes[attribute] : undefined
+            if (typeof value === 'number') {
+                numbers.push(key)
+            } else if (typeof value === 'string') {
+                strings.push(key)
+            } else {
+                noValue.push(key)
             }
-            const value = attributes[attribute]
-            return typeof value === 'string'
-        })
+        }
 
         const compare = (a, b) => {
             const aa = this.getAttributes(a)[attribute]
@@ -173,12 +174,14 @@ class SampleInfo {
             if (typeof aa === 'number' && typeof bb === 'number') {
                 return sortDirection * (aa - bb)
             }
+
+            return 0
         }
 
         numbers.sort(compare)
         strings.sort(compare)
 
-        return sortDirection === -1 ? [...numbers, ...strings] : [...strings, ...numbers]
+        return sortDirection === -1 ? [...numbers, ...strings, ...noValue] : [...strings, ...numbers, ...noValue]
     }
 
     #processSampleInfoFileAsString(string) {
