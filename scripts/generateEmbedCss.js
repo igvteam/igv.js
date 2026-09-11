@@ -8,12 +8,12 @@ const __dirname = dirname(__filename);
 
 // Resolve paths relative to current directory
 const cssPath = resolve(__dirname, '../css/igv.css');
-let inlineCSS = fs.readFileSync(cssPath, 'utf-8');
-inlineCSS = inlineCSS.replace(/\r\n/g, '\\n');
-inlineCSS = inlineCSS.replace(/\n/g, '\\n');
-inlineCSS = inlineCSS.replace(/"/g, '\\"');
+const inlineCSS = fs.readFileSync(cssPath, 'utf-8');
 
-const cssContent = `export default '${inlineCSS}'`;
+// JSON.stringify escapes newlines, quotes and backslashes correctly.  Hand-rolled
+// escaping missed backslashes and single quotes, which CSS escape sequences
+// (content: "\2014") and quoted url()/font-family values would have broken.
+const cssContent = `export default ${JSON.stringify(inlineCSS)}`;
 
 const outputPath = resolve(__dirname, '../js/embedCss.js');
 fs.writeFileSync(outputPath, cssContent, 'utf-8');
