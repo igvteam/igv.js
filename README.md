@@ -155,6 +155,11 @@ igv.js require a modern web browser with support for Javascript ECMAScript 2015 
 
 igv.js is [MIT](/LICENSE) licensed.
 
+## More info
+
+The `CLAUDE.md` file provides guidance to Claude Code (claude.ai/code) when working with code in this repository and
+contains useful general information about the app, including build and run commands, architecture, and configuration.
+
 
 
 ### [Release Notes](https://github.com/igvteam/igv.js/releases)

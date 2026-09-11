@@ -23,6 +23,22 @@ npx mocha --ui tdd test/testBED.js -g "BED query"  # single test
 
 Every test file starts with `import "./utils/mockObjects.js"` (side-effect only), which installs globals — `document`, `window`, `File`, `XMLHttpRequest`, `DOMParser`, `atob`/`btoa` — so browser code runs under Node. `XMLHttpRequestMock` routes relative paths to the filesystem (with range-header support) and absolute URLs to the network, so most readers can be tested with no server. Genome fixtures come from `test/utils/MockGenome.js`.
 
+## No bundler (a project-wide rule)
+
+Every igvteam JavaScript project, igv.js included, must run **directly in a browser as ES modules, with no bundler, transpiler, or import map**. That is why third-party imports are written as explicit relative paths into `node_modules`:
+
+```js
+import {StringUtils} from "../node_modules/igv-utils/src/index.js"        // js/locus.js
+import DOMPurify from "../../../node_modules/dompurify/dist/purify.es.mjs" // js/ui/components/textbox.js
+```
+
+New code must follow the same rule:
+
+- Never write a bare specifier (`import ... from "igv-utils"`) — the browser cannot resolve it.
+- Path the `../` prefix to the file's depth below the repo root, and point at the package's ESM entry file (`src/index.js`, `dist/*.es.mjs`, …), never at a directory or a `package.json` `exports` alias.
+- Only add a dependency that ships an ESM build usable straight from `node_modules`; CommonJS-only packages cannot be used this way.
+- Rollup (`npm run build`) exists to produce `dist/` for consumers — it is not a prerequisite for running the code.
+
 ## Development loop
 
 Develop against the source, not `dist/`: the HTML files under `dev/` import `../js/index.js` directly as an ES module. Serve the repo root over HTTP and open e.g. `dev/igvjs.html`. `npm run build:dev-dashboard` regenerates `dev/dev.html`, a searchable index of every page under `dev/`.
@@ -83,4 +99,4 @@ Subclass `TrackBase` and implement `getFeatures(chr, start, end, bpPerPixel, vie
 - A single short subject line (under 50 characters) whenever possible; no body.
 - No bulleted lists, no recaps of what changed file-by-file, no explanation of the reasoning.
 - Add a body only when the *why* is genuinely non-obvious from the diff — then one or two sentences, not a summary of the change.
-- Trailers (co-author, issue refs) are exempt from the "no body" rule.
+
