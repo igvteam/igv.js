@@ -1495,13 +1495,11 @@ class AlignmentTrack extends TrackBase {
 
 
     get minTemplateLength() {
-        return (this.minTLEN !== undefined) ? this.minTLEN :
-            this.parent._pairedEndStats ? this.parent._pairedEndStats.minTLEN : 0
+        return this.minTLEN ?? this.parent._pairedEndStats?.minTLEN ?? 0
     }
 
     get maxTemplateLength() {
-        return (this.maxTLEN !== undefined) ? this.maxTLEN :
-            this.parent._pairedEndStats ? this.parent._pairedEndStats.maxTLEN : 1000
+        return this.maxTLEN ?? this.parent._pairedEndStats?.maxTLEN ?? 1000
     }
 
     getState() {
