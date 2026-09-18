@@ -56,8 +56,13 @@ class XMLHttpRequestLocal {
             const start = parseInt(tokens[0]);
             const length = parseInt(tokens[1]) - start + 1;
             b = Buffer.alloc(length);
-            fs.readSync(fd, b, 0, length, start);
+            const bytesRead = fs.readSync(fd, b, 0, length, start);
             fs.closeSync(fd);
+            // A server returns only the bytes that exist.  Truncate rather than return zero padding,
+            // otherwise a read past the end of the file silently succeeds here but fails in a browser.
+            if (bytesRead < length) {
+                b = b.subarray(0, bytesRead);
+            }
             this.status = 206;
         } else {
             b = fs.readFileSync(this.path);
