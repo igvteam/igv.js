@@ -91,7 +91,7 @@ class AlignmentTrack extends TrackBase {
 
         // Backward compatibility overrides
         if (config.largeFragmentLengthColor) this.largeTLENColor = config.largeFragmentLengthColor
-        if (config.pairOrienation) this.expectedPairOrientation = config.pairOrientation
+        if (config.pairOrienation) this.expectedPairOrientation = config.pairOrienation
         if (config.smallFragmentLengthColor) this.smallTLENColor = config.smallFragmentLengthColor
         if (config.largeFragmentLengthColor) this.largeTLENColor = config.largeFragmentLengthColor
         if (config.minFragmentLength) this.minTLEN = config.minFragmentLength
