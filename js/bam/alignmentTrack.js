@@ -1450,14 +1450,19 @@ class AlignmentTrack extends TrackBase {
             // falls through
             case "tlen":
             case "fragmentLength":
+                const mate = alignment.mate
+                const mateMapped = alignment.isMateMapped()
 
-                if (alignment.mate && alignment.isMateMapped()) {
-                    if (alignment.mate.chr !== alignment.chr) {
-                        color = getChrColor(alignment.mate.chr)
-                    } else if (this.minTemplateLength && Math.abs(alignment.fragmentLength) < this.minTemplateLength) {
-                        color = this.smallTLENColor
-                    } else if (this.maxTemplateLength && Math.abs(alignment.fragmentLength) > this.maxTemplateLength) {
-                        color = this.largeTLENColor
+                if (mateMapped) {
+                    if (mate && mate.chr !== alignment.chr) {
+                        color = getChrColor(mate.chr)
+                    } else if (Number.isFinite(alignment.fragmentLength)) {
+                        const tlen = Math.abs(alignment.fragmentLength)
+                        if (this.minTemplateLength && tlen < this.minTemplateLength) {
+                            color = this.smallTLENColor
+                        } else if (this.maxTemplateLength && tlen > this.maxTemplateLength) {
+                            color = this.largeTLENColor
+                        }
                     }
                 }
                 break
