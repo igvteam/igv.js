@@ -73,7 +73,7 @@ class Cache {
         const s = Math.max(0, start - 1000)
         const e = start + l + 1000
         const buffer = await this.fetch(s, e - s)
-        const c = new Chunk(s, e, buffer)
+        const c = new Chunk(s, buffer)
         if (this.chunks.length > this.maxChunkCount) this.chunks.shift()
         this.chunks.push(c)
 
@@ -86,13 +86,22 @@ class Cache {
 
 class Chunk {
 
-    constructor(start, end, buffer) {
+    /**
+     * A chunk spans the bytes that were actually received, which is not necessarily the range that was
+     * requested -- a response runs short at the end of the file, and can run short before it if something
+     * between here and the file truncates it.  Recording the requested range instead would let "contains"
+     * report a hit for bytes that never arrived, and "slice" would then quietly return a short buffer
+     * rather than the read going back to the server.
+     */
+    constructor(start, buffer) {
         this.start = start
-        this.end = end
         this.buffer = buffer
+        this.end = start + buffer.byteLength
     }
 
     contains(start, end) {
         return start >= this.start && end <= this.end
     }
 }
+
+export {Cache}
