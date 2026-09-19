@@ -648,8 +648,11 @@ class TrackViewport extends Viewport {
     needsReload() {
         if (!this.featureCache) return true
         const {chr, bpPerPixel} = this.referenceFrame
+        // repaintDimensions ends one base past the canvas and does not clamp the start at zero, neither
+        // of which loadFeatures does when it builds the cache.  Without both adjustments the cache can
+        // never satisfy this, so the test always passes the viewport through to loadFeatures.
         const {bpStart, bpEnd} = this.repaintDimensions()
-        return (!this.featureCache.containsRange(chr, bpStart, bpEnd, bpPerPixel, this.windowFunction))
+        return (!this.featureCache.containsRange(chr, Math.max(0, bpStart), bpEnd - 1, bpPerPixel, this.windowFunction))
     }
 
     static createZoomInNotice(parentElement) {
@@ -1095,5 +1098,5 @@ class FeatureCache {
     }
 }
 
-export {trackViewportPopoverList}
+export {trackViewportPopoverList, FeatureCache}
 export default TrackViewport
