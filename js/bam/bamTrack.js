@@ -129,11 +129,11 @@ class BAMTrack extends TrackBase {
         const alignmentContainer = await this.featureSource.getAlignments(chr, bpStart, bpEnd)
         alignmentContainer.viewport = viewport
 
-        if (alignmentContainer.hasPairs && !this._pairedEndStats && !this.config.maxFragmentLength) {
-            const pairedEndStats = new PairedEndStats(alignmentContainer.allAlignments(), this.config)
-            if (pairedEndStats.totalCount > 99) {
-                this._pairedEndStats = pairedEndStats
+        if (alignmentContainer.hasPairs && !this.config.maxFragmentLength) {
+            if (!this._pairedEndStats) {
+                this._pairedEndStats = new PairedEndStats(this.config)
             }
+            this._pairedEndStats.addSample(alignmentContainer.allAlignments())
         }
 
         // Must pack before sorting

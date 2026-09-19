@@ -91,7 +91,7 @@ class AlignmentTrack extends TrackBase {
 
         // Backward compatibility overrides
         if (config.largeFragmentLengthColor) this.largeTLENColor = config.largeFragmentLengthColor
-        if (config.pairOrienation) this.expectedPairOrientation = config.pairOrientation
+        if (config.pairOrienation) this.expectedPairOrientation = config.pairOrienation
         if (config.smallFragmentLengthColor) this.smallTLENColor = config.smallFragmentLengthColor
         if (config.largeFragmentLengthColor) this.largeTLENColor = config.largeFragmentLengthColor
         if (config.minFragmentLength) this.minTLEN = config.minFragmentLength
@@ -1495,13 +1495,11 @@ class AlignmentTrack extends TrackBase {
 
 
     get minTemplateLength() {
-        return (this.minTLEN !== undefined) ? this.minTLEN :
-            this.parent._pairedEndStats ? this.parent._pairedEndStats.minTLEN : 0
+        return this.minTLEN ?? this.parent._pairedEndStats?.minTLEN ?? 0
     }
 
     get maxTemplateLength() {
-        return (this.maxTLEN !== undefined) ? this.maxTLEN :
-            this.parent._pairedEndStats ? this.parent._pairedEndStats.maxTLEN : 1000
+        return this.maxTLEN ?? this.parent._pairedEndStats?.maxTLEN ?? 1000
     }
 
     getState() {
