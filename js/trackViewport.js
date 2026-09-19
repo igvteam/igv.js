@@ -261,6 +261,9 @@ class TrackViewport extends Viewport {
             this.startSpinner()
 
             const track = this.trackView.track
+            // The condition under which getFeatures answers from the cache without reaching the track.
+            const fromCache = this.featureCache &&
+                this.featureCache.containsRange(chr, bpStart, bpEnd, referenceFrame.bpPerPixel, this.windowFunction)
             const features = await this.getFeatures(track, chr, bpStart, bpEnd, referenceFrame.bpPerPixel)
             if (features) {
                 let roiFeatures = []
@@ -278,9 +281,12 @@ class TrackViewport extends Viewport {
                 this.hideMessage()
                 this.stopSpinner()
 
-                // Notify listeners, like any interactive filtering handlers,
-                // that data is ready for this track.
-                this.browser.fireEvent('featuresloaded', [this])
+                // Notify listeners, like any interactive filtering handlers, that data is ready for
+                // this track -- but only when new features were fetched, not when the load was
+                // satisfied from the cache.
+                if (!fromCache) {
+                    this.browser.fireEvent('featuresloaded', [this])
+                }
 
                 return this.featureCache
             }
