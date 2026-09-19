@@ -261,6 +261,9 @@ class TrackViewport extends Viewport {
             this.startSpinner()
 
             const track = this.trackView.track
+            // The condition under which getFeatures answers from the cache without reaching the track.
+            const fromCache = this.featureCache &&
+                this.featureCache.containsRange(chr, bpStart, bpEnd, referenceFrame.bpPerPixel, this.windowFunction)
             const features = await this.getFeatures(track, chr, bpStart, bpEnd, referenceFrame.bpPerPixel)
             if (features) {
                 let roiFeatures = []
@@ -278,9 +281,12 @@ class TrackViewport extends Viewport {
                 this.hideMessage()
                 this.stopSpinner()
 
-                // Notify listeners, like any interactive filtering handlers,
-                // that data is ready for this track.
-                this.browser.fireEvent('featuresloaded', [this])
+                // Notify listeners, like any interactive filtering handlers, that data is ready for
+                // this track -- but only when new features were fetched, not when the load was
+                // satisfied from the cache.
+                if (!fromCache) {
+                    this.browser.fireEvent('featuresloaded', [this])
+                }
 
                 return this.featureCache
             }
@@ -648,8 +654,11 @@ class TrackViewport extends Viewport {
     needsReload() {
         if (!this.featureCache) return true
         const {chr, bpPerPixel} = this.referenceFrame
+        // repaintDimensions ends one base past the canvas and does not clamp the start at zero, neither
+        // of which loadFeatures does when it builds the cache.  Without both adjustments the cache can
+        // never satisfy this, so the test always passes the viewport through to loadFeatures.
         const {bpStart, bpEnd} = this.repaintDimensions()
-        return (!this.featureCache.containsRange(chr, bpStart, bpEnd, bpPerPixel, this.windowFunction))
+        return (!this.featureCache.containsRange(chr, Math.max(0, bpStart), bpEnd - 1, bpPerPixel, this.windowFunction))
     }
 
     static createZoomInNotice(parentElement) {
@@ -1095,5 +1104,5 @@ class FeatureCache {
     }
 }
 
-export {trackViewportPopoverList}
+export {trackViewportPopoverList, FeatureCache}
 export default TrackViewport
