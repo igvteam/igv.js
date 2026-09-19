@@ -95,8 +95,8 @@ Subclass `TrackBase` and implement `getFeatures(chr, start, end, bpPerPixel, vie
 
 ## Git commit messages
 
-- Keep commit messages extremely concise.
+- Keep commit messages concise.
 - A single short subject line (under 50 characters) whenever possible; no body.
-- No bulleted lists, no recaps of what changed file-by-file, no explanation of the reasoning.
+- No bulleted lists, no recaps of what changed file-by-file
 - Add a body only when the *why* is genuinely non-obvious from the diff — then one or two sentences, not a summary of the change.
 

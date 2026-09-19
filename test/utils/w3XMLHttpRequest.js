@@ -1184,7 +1184,9 @@ class XMLHttpRequest extends XMLHttpRequestEventTarget {
             throw new DOMException('', 'InvalidStateError')
         }
 
-        this.setRequestHeader('User-Agent', 'Mozilla')  // We are emulating a browser
+        // We are emulating a browser.  The full "Mozilla/<version> (...)" form matters:
+        // igv.org refuses a bare "Mozilla" as a scripted client.
+        this.setRequestHeader('User-Agent', 'Mozilla/5.0 (Node.js; igv.js unit tests)')
 
         if (body) {
             const bodyInit = body instanceof ArrayBuffer || body instanceof Uint8Array ? Buffer.from(body) : body
