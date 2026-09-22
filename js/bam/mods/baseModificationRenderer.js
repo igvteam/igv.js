@@ -91,15 +91,16 @@ class BaseModificationRenderer {
                             c = getModColor(modification, maxLh, colorOption);
                         }
 
-                        ctx.fillStyle = c
+                        if (c) {
+                            ctx.fillStyle = c
 
-                        // Expand narrow width to make more visible
-                        if (dX < 3) {
-                            dX = 3
-                            pX--
+                            // Expand narrow width to make more visible
+                            if (dX < 3) {
+                                dX = 3
+                                pX--
+                            }
+                            ctx.fillRect(pX, pY, dX, Math.max(1, dY - 2))
                         }
-                        ctx.fillRect(pX, pY, dX, Math.max(1, dY - 2))
-
                     }
                 }
             }
