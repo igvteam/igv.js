@@ -51,13 +51,19 @@ async function createBrowser(parentDiv, config) {
     const browser = new Browser(config, parentDiv)
     allBrowsers.push(browser)
 
-    const sessionURL = config.sessionURL || config.session || config.hubURL
-    if (sessionURL) {
-        await browser.loadSession({
-            url: sessionURL
-        })
-    } else {
-        await browser.loadSessionObject(config)
+    // A load that rejects leaves nothing behind: no browser in the page, none in the list
+    try {
+        const sessionURL = config.sessionURL || config.session || config.hubURL
+        if (sessionURL) {
+            await browser.loadSession({
+                url: sessionURL
+            })
+        } else {
+            await browser.loadSessionObject(config)
+        }
+    } catch (error) {
+        removeBrowser(browser)
+        throw error
     }
 
     browser.navbar.navbarDidResize()
