@@ -29,6 +29,7 @@ class Genome {
 
     #wgChromosomeNames
     #aliasRecordCache = new Map()
+    #cytobandFailures = new Set()
 
     // Optional parts that failed while the genome was built, as {kind, url, error}: left out, and reported by the browser
     loadFailures = []
@@ -73,10 +74,14 @@ class Genome {
         if (this.sequence.chromosomes) {
             this.chromosomes = this.sequence.chromosomes
         } else if (config.chromSizesURL) {
-            // An optional part: if it fails, leave it out and load chromosomes from the sequence as they are needed
+            // An optional part only if the sequence can name the chromosomes: if it fails, leave it out and load
+            // chromosomes from the sequence as they are needed.  Otherwise there is no chromosome to start on
             try {
                 this.chromosomes = await loadChromSizes(config.chromSizesURL)
             } catch (error) {
+                if (!this.sequence.chromosomeNames) {
+                    throw error
+                }
                 console.error(error)
                 this.loadFailures.push({kind: 'chromSizes', url: config.chromSizesURL, error})
                 this.chromosomes = new Map()
@@ -252,17 +257,25 @@ class Genome {
 
     /**
      * Return the cytobands for a chromosome.  The cytobands load lazily, on first use, so a failure is an optional
-     * part failing after the load: it is logged once and the ideogram is drawn without them.
+     * part failing after the load: that chromosome's ideogram is drawn without them, other chromosomes still load
+     * theirs, and the first failure is reported.
      */
     async getCytobands(chr) {
-        const cytobandSource = this.cytobandSource
-        if (cytobandSource) {
+        if (this.cytobandSource) {
+            const chrName = this.getChromosomeName(chr)
+            if (this.#cytobandFailures.has(chrName)) {
+                return
+            }
             try {
-                return await cytobandSource.getCytobands(this.getChromosomeName(chr))
+                return await this.cytobandSource.getCytobands(chrName)
             } catch (error) {
-                if (this.cytobandSource === cytobandSource) {    // Concurrent requests can fail together; log once
+                if (!this.#cytobandFailures.has(chrName)) {    // Concurrent requests can fail together; log once
+                    this.#cytobandFailures.add(chrName)
                     console.error(error)
-                    this.cytobandSource = undefined
+                    if (1 === this.#cytobandFailures.size) {
+                        const url = this.config.cytobandURL || this.config.cytobandBbURL
+                        this.browser?.reportLoadFailure('cytobands', url, error)
+                    }
                 }
             }
         }

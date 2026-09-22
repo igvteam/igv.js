@@ -924,6 +924,17 @@ class Browser {
     }
 
     /**
+     * Report an optional part that failed after the load it belongs to, e.g. cytobands, which load lazily.
+     *
+     * @param kind   Kind of part, as in the loadfailures event
+     * @param url    URL of the part
+     * @param error  The error it failed with
+     */
+    reportLoadFailure(kind, url, error) {
+        this.#reportLoadFailures([{kind, url, message: describeLoadError(error.cause || error)}])
+    }
+
+    /**
      * Report every failure in a session or genome load, once: a single loadfailures event carrying all of them.
      *
      * @param loadFailures  Array of {kind, url, message}
