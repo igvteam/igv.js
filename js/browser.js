@@ -49,6 +49,7 @@ import {loadHub} from "./ucsc/hub/hub.js"
 import {EventEmitter} from "./events.js"
 import Locus from "./locus.js"
 import {isLocalFile, isGoogleDriveURL} from "./util/sessionResourceValidator.js"
+import {describeLoadError, loadFailure} from "./util/loadFailure.js"
 
 
 // css - $igv-scrollbar-outer-width: 14px;
@@ -382,7 +383,7 @@ class Browser {
      * Initialize a session from an object, json, or by loading from a file.
      *
      * @param options
-     * @returns {*}
+     * @returns {Promise<Array>}  Promise for the load failures, as reported by the loadfailures event
      */
     async loadSession(options) {
 
@@ -398,7 +399,7 @@ class Browser {
             session = options
         }
 
-        await this.loadSessionObject(session)
+        return this.loadSessionObject(session)
     }
 
     /**
@@ -443,7 +444,7 @@ class Browser {
     /**
      * Note:  public API function
      * @param session
-     * @returns {Promise<void>}
+     * @returns {Promise<Array>}  Promise for the load failures, as reported by the loadfailures event
      */
     async loadSessionObject(session) {
 
@@ -511,7 +512,7 @@ class Browser {
         const genomeOrReference = session.reference || session.genome || session.genarkAccession
         if (!genomeOrReference) {
             console.warn("No genome or reference object specified")
-            return
+            return []
         }
 
         const genomeConfig = StringUtils.isString(genomeOrReference) ?
@@ -625,7 +626,7 @@ class Browser {
         }
 
         // Load a hidden track -- used to populate searchable database without creating a track
-        const loadFailures = genomeLoadFailures(genome)
+        const loadFailures = [...genome.loadFailures]
         const failedHidden = new Set()
         const configHidden = nonLocalTrackConfigurations.filter(config => true === config.hidden)
         for (const config of configHidden) {
@@ -649,6 +650,8 @@ class Browser {
         if (session.locus && Locus.isSingleBaseLocusString(session.locus)) {
             await this.search(session.locus)
         }
+
+        return loadFailures
     }
 
     cleanHouseForSession() {
@@ -686,6 +689,7 @@ class Browser {
         } else {
             genome = await Genome.createGenome(genomeConfig, this)
         }
+        genome.loadFailures ??= []   // A Genbank genome records none
 
         this.removeAllTracks()   // Do this before the new genome is set
         this.roiManager.clearROIs()
@@ -750,7 +754,8 @@ class Browser {
      * as well as optional cytoband and annotation tracks.
      *
      * @param idOrConfig
-     * @returns genome
+     * @returns {Promise<Genome>}  Promise for the genome.  Its loadFailures lists the parts and tracks that failed,
+     *                             as reported by the loadfailures event
      */
     async loadGenome(idOrConfig) {
 
@@ -802,7 +807,7 @@ class Browser {
             tracks.push({type: "sequence", order: defaultSequenceTrackOrder})
         }
 
-        const loadFailures = genomeLoadFailures(this.genome)
+        const loadFailures = this.genome.loadFailures
         loadFailures.push(...await this.#loadTrackListTolerantly(tracks))
         this.#reportLoadFailures(loadFailures)
 
@@ -931,7 +936,7 @@ class Browser {
      * @param error  The error it failed with
      */
     reportLoadFailure(kind, url, error) {
-        this.#reportLoadFailures([{kind, url, message: describeLoadError(error.cause || error)}])
+        this.#reportLoadFailures([loadFailure(kind, url, error)])
     }
 
     /**
@@ -2743,17 +2748,6 @@ toggleTrackLabels(trackViews, isVisible) {
     }
 }
 
-const httpMessages = {
-    "401": "Access unauthorized",
-    "403": "Access forbidden",
-    "404": "Not found"
-}
-
-function describeLoadError(error) {
-    const msg = error.message || error.error || error.toString()
-    return httpMessages.hasOwnProperty(msg) ? httpMessages[msg] : msg
-}
-
 function escapeHTML(string) {
     return String(string)
         .replaceAll('&', '&amp;')
@@ -2775,25 +2769,7 @@ function trackLoadFailure(config, error) {
     if (StringUtils.isString(config)) {
         config = JSON.parse(config)
     }
-    return {
-        kind: 'track',
-        url: describeTrackURL(config) || config.fastaURL || config.name,
-        message: describeLoadError(error.cause || error)
-    }
-}
-
-/**
- * The optional genome parts that failed while the genome was built, as reported by the loadfailures event.
- * A Genbank genome records none.
- *
- * @param genome  The genome just loaded
- */
-function genomeLoadFailures(genome) {
-    return (genome.loadFailures || []).map(({kind, url, error}) => ({
-        kind,
-        url,
-        message: describeLoadError(error.cause || error)
-    }))
+    return loadFailure('track', describeTrackURL(config) || config.fastaURL || config.name, error)
 }
 
 export default Browser

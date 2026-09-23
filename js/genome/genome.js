@@ -10,6 +10,7 @@ import {loadChromSizes} from "./chromSizes.js"
 import ChromAliasDefaults from "./chromAliasDefaults.js"
 import {updateReference} from "./updateReference.js"
 import BWSource from "../bigwig/bwSource.js"
+import {loadFailure} from "../util/loadFailure.js"
 
 const ucsdIDMap = new Map([
     ["1kg_ref", "hg18"],
@@ -31,7 +32,7 @@ class Genome {
     #aliasRecordCache = new Map()
     #cytobandFailures = new Set()
 
-    // Optional parts that failed while the genome was built, as {kind, url, error}: left out, and reported by the browser
+    // Optional parts that failed while the genome was built, as {kind, url, message}: left out, and reported by the browser
     loadFailures = []
 
     static async createGenome(options, browser) {
@@ -83,7 +84,7 @@ class Genome {
                     throw error
                 }
                 console.error(error)
-                this.loadFailures.push({kind: 'chromSizes', url: config.chromSizesURL, error})
+                this.loadFailures.push(loadFailure('chromSizes', config.chromSizesURL, error))
                 this.chromosomes = new Map()
             }
         } else {
@@ -146,7 +147,7 @@ class Genome {
             await this.chromAlias.preload(chrNames)
         } catch (error) {
             console.error(error)
-            this.loadFailures.push({kind: 'chromAlias', url: this.config.chromAliasBbURL, error})
+            this.loadFailures.push(loadFailure('chromAlias', this.config.chromAliasBbURL, error))
             this.chromAlias = this.#createChromAlias({...this.config, chromAliasBbURL: undefined})
         }
     }
