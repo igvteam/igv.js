@@ -12,7 +12,8 @@ let allBrowsers = []
  *
  * @param parentDiv - DOM tree root
  * @param config - configuration options.
- *
+ * @returns {Promise<Browser>}  Promise for the browser.  Its loadFailures lists the optional parts and tracks of the
+ *                              initial genome and session that failed to load, as {kind, url, message}
  */
 async function createBrowser(parentDiv, config) {
 
@@ -55,11 +56,11 @@ async function createBrowser(parentDiv, config) {
     try {
         const sessionURL = config.sessionURL || config.session || config.hubURL
         if (sessionURL) {
-            await browser.loadSession({
+            browser.loadFailures = await browser.loadSession({
                 url: sessionURL
             })
         } else {
-            await browser.loadSessionObject(config)
+            browser.loadFailures = await browser.loadSessionObject(config)
         }
     } catch (error) {
         removeBrowser(browser)
