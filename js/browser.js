@@ -2767,7 +2767,11 @@ function describeTrackURL(config) {
  */
 function trackLoadFailure(config, error) {
     if (StringUtils.isString(config)) {
-        config = JSON.parse(config)
+        try {
+            config = JSON.parse(config)
+        } catch {
+            return loadFailure('track', config, error)   // The json itself is what failed
+        }
     }
     return loadFailure('track', describeTrackURL(config) || config.fastaURL || config.name, error)
 }
