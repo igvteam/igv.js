@@ -941,22 +941,13 @@ class Browser {
 
     /**
      * Report every failure in a session or genome load, once: a single loadfailures event carrying all of them.
+     * igv.js raises no alert for them; that is left to the embedder.
      *
      * @param loadFailures  Array of {kind, url, message}
      */
     #reportLoadFailures(loadFailures) {
-
-        if (0 === loadFailures.length) {
-            return
-        }
-
-        this.fireEvent('loadfailures', [loadFailures])
-
-        // One combined alert, unless the embedder handles load failures with a createBrowser listener. One, because
-        // the alert dialog is a single instance, so separate alerts would show only the last
-        if (!this.config.listeners?.loadfailures) {
-            const lines = loadFailures.map(({url, message}) => `${escapeHTML(url)}<br>${escapeHTML(message)}`)
-            this.alert.present(`Some resources could not be loaded:<br><br>${lines.join('<br><br>')}`)
+        if (loadFailures.length > 0) {
+            this.fireEvent('loadfailures', [loadFailures])
         }
     }
 
@@ -2746,13 +2737,6 @@ toggleTrackLabels(trackViews, isVisible) {
             }
         }
     }
-}
-
-function escapeHTML(string) {
-    return String(string)
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
 }
 
 function describeTrackURL(config) {

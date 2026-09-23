@@ -91,8 +91,8 @@ Loading a genome or session keeps going when *optional* parts fail. The rule:
 
 - **Required** (a failure aborts the load): the genome's sequence, and anything without which there is no chromosome to start on (e.g. chrom.sizes when the sequence can't list its own chromosome names). If you make something optional, check that the browser still has a usable initial locus without it.
 - **Optional parts that fail while the genome is built** go into `genome.loadFailures` as `{kind, url, message}` (built with `loadFailure` from `js/util/loadFailure.js`, the same form the `loadfailures` event carries). `loadGenome` also adds the genome's own tracks that failed, and returns the genome; `loadSession`/`loadSessionObject` return the session's failures. Tracks are loaded with `allSettled`, so one bad track doesn't block the others.
-- **Report each load once**: `Browser` combines everything into a single `loadfailures` event, plus one combined alert when the embedder hasn't set a listener (the alert dialog is a single instance, so separate alerts would hide one another).
-- **Parts that load lazily** (e.g. cytobands) fail after that report has gone out. Report them with `browser.reportLoadFailure(kind, url, error)`, not by pushing to `genome.loadFailures`, which is not reported again after the load. Limit a failure to the item that failed (one chromosome, not the whole source), and don't retry on every redraw.
+- **Report each load once**: `Browser` combines everything into a single `loadfailures` event. igv.js raises no alert for load failures; the embedder shows them, from the thrown error, the returned failures, or the event.
+- **Parts that load lazily** (e.g. cytobands) fail after the load has returned. Report them with `browser.reportLoadFailure(kind, url, error)`, which fires the event, not by pushing to `genome.loadFailures`, which the caller has already read. Limit a failure to the item that failed (one chromosome, not the whole source), and don't retry on every redraw.
 
 ### Session state
 
