@@ -85,6 +85,15 @@ Subclass `TrackBase` and implement `getFeatures(chr, start, end, bpPerPixel, vie
 
 `js/genome/genome.js` plus 2bit/indexed-FASTA sequence readers, cytobands, and — importantly — the chromosome **alias** layer (`chromAlias*.js`). Chromosome naming (`chr1` vs `1` vs RefSeq accessions) is normalized there; feature readers and search should rely on it rather than string-matching chromosome names. UCSC track hubs are loaded via `js/ucsc/hub`.
 
+### Load failures
+
+Loading a genome or session keeps going when *optional* parts fail. The rule:
+
+- **Required** (a failure aborts the load): the genome's sequence, and anything without which there is no chromosome to start on (e.g. chrom.sizes when the sequence can't list its own chromosome names). If you make something optional, check that the browser still has a usable initial locus without it.
+- **Optional parts that fail while the genome is built** go into `genome.loadFailures` as `{kind, url, error}`. Tracks are loaded with `allSettled`, so one bad track doesn't block the others.
+- **Report each load once**: `Browser` combines everything into a single `loadfailures` event, plus one combined alert when the embedder hasn't set a listener (the alert dialog is a single instance, so separate alerts would hide one another).
+- **Parts that load lazily** (e.g. cytobands) fail after that report has gone out. Report them with `browser.reportLoadFailure(kind, url, error)`, not by pushing to `genome.loadFailures`, which nothing reads after the load. Limit a failure to the item that failed (one chromosome, not the whole source), and don't retry on every redraw.
+
 ### Session state
 
 `browser.toJSON()` / `loadSessionObject()` round-trip the browser; `TrackBase.getState()` defines what a track contributes (only simple types, and only values differing from `constructor.defaults`). Legacy IGV-desktop XML sessions are converted in `js/session/igvXmlSession.js`.
