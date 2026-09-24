@@ -10,6 +10,13 @@
   "files": [
     "dist/**"
   ],
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": ">=22.13",
+      "onFail": "error"
+    }
+  },
   "scripts": {
     "prepack": "npm run build",
     "prepare": "npm run build",
