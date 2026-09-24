@@ -14,7 +14,7 @@ jobs:
       with:
         node-version: '24.x'
     - name: Install dependencies
-      run: npm install
+      run: npm ci
       env:
         DEFAULT_BRANCH: master
     - run: npm test
