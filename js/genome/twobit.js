@@ -37,6 +37,9 @@ class TwobitSequence {
     async init() {
         if(this.bptURL) {
             this.index = await BPTree.loadBpTree(this.bptURL, this.config, 0)
+            // The external index names the chromosomes, but the sequence is required: read a byte so a missing
+            // file fails the load
+            await igvxhr.loadArrayBuffer(this.url, {range: {start: 0, size: 1}})
         } else {
             const idx = await this._readIndex()
             this.index = {

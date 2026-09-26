@@ -78,6 +78,48 @@ suite("testGenome", function () {
         assert.equal(error?.path, "test/data/twobit/missing.chrom.sizes")
     })
 
+    test("an indexed fasta genome loads its sequence", async function () {
+
+        const genome = await Genome.createGenome({
+            id: "foo",
+            fastaURL: "test/data/twobit/foo.2bit.fa",
+            indexURL: "test/data/twobit/foo.2bit.fa.fai"
+        })
+
+        assert.deepEqual(genome.chromosomeNames, ["chr1"])
+        assert.equal(await genome.getSequence("chr1", 47, 50), "ACT")
+    })
+
+    test("a fasta failure is fatal even when its index loads", async function () {
+
+        let error
+        try {
+            await Genome.createGenome({
+                id: "foo",
+                fastaURL: "test/data/twobit/missing.fa",
+                indexURL: "test/data/twobit/foo.2bit.fa.fai"
+            })
+        } catch (e) {
+            error = e
+        }
+        assert.equal(error?.path, "test/data/twobit/missing.fa")
+    })
+
+    test("a 2bit failure is fatal even when its bpt index loads", async function () {
+
+        let error
+        try {
+            await Genome.createGenome({
+                id: "GCF_000002655.1",
+                twoBitURL: "test/data/twobit/missing.2bit",
+                twoBitBptURL: "test/data/twobit/GCF_000002655.1.2bit.bpt"
+            })
+        } catch (e) {
+            error = e
+        }
+        assert.equal(error?.path, "test/data/twobit/missing.2bit")
+    })
+
     test("a cytoband failure leaves out only that chromosome, and is reported once", async function () {
 
         const reported = []

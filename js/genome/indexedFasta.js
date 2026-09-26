@@ -36,7 +36,9 @@ class FastaSequence {
     }
 
     async init() {
-        return this.getIndex()
+        await this.getIndex()
+        // The index names the chromosomes, but the sequence is required: read a byte so a missing file fails the load
+        await igvxhr.loadArrayBuffer(this.file, buildOptions(this.config, {range: {start: 0, size: 1}}))
     }
 
     get chromosomeNames() {
