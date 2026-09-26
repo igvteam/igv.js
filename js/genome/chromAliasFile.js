@@ -16,6 +16,7 @@ import ChromAliasDefaults from "./chromAliasDefaults.js"
 class ChromAliasFile {
 
     aliasRecordCache = new Map()
+    #aliasesLoading
 
     constructor(aliasURL, config, genome) {
         this.aliasURL = aliasURL
@@ -97,9 +98,12 @@ class ChromAliasFile {
      * @returns {Promise<any>} promise to resolve to the alias record.
      */
     async search(alias) {
-        if(this.aliasRecordCache.size === 0) {
-            await this.loadAliases()
+        if (!this.#aliasesLoading) {
+            // The alias file loads lazily, on first search, so a failure is an optional part failing after the
+            // load: it is logged once and searches find nothing
+            this.#aliasesLoading = this.loadAliases().catch(error => console.error(error))
         }
+        await this.#aliasesLoading
         return this.aliasRecordCache.get(alias)
 
     }

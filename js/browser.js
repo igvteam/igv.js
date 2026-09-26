@@ -49,6 +49,7 @@ import {loadHub} from "./ucsc/hub/hub.js"
 import {EventEmitter} from "./events.js"
 import Locus from "./locus.js"
 import {isLocalFile, isGoogleDriveURL} from "./util/sessionResourceValidator.js"
+import {describeLoadError, loadFailure} from "./util/loadFailure.js"
 
 
 // css - $igv-scrollbar-outer-width: 14px;
@@ -382,7 +383,7 @@ class Browser {
      * Initialize a session from an object, json, or by loading from a file.
      *
      * @param options
-     * @returns {*}
+     * @returns {Promise<Array>}  Promise for the load failures, as reported by the loadfailures event
      */
     async loadSession(options) {
 
@@ -398,7 +399,7 @@ class Browser {
             session = options
         }
 
-        await this.loadSessionObject(session)
+        return this.loadSessionObject(session)
     }
 
     /**
@@ -443,7 +444,7 @@ class Browser {
     /**
      * Note:  public API function
      * @param session
-     * @returns {Promise<void>}
+     * @returns {Promise<Array>}  Promise for the load failures, as reported by the loadfailures event
      */
     async loadSessionObject(session) {
 
@@ -511,7 +512,7 @@ class Browser {
         const genomeOrReference = session.reference || session.genome || session.genarkAccession
         if (!genomeOrReference) {
             console.warn("No genome or reference object specified")
-            return
+            return []
         }
 
         const genomeConfig = StringUtils.isString(genomeOrReference) ?
@@ -625,13 +626,23 @@ class Browser {
         }
 
         // Load a hidden track -- used to populate searchable database without creating a track
+        const loadFailures = [...genome.loadFailures]
+        const failedHidden = new Set()
         const configHidden = nonLocalTrackConfigurations.filter(config => true === config.hidden)
         for (const config of configHidden) {
-            const featureSource = FeatureSource(config, this.genome)
-            await featureSource.getFeatures({chr: "1", start: 0, end: Number.MAX_SAFE_INTEGER})
+            try {
+                const featureSource = FeatureSource(config, this.genome)
+                await featureSource.getFeatures({chr: "1", start: 0, end: Number.MAX_SAFE_INTEGER})
+            } catch (error) {
+                console.error(error)
+                loadFailures.push(trackLoadFailure(config, error))
+                failedHidden.add(config)   // Already reported; don't load it again as a track
+            }
         }
 
-        await this.loadTrackList(nonLocalTrackConfigurations)
+        const trackList = nonLocalTrackConfigurations.filter(config => !failedHidden.has(config))
+        loadFailures.push(...await this.#loadTrackListTolerantly(trackList))
+        this.#reportLoadFailures(loadFailures)
 
         // If an initial locus is defined and represents a single basedo a "search" here.  This will force micro
         // adjustments after width of track column(s) is known.  This can be an issue when the center gide is shown
@@ -639,6 +650,8 @@ class Browser {
         if (session.locus && Locus.isSingleBaseLocusString(session.locus)) {
             await this.search(session.locus)
         }
+
+        return loadFailures
     }
 
     cleanHouseForSession() {
@@ -669,17 +682,19 @@ class Browser {
      */
     async loadReference(genomeConfig, initialLocus) {
 
-        this.removeAllTracks()   // Do this first, before new genome is set
-        this.roiManager.clearROIs()
-
-        this.navbar.setEnableTrackSelection(false)
-
+        // Build the genome before clearing anything, so a genome that fails to load leaves the current one intact
         let genome
         if (genomeConfig.gbkURL) {
             genome = await loadGenbank(genomeConfig.gbkURL)
         } else {
             genome = await Genome.createGenome(genomeConfig, this)
         }
+        genome.loadFailures ??= []   // A Genbank genome records none
+
+        this.removeAllTracks()   // Do this before the new genome is set
+        this.roiManager.clearROIs()
+
+        this.navbar.setEnableTrackSelection(false)
 
         const genomeChange = undefined === this.genome || (this.genome.id !== genome.id)
 
@@ -739,7 +754,8 @@ class Browser {
      * as well as optional cytoband and annotation tracks.
      *
      * @param idOrConfig
-     * @returns genome
+     * @returns {Promise<Genome>}  Promise for the genome.  Its loadFailures lists the parts and tracks that failed,
+     *                             as reported by the loadfailures event
      */
     async loadGenome(idOrConfig) {
 
@@ -791,7 +807,9 @@ class Browser {
             tracks.push({type: "sequence", order: defaultSequenceTrackOrder})
         }
 
-        await this.loadTrackList(tracks)
+        const loadFailures = this.genome.loadFailures
+        loadFailures.push(...await this.#loadTrackListTolerantly(tracks))
+        this.#reportLoadFailures(loadFailures)
 
         return this.genome
     }
@@ -883,6 +901,63 @@ class Browser {
      */
     async loadTrackList(configList) {
 
+        const results = await this.#settleTrackList(configList)
+
+        const failure = results.find(({status}) => status === 'rejected')
+        if (failure) {
+            throw failure.reason
+        }
+
+        return results.map(({value}) => value)
+    }
+
+    /**
+     * Load a list of tracks for a session or genome load, which tolerates failures: the tracks that load are
+     * added, and the ones that fail are returned as load failures rather than thrown.
+     *
+     * @param configList  Array of track configurations
+     * @returns {Promise<Array>}  Promise for one {kind, url, message} load failure per track that failed
+     */
+    async #loadTrackListTolerantly(configList) {
+
+        const results = await this.#settleTrackList(configList)
+
+        return results
+            .map((result, i) => ({result, config: configList[i]}))
+            .filter(({result}) => result.status === 'rejected')
+            .map(({result, config}) => trackLoadFailure(config, result.reason))
+    }
+
+    /**
+     * Report an optional part that failed after the load it belongs to, e.g. cytobands, which load lazily.
+     *
+     * @param kind   Kind of part, as in the loadfailures event
+     * @param url    URL of the part
+     * @param error  The error it failed with
+     */
+    reportLoadFailure(kind, url, error) {
+        this.#reportLoadFailures([loadFailure(kind, url, error)])
+    }
+
+    /**
+     * Report every failure in a session or genome load, once: a single loadfailures event carrying all of them.
+     * igv.js raises no alert for them; that is left to the embedder.
+     *
+     * @param loadFailures  Array of {kind, url, message}
+     */
+    #reportLoadFailures(loadFailures) {
+        if (loadFailures.length > 0) {
+            this.fireEvent('loadfailures', [loadFailures])
+        }
+    }
+
+    /**
+     * Load every track in the list, settling each load, then order and resize the tracks that loaded.
+     *
+     * @returns {Promise<Array>}  Promise for one settled result per configuration, as from Promise.allSettled
+     */
+    async #settleTrackList(configList) {
+
         try {
             this.startSpinner()   // TODO this.startSpinner() when we have one
 
@@ -899,7 +974,8 @@ class Browser {
                 promises.push(this.#loadTrackHelper(config))
             }
 
-            const loadedTracks = await Promise.all(promises)
+            // Settle every load before ordering and resizing, so a failure doesn't strand the tracks that loaded
+            const results = await Promise.allSettled(promises)
 
             // If any tracks are selected show the selection buttons
             if (this.trackViews.some(({track}) => track.selected)) {
@@ -912,7 +988,7 @@ class Browser {
 
             this.fireEvent('trackorderchanged', [this.getTrackOrder()])
 
-            return loadedTracks
+            return results
 
         } finally {
             this.stopSpinner()   // TODO  this.stopSpinner()
@@ -952,22 +1028,7 @@ class Browser {
             track = await this.createTrack(config)
 
         } catch (error) {
-
-            let msg = error.message || error.error || error.toString()
-
-            const httpMessages =
-                {
-                    "401": "Access unauthorized",
-                    "403": "Access forbidden",
-                    "404": "Not found"
-                }
-
-            if (httpMessages.hasOwnProperty(msg)) {
-                msg = httpMessages[msg]
-            }
-
-            msg = `${msg} : ${FileUtils.isFile(config.url) ? config.url.name : config.url}`
-            const err = new Error(msg)
+            const err = new Error(`${describeLoadError(error)} : ${describeTrackURL(config)}`, {cause: error})
             console.error(err)
             throw err
         }
@@ -2678,5 +2739,25 @@ toggleTrackLabels(trackViews, isVisible) {
     }
 }
 
-export default Browser
+function describeTrackURL(config) {
+    return FileUtils.isFile(config.url) ? config.url.name : config.url
+}
 
+/**
+ * A track load failure, as reported by the loadfailures event.
+ *
+ * @param config  The track configuration, possibly as json
+ * @param error  The error the track load rejected with
+ */
+function trackLoadFailure(config, error) {
+    if (StringUtils.isString(config)) {
+        try {
+            config = JSON.parse(config)
+        } catch {
+            return loadFailure('track', config, error)   // The json itself is what failed
+        }
+    }
+    return loadFailure('track', describeTrackURL(config) || config.fastaURL || config.name, error)
+}
+
+export default Browser

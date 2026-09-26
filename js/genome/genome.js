@@ -10,6 +10,7 @@ import {loadChromSizes} from "./chromSizes.js"
 import ChromAliasDefaults from "./chromAliasDefaults.js"
 import {updateReference} from "./updateReference.js"
 import BWSource from "../bigwig/bwSource.js"
+import {loadFailure} from "../util/loadFailure.js"
 
 const ucsdIDMap = new Map([
     ["1kg_ref", "hg18"],
@@ -29,6 +30,10 @@ class Genome {
 
     #wgChromosomeNames
     #aliasRecordCache = new Map()
+    #cytobandFailures = new Set()
+
+    // Optional parts that failed while the genome was built, as {kind, url, message}: left out, and reported by the browser
+    loadFailures = []
 
     static async createGenome(options, browser) {
 
@@ -53,7 +58,7 @@ class Genome {
 
         const config = this.config
 
-        // Load sequence
+        // Load sequence.  This is required: the genome loads if and only if its sequence source loads
         this.sequence = await loadSequence(config, this.browser)
 
         // Load cytobands.  This is optional but required to support the ideogram.  Only needed for whole genome view
@@ -70,7 +75,18 @@ class Genome {
         if (this.sequence.chromosomes) {
             this.chromosomes = this.sequence.chromosomes
         } else if (config.chromSizesURL) {
-            this.chromosomes = await loadChromSizes(config.chromSizesURL)
+            // An optional part only if the sequence can name the chromosomes: if it fails, leave it out and load
+            // chromosomes from the sequence as they are needed.  Otherwise there is no chromosome to start on
+            try {
+                this.chromosomes = await loadChromSizes(config.chromSizesURL)
+            } catch (error) {
+                if (!this.sequence.chromosomeNames) {
+                    throw error
+                }
+                console.error(error)
+                this.loadFailures.push(loadFailure('chromSizes', config.chromSizesURL, error))
+                this.chromosomes = new Map()
+            }
         } else {
             this.chromosomes = new Map()   // Cache, chromosome are added as they are loaded
         }
@@ -83,13 +99,7 @@ class Genome {
         }
 
         // Chromosome alias
-        if (config.chromAliasBbURL) {
-            this.chromAlias = new ChromAliasBB(config.chromAliasBbURL, Object.assign({}, config), this)
-        } else if (config.aliasURL) {
-            this.chromAlias = new ChromAliasFile(config.aliasURL, Object.assign({}, config), this)
-        } else if (this.chromosomeNames) {
-            this.chromAlias = new ChromAliasDefaults(this.id, this.chromosomeNames)
-        }
+        this.chromAlias = this.#createChromAlias(config)
 
         if (false !== config.wholeGenomeView && this.chromosomes.size > 0) {
             // Set chromosome order for WG view and chromosome pulldown.  If chromosome order is not specified sort
@@ -100,12 +110,12 @@ class Genome {
                     this.#wgChromosomeNames = config.chromosomeOrder.split(',').map(nm => nm.trim())
                 }
                 // Trim to remove non-existent chromosomes
-                await this.chromAlias.preload(this.#wgChromosomeNames)
+                await this.#preloadChromAlias(this.#wgChromosomeNames)
                 this.#wgChromosomeNames =
                     this.#wgChromosomeNames.map(c => this.getChromosomeName(c)).filter(c => this.chromosomes.has(c))
             } else {
                 this.#wgChromosomeNames = trimSmallChromosomes(this.chromosomes)
-                await this.chromAlias.preload(this.#wgChromosomeNames)
+                await this.#preloadChromAlias(this.#wgChromosomeNames)
             }
         }
 
@@ -114,6 +124,31 @@ class Genome {
         if (this.wholeGenomeView) {
             const l = this.#wgChromosomeNames.reduce((accumulator, currentValue) => accumulator + this.chromosomes.get(currentValue).bpLength, 0)
             this.chromosomes.set("all", new Chromosome("all", 0, l))
+        }
+    }
+
+    #createChromAlias(config) {
+        if (config.chromAliasBbURL) {
+            return new ChromAliasBB(config.chromAliasBbURL, Object.assign({}, config), this)
+        } else if (config.aliasURL) {
+            return new ChromAliasFile(config.aliasURL, Object.assign({}, config), this)
+        } else if (this.chromosomeNames) {
+            return new ChromAliasDefaults(this.id, this.chromosomeNames)
+        }
+    }
+
+    /**
+     * Preload the chromosome alias, falling back if it fails.  Only the alias bigBed can fail here (the other alias
+     * sources preload nothing), and it is an optional part: it is left out, the next alias source is used, and the
+     * failure is recorded as a load failure.
+     */
+    async #preloadChromAlias(chrNames) {
+        try {
+            await this.chromAlias.preload(chrNames)
+        } catch (error) {
+            console.error(error)
+            this.loadFailures.push(loadFailure('chromAlias', this.config.chromAliasBbURL, error))
+            this.chromAlias = this.#createChromAlias({...this.config, chromAliasBbURL: undefined})
         }
     }
 
@@ -221,11 +256,29 @@ class Genome {
         }
     }
 
+    /**
+     * Return the cytobands for a chromosome.  The cytobands load lazily, on first use, so a failure is an optional
+     * part failing after the load: that chromosome's ideogram is drawn without them, other chromosomes still load
+     * theirs, and the first failure is reported.
+     */
     async getCytobands(chr) {
         if (this.cytobandSource) {
             const chrName = this.getChromosomeName(chr)
-            const cytos = await this.cytobandSource.getCytobands(chrName)
-            return cytos
+            if (this.#cytobandFailures.has(chrName)) {
+                return
+            }
+            try {
+                return await this.cytobandSource.getCytobands(chrName)
+            } catch (error) {
+                if (!this.#cytobandFailures.has(chrName)) {    // Concurrent requests can fail together; log once
+                    this.#cytobandFailures.add(chrName)
+                    console.error(error)
+                    if (1 === this.#cytobandFailures.size) {
+                        const url = this.config.cytobandURL || this.config.cytobandBbURL
+                        this.browser?.reportLoadFailure('cytobands', url, error)
+                    }
+                }
+            }
         }
     }
 
@@ -454,13 +507,16 @@ function isDigit(val) {
 function generateGenomeID(config) {
     if (config.id !== undefined) {
         return config.id
-    } else if (config.fastaURL && StringUtils.isString(config.fastaURL) && !config.fastaURL.startsWith("data:")) {
-        return config.fastaURL
-    } else if (config.fastaURL && config.fastaURL.name) {
-        return config.fastaURL.name
-    } else {
-        return ""
     }
+    // twoBitURL first, the order loadSequence reads them in
+    for (const url of [config.twoBitURL, config.fastaURL]) {
+        if (url && StringUtils.isString(url) && !url.startsWith("data:")) {
+            return url
+        } else if (url && url.name) {
+            return url.name
+        }
+    }
+    return ""
 }
 
 export default Genome
