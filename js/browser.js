@@ -384,7 +384,7 @@ class Browser {
      * Initialize a session from an object, json, or by loading from a file.
      *
      * @param options
-     * @returns {Promise<Array>}  Promise for the load failures, as reported by the loadfailures event
+     * @returns {*}
      */
     async loadSession(options) {
 
@@ -400,7 +400,7 @@ class Browser {
             session = options
         }
 
-        return this.loadSessionObject(session)
+        await this.loadSessionObject(session)
     }
 
     /**
@@ -445,7 +445,7 @@ class Browser {
     /**
      * Note:  public API function
      * @param session
-     * @returns {Promise<Array>}  Promise for the load failures, as reported by the loadfailures event
+     * @returns {Promise<void>}
      */
     async loadSessionObject(session) {
 
@@ -517,7 +517,7 @@ class Browser {
 
         if (!genome) {
             console.warn("No genome or reference object specified")
-            return []
+            return
         }
 
         await this.loadReference(genomeConfig, genomeConfig.locus || session.locus, genome)
@@ -661,8 +661,6 @@ class Browser {
         if (session.locus && Locus.isSingleBaseLocusString(session.locus)) {
             await this.search(session.locus)
         }
-
-        return loadFailures
     }
 
     cleanHouseForSession() {
@@ -773,8 +771,7 @@ class Browser {
      * as well as optional cytoband and annotation tracks.
      *
      * @param idOrConfig
-     * @returns {Promise<Genome>}  Promise for the genome.  Its loadFailures lists the parts and tracks that failed,
-     *                             as reported by the loadfailures event
+     * @returns genome
      */
     async loadGenome(idOrConfig) {
 
@@ -826,9 +823,8 @@ class Browser {
             tracks.push({type: "sequence", order: defaultSequenceTrackOrder})
         }
 
-        const loadFailures = this.genome.loadFailures
-        loadFailures.push(...await this.#loadTrackListTolerantly(tracks))
-        this.#reportLoadFailures(loadFailures)
+        const trackFailures = await this.#loadTrackListTolerantly(tracks)
+        this.#reportLoadFailures([...this.genome.loadFailures, ...trackFailures])
 
         return this.genome
     }
@@ -932,10 +928,10 @@ class Browser {
 
     /**
      * Load a list of tracks for a session or genome load, which tolerates failures: the tracks that load are
-     * added, and the ones that fail are returned as load failures rather than thrown.
+     * added, and the ones that fail are returned rather than thrown.
      *
      * @param configList  Array of track configurations
-     * @returns {Promise<Array>}  Promise for one {kind, url, message} load failure per track that failed
+     * @returns {Promise<Array>}  Promise for one {kind, url, message} per track that failed
      */
     async #loadTrackListTolerantly(configList) {
 
@@ -946,25 +942,15 @@ class Browser {
     }
 
     /**
-     * Report an optional part that failed after the load it belongs to, e.g. cytobands, which load lazily.
-     *
-     * @param kind   Kind of part, as in the loadfailures event
-     * @param url    URL of the part
-     * @param error  The error it failed with
-     */
-    reportLoadFailure(kind, url, error) {
-        this.#reportLoadFailures([loadFailure(kind, url, error)])
-    }
-
-    /**
-     * Report every failure in a session or genome load, once: a single loadfailures event carrying all of them.
-     * igv.js raises no alert for them; that is left to the embedder.
+     * Report every failure in a session or genome load in one alert.  One, because the alert dialog is a single
+     * instance, so separate alerts would show only the last.
      *
      * @param loadFailures  Array of {kind, url, message}
      */
     #reportLoadFailures(loadFailures) {
         if (loadFailures.length > 0) {
-            this.fireEvent('loadfailures', [loadFailures])
+            const lines = loadFailures.map(({url, message}) => `${escapeHTML(url)}<br>${escapeHTML(message)}`)
+            this.alert.present(`Some resources could not be loaded:<br><br>${lines.join('<br><br>')}`)
         }
     }
 
@@ -2756,12 +2742,19 @@ toggleTrackLabels(trackViews, isVisible) {
     }
 }
 
+function escapeHTML(string) {
+    return String(string)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+}
+
 function describeTrackURL(config) {
     return FileUtils.isFile(config.url) ? config.url.name : config.url
 }
 
 /**
- * A track load failure, as reported by the loadfailures event.
+ * A track load failure, as {kind, url, message}.
  *
  * @param config  The track configuration, possibly as json
  * @param error  The error the track load rejected with

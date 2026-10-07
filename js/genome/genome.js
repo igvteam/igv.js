@@ -259,7 +259,7 @@ class Genome {
     /**
      * Return the cytobands for a chromosome.  The cytobands load lazily, on first use, so a failure is an optional
      * part failing after the load: that chromosome's ideogram is drawn without them, other chromosomes still load
-     * theirs, and the first failure is reported.
+     * theirs, and the failure is logged.
      */
     async getCytobands(chr) {
         if (this.cytobandSource) {
@@ -273,10 +273,6 @@ class Genome {
                 if (!this.#cytobandFailures.has(chrName)) {    // Concurrent requests can fail together; log once
                     this.#cytobandFailures.add(chrName)
                     console.error(error)
-                    if (1 === this.#cytobandFailures.size) {
-                        const url = this.config.cytobandURL || this.config.cytobandBbURL
-                        this.browser?.reportLoadFailure('cytobands', url, error)
-                    }
                 }
             }
         }

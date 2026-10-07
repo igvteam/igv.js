@@ -10,7 +10,7 @@ function describeLoadError(error) {
 }
 
 /**
- * A load failure, as reported by the loadfailures event.
+ * A load failure, as reported in the browser's load-failure alert.
  *
  * @param kind  What failed to load, e.g. 'track' or 'chromAlias'
  * @param url  The resource that failed

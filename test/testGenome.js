@@ -120,15 +120,13 @@ suite("testGenome", function () {
         assert.equal(error?.path, "test/data/twobit/missing.2bit")
     })
 
-    test("a cytoband failure leaves out only that chromosome, and is reported once", async function () {
+    test("a cytoband failure leaves out only that chromosome", async function () {
 
-        const reported = []
-        const browser = {reportLoadFailure: (kind, url, error) => reported.push({kind, url, error})}
         const genome = await Genome.createGenome({
             id: "foo",
             twoBitURL: "test/data/twobit/foo.2bit",
             cytobandURL: "test/data/cytobands/foo.cytoband.txt"
-        }, browser)
+        })
 
         const cytobands = [{start: 0, end: 10, name: "p1"}]
         const requests = []
@@ -146,9 +144,6 @@ suite("testGenome", function () {
         assert.isUndefined(await genome.getCytobands("chr2"))   // Not requested again
 
         assert.deepEqual(requests, ["chr2", "chr3", "chr1"])
-        assert.equal(reported.length, 1)
-        assert.equal(reported[0].kind, "cytobands")
-        assert.equal(reported[0].url, "test/data/cytobands/foo.cytoband.txt")
     })
 
 })
