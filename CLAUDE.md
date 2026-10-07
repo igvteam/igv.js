@@ -43,7 +43,7 @@ New code must follow the same rule:
 
 Develop against the source, not `dist/`: the HTML files under `dev/` import `../js/index.js` directly as an ES module. Serve the repo root over HTTP and open e.g. `dev/igvjs.html`. `npm run build:dev-dashboard` regenerates `dev/dev.html`, a searchable index of every page under `dev/`.
 
-CI (`.github/workflows/ci_build.yml`) runs `npm install && npm test` on Node 24.
+CI (`.github/workflows/ci_build.yml`) runs `npm ci && npm test` on the Node version in `.nvmrc`; `devEngines` in `package.json` sets the development minimum (Node 22.13).
 
 ## Architecture
 
