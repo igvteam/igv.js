@@ -268,7 +268,16 @@ class TextFeatureSource extends BaseFeatureSource {
         }
     }
 
-    search(term) {
+    async search(term) {
+        // Non-indexed sources build their search index when the file is read, which otherwise happens on first draw
+        if (!this.featureMap && this.searchable && !this.queryable && this.genome) {
+            try {
+                await this.getFeatures({chr: this.genome.chromosomeNames[0], start: 0, end: Number.MAX_SAFE_INTEGER})
+            } catch (error) {
+                console.error(error)
+                this.featureMap = new Map()   // Don't retry the load on every search
+            }
+        }
         if (this.featureMap) {
             return this.featureMap.get(term.toUpperCase())
         }

@@ -7,11 +7,15 @@ import {igvxhr, StringUtils} from "../node_modules/igv-utils/src/index.js"
  */
 
 const DEFAULT_SEARCH_CONFIG = {
-    timeout: 5000,
+    timeout: 2000,
     type: "plain",
     url: 'https://igv.org/genomes/locus.php?genome=$GENOME$&name=$FEATURE$',
     coords: 0
 }
+
+// Web service URLs that returned no result, to avoid repeating known misses.  Size is capped, oldest entries evicted.
+const MAX_NOT_FOUND = 100
+const notFoundURLs = new Set()
 
 /**
  * Search for a feature by name in MANE transcripts, searchable tracks, and web services
@@ -65,10 +69,21 @@ async function searchWebService(browser, locus, searchConfig) {
     if (path.indexOf("$GENOME$") > -1) {
         path = path.replace("$GENOME$", (browser.genome.id ? browser.genome.id : "hg19"))
     }
+    if (notFoundURLs.has(path)) {
+        return undefined
+    }
+
     const options = searchConfig.timeout ? {timeout: searchConfig.timeout} : undefined
     const result = await igvxhr.loadString(path, options)
 
-    return await processSearchResult(browser, result, searchConfig)
+    const feature = await processSearchResult(browser, result, searchConfig)
+    if (!feature) {
+        if (notFoundURLs.size >= MAX_NOT_FOUND) {
+            notFoundURLs.delete(notFoundURLs.values().next().value)
+        }
+        notFoundURLs.add(path)
+    }
+    return feature
 }
 
 /**

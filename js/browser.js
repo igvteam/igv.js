@@ -68,6 +68,8 @@ class Browser {
 
     qtlSelections = new QTLSelections()
 
+    #unresolvedInitialLocus   // Initial locus not found when the reference was loaded, retried after tracks load
+
     constructor(config, parentDiv) {
 
         this.config = config
@@ -633,6 +635,16 @@ class Browser {
 
         await this.loadTrackList(nonLocalTrackConfigurations)
 
+        // The initial locus might be a feature name defined in a searchable track, which could not be found before
+        // tracks were loaded.  Retry now.
+        if (this.#unresolvedInitialLocus) {
+            const locus = this.#unresolvedInitialLocus
+            this.#unresolvedInitialLocus = undefined
+            if (!await this.search(locus)) {
+                console.error(`Cannot set initial locus ${locus}`)
+            }
+        }
+
         // If an initial locus is defined and represents a single basedo a "search" here.  This will force micro
         // adjustments after width of track column(s) is known.  This can be an issue when the center gide is shown
         // Without this adjustment the single base would be off center by a few pixels.
@@ -669,6 +681,8 @@ class Browser {
      */
     async loadReference(genomeConfig, initialLocus) {
 
+        this.#unresolvedInitialLocus = undefined
+
         this.removeAllTracks()   // Do this first, before new genome is set
         this.roiManager.clearROIs()
 
@@ -703,9 +717,12 @@ class Browser {
 
             const locusFound = await this.search(locus, true)
             if (!locusFound) {
-                console.error(`Cannot set initial locus ${locus}`)
                 if (locus !== genome.initialLocus) {
+                    // Might be a feature name in a searchable track, retried after tracks are loaded
+                    this.#unresolvedInitialLocus = locus
                     await this.search(genome.initialLocus)
+                } else {
+                    console.error(`Cannot set initial locus ${locus}`)
                 }
             }
         }
