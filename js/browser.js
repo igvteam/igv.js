@@ -452,15 +452,26 @@ class Browser {
 
         // Capture current configuration options that might be missing from session
         setDefaults(session, this.config)
-
-        // prepare to load a new session, discarding DOM and state
-        this.cleanHouseForSession()
-        this.config = session
+        const config = session
 
         // Check for juicebox session
         if (session.browsers) {
             session = await translateSession(session)
         }
+
+        // Build the genome before discarding anything, so a session whose genome fails to load leaves the browser intact
+        const genomeOrReference = session.reference || session.genome || session.genarkAccession
+        let genomeConfig, genome
+        if (genomeOrReference) {
+            genomeConfig = StringUtils.isString(genomeOrReference) ?
+                await GenomeUtils.expandReference(this.alert, genomeOrReference) :
+                genomeOrReference
+            genome = await this.#createGenome(genomeConfig)
+        }
+
+        // prepare to load a new session, discarding DOM and state
+        this.cleanHouseForSession()
+        this.config = config
 
         this.navbar.sampleInfoControl.setButtonVisibility(false)
 
@@ -511,17 +522,12 @@ class Browser {
             }
         }
 
-        const genomeOrReference = session.reference || session.genome || session.genarkAccession
-        if (!genomeOrReference) {
+        if (!genome) {
             console.warn("No genome or reference object specified")
             return []
         }
 
-        const genomeConfig = StringUtils.isString(genomeOrReference) ?
-            await GenomeUtils.expandReference(this.alert, genomeOrReference) :
-            genomeOrReference
-
-        const genome = await this.loadReference(genomeConfig, genomeConfig.locus || session.locus)
+        await this.loadReference(genomeConfig, genomeConfig.locus || session.locus, genome)
 
         this.centerLineList = this.createCenterLineList(this.columnContainer)
 
@@ -691,25 +697,14 @@ class Browser {
      *
      * @param genomeConfig
      * @param initialLocus
+     * @param genome  Optional, the genome already built from genomeConfig
      */
-    async loadReference(genomeConfig, initialLocus) {
-
-        this.#unresolvedInitialLocus = undefined
-
-        this.removeAllTracks()   // Do this first, before new genome is set
-        this.roiManager.clearROIs()
-
-        this.navbar.setEnableTrackSelection(false)
+    async loadReference(genomeConfig, initialLocus, genome) {
 
         // Build the genome before clearing anything, so a genome that fails to load leaves the current one intact
+        genome ??= await this.#createGenome(genomeConfig)
 
-        let genome
-        if (genomeConfig.gbkURL) {
-            genome = await loadGenbank(genomeConfig.gbkURL)
-        } else {
-            genome = await Genome.createGenome(genomeConfig, this)
-        }
-        genome.loadFailures ??= []   // A Genbank genome records none
+        this.#unresolvedInitialLocus = undefined
 
         this.removeAllTracks()   // Do this before the new genome is set
         this.roiManager.clearROIs()
@@ -760,6 +755,14 @@ class Browser {
                 })
             }
         }
+        return genome
+    }
+
+    async #createGenome(genomeConfig) {
+        const genome = genomeConfig.gbkURL ?
+            await loadGenbank(genomeConfig.gbkURL) :
+            await Genome.createGenome(genomeConfig, this)
+        genome.loadFailures ??= []   // A Genbank genome records none
         return genome
     }
 
