@@ -630,7 +630,7 @@ class Browser {
         const loadFailures = [...genome.loadFailures]
         const failedHidden = new Set()
         const configHidden = nonLocalTrackConfigurations.filter(config => true === config.hidden)
-        for (const config of configHidden) {
+        await Promise.all(configHidden.map(async config => {
             try {
                 const featureSource = FeatureSource(config, this.genome)
                 await featureSource.getFeatures({chr: "1", start: 0, end: Number.MAX_SAFE_INTEGER})
@@ -639,7 +639,7 @@ class Browser {
                 loadFailures.push(trackLoadFailure(config, error))
                 failedHidden.add(config)   // Already reported; don't load it again as a track
             }
-        }
+        }))
 
         const trackList = nonLocalTrackConfigurations.filter(config => !failedHidden.has(config))
         loadFailures.push(...await this.#loadTrackListTolerantly(trackList))
@@ -941,10 +941,8 @@ class Browser {
 
         const results = await this.#settleTrackList(configList)
 
-        return results
-            .map((result, i) => ({result, config: configList[i]}))
-            .filter(({result}) => result.status === 'rejected')
-            .map(({result, config}) => trackLoadFailure(config, result.reason))
+        return results.flatMap(({status, reason}, i) =>
+            status === 'rejected' ? [trackLoadFailure(configList[i], reason)] : [])
     }
 
     /**

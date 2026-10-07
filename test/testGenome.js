@@ -68,7 +68,7 @@ suite("testGenome", function () {
         try {
             await Genome.createGenome({
                 id: "GCF_000002655.1",
-                twoBitURL: "test/data/twobit/GCF_000002655.1.2bit",
+                twoBitURL: "test/data/twobit/foo.2bit",
                 twoBitBptURL: "test/data/twobit/GCF_000002655.1.2bit.bpt",
                 chromSizesURL: "test/data/twobit/missing.chrom.sizes"
             })

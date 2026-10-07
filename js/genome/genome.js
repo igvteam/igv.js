@@ -510,9 +510,10 @@ function generateGenomeID(config) {
     }
     // twoBitURL first, the order loadSequence reads them in
     for (const url of [config.twoBitURL, config.fastaURL]) {
-        if (url && StringUtils.isString(url) && !url.startsWith("data:")) {
+        if (!url) continue
+        if (StringUtils.isString(url) && !url.startsWith("data:")) {
             return url
-        } else if (url && url.name) {
+        } else if (url.name) {
             return url.name
         }
     }

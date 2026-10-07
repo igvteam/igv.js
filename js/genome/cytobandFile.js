@@ -6,6 +6,7 @@ import Chromosome from "./chromosome.js"
 class CytobandFile {
 
     cytobands = new Map()
+    #loading
 
     constructor(url, config) {
         this.url = url;
@@ -13,9 +14,9 @@ class CytobandFile {
     }
 
     async getCytobands(chr) {
-        if(this.cytobands.size === 0) {
-            await this.#loadCytobands()
-        }
+        // The file is loaded once, on first use; a failed load is not retried
+        this.#loading ??= this.#loadCytobands()
+        await this.#loading
         return this.cytobands.get(chr)
     }
 

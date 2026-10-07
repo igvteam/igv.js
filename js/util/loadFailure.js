@@ -20,4 +20,4 @@ function loadFailure(kind, url, error) {
     return {kind, url, message: describeLoadError(error.cause || error)}
 }
 
-export {describeLoadError, loadFailure}
+export {httpMessages, describeLoadError, loadFailure}

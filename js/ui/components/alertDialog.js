@@ -1,12 +1,6 @@
 import DOMPurify from "../../../node_modules/dompurify/dist/purify.es.mjs"
 import makeDraggable from "../utils/draggable.js"
-
-const httpMessages =
-    {
-        "401": "Access unauthorized",
-        "403": "Access forbidden",
-        "404": "Not found"
-    };
+import {httpMessages} from "../../util/loadFailure.js"
 
 class AlertDialog {
     /**
