@@ -30,7 +30,6 @@ import {createCircularView, makeCircViewChromosomes} from "./jbrowse/circularVie
 import ROIManager from './roi/ROIManager.js'
 import TrackROISet from "./roi/trackROISet.js"
 import SampleInfo from "./sample/sampleInfo.js"
-import {translateSession} from "./hic/shoeboxUtils.js"
 import MenuUtils from "./ui/menuUtils.js"
 import Genome from "./genome/genome.js"
 import {setDefaults} from "./util/defaultOptions.js"
@@ -452,12 +451,6 @@ class Browser {
 
         // Capture current configuration options that might be missing from session
         setDefaults(session, this.config)
-        const config = session
-
-        // Check for juicebox session
-        if (session.browsers) {
-            session = await translateSession(session)
-        }
 
         // Build the genome before discarding anything, so a session whose genome fails to load leaves the browser intact
         const genomeOrReference = session.reference || session.genome || session.genarkAccession
@@ -471,7 +464,7 @@ class Browser {
 
         // prepare to load a new session, discarding DOM and state
         this.cleanHouseForSession()
-        this.config = config
+        this.config = session
 
         this.navbar.sampleInfoControl.setButtonVisibility(false)
 
