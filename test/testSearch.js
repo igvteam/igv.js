@@ -1,8 +1,10 @@
 import "./utils/mockObjects.js"
 import {assert} from 'chai'
+import fs from "fs"
 import {createGenome} from "./utils/MockGenome.js"
 import search, {parseLocusString, searchWebService} from "../js/search.js"
 import FeatureSource from "../js/feature/featureSource.js"
+import {searchFeatures} from "../js/searchFeatures.js"
 
 const genome = createGenome()
 
@@ -144,5 +146,72 @@ suite("testSearch", function () {
     })
 
 
+    /**
+     * Searchable non-indexed tracks build their name index when the file is read.  Search must work before the
+     * track is first drawn, e.g. for an initial locus.  See issue #2105
+     */
+    test("search non-indexed searchable track", async function () {
+
+        const featureSource = FeatureSource({
+            url: "test/data/bed/myc.refgene",
+            format: "refgene",
+            searchable: true
+        }, genome)
+        const track = {
+            searchable: true,
+            featureSource,
+            search: name => featureSource.search(name)
+        }
+        const trackBrowser = {genome, tracks: [track], config: {search: false}}
+
+        const feature = await searchFeatures(trackBrowser, "MYC")
+        assert.ok(feature)
+        assert.equal(feature.chr, "chr8")
+        assert.equal(feature.start, 127735433)
+    })
+
+    test("search non-indexed searchable track with missing file", async function () {
+
+        const featureSource = FeatureSource({
+            url: "test/data/bed/doesNotExist.refgene",
+            format: "refgene",
+            searchable: true
+        }, genome)
+
+        assert.isUndefined(await featureSource.search("MYC"))
+    })
+
+    test("webservice not-found results are cached", async function () {
+
+        const searchConfig = {type: "plain", url: "test/data/search_$FEATURE$.tmp.txt", coords: 0}
+        const file = "test/data/search_NOSUCHGENE.tmp.txt"
+        fs.writeFileSync(file, "")   // Empty response => not found
+        try {
+            assert.isUndefined(await searchWebService(browser, "nosuchgene", searchConfig))
+        } finally {
+            fs.unlinkSync(file)
+        }
+
+        // Response file is gone, a second request would throw.  Expect the cached miss instead.
+        assert.isUndefined(await searchWebService(browser, "nosuchgene", searchConfig))
+    })
+
+    test("search non-indexed searchable track, genome without chromosomeNames", async function () {
+
+        // Genome with no chromosome list, only the chromosome loaded for the initial locus
+        const sparseGenome = createGenome()
+        sparseGenome.chromosomeNames = undefined
+        sparseGenome.chromosomes = new Map([["chr1", sparseGenome.chromosomes.get("chr1")]])
+
+        const featureSource = FeatureSource({
+            url: "test/data/bed/myc.refgene",
+            format: "refgene",
+            searchable: true
+        }, sparseGenome)
+
+        const feature = await featureSource.search("MYC")
+        assert.ok(feature)
+        assert.equal(feature.chr, "chr8")
+    })
 })
 

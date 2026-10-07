@@ -43,7 +43,7 @@ New code must follow the same rule:
 
 Develop against the source, not `dist/`: the HTML files under `dev/` import `../js/index.js` directly as an ES module. Serve the repo root over HTTP and open e.g. `dev/igvjs.html`. `npm run build:dev-dashboard` regenerates `dev/dev.html`, a searchable index of every page under `dev/`.
 
-CI (`.github/workflows/ci_build.yml`) runs `npm install && npm test` on Node 24.
+CI (`.github/workflows/ci_build.yml`) runs `npm ci && npm test` on the Node version in `.nvmrc`; `devEngines` in `package.json` sets the development minimum (Node 22.13).
 
 ## Architecture
 
@@ -75,7 +75,14 @@ Caching conventions worth knowing before touching viewport code: features are lo
 
 Subclass `TrackBase` and implement `getFeatures(chr, start, end, bpPerPixel, viewport)`, `draw(options)`, `computePixelHeight(features)`, plus optional `popupData`, `menuItemList`, `postInit`. Register it in the `trackFunctions` map in `js/trackFactory.js` (which also maps legacy type aliases: `annotation`/`genes`/`snp` → `feature`, `maf`/`mut` → `seg`, …). External code registers via `igv.registerTrackClass` / `igv.registerTrackCreatorFunction`.
 
-**All canvas drawing must go through `IGVGraphics` (`js/igv-canvas.js`)**, not raw `ctx` calls — the same draw path is replayed against `canvas2svg.js` for SVG export (`renderSVGContext`). Raw context calls silently break "Save SVG".
+**Prefer `IGVGraphics` (`js/igv-canvas.js`) over raw `ctx` calls** for canvas drawing. The same draw path is replayed against `canvas2svg.js` for SVG export (`renderSVGContext`), and `IGVGraphics` only uses the subset that survives that replay.
+
+Raw `ctx` calls are *not* automatically a bug — `canvas2svg` implements most of the 2D API (`fillStyle`, `fillRect`, `strokeRect`, paths, `fillText`, `drawImage`, `clip`, gradients, …), so existing raw calls such as those in `js/bam/mods/baseModificationRenderer.js` export correctly. What breaks "Save SVG" is reaching for a member `canvas2svg` doesn't back:
+
+- **Silent no-ops** (return `undefined`, no error, wrong or missing output in the SVG): `setTransform`, `getImageData`, `putImageData`, `createImageData`, `globalCompositeOperation`, `drawFocusRing`.
+- **Missing entirely** (throws `TypeError` during export only, so it passes on-screen testing): `ellipse` (use `fillEllipse`/`strokeEllipse`), `roundRect`, `resetTransform`, `getLineDash`, `isPointInPath`, `filter`, `imageSmoothingEnabled`, `createConicGradient`.
+
+So: don't rewrite working raw `ctx` code just to satisfy the rule, but check anything new against `js/canvas2svg.js` — and test "Save SVG", since neither failure mode shows up on screen.
 
 ### Data sources
 
