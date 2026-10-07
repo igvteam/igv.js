@@ -195,5 +195,23 @@ suite("testSearch", function () {
         // Response file is gone, a second request would throw.  Expect the cached miss instead.
         assert.isUndefined(await searchWebService(browser, "nosuchgene", searchConfig))
     })
+
+    test("search non-indexed searchable track, genome without chromosomeNames", async function () {
+
+        // Genome with no chromosome list, only the chromosome loaded for the initial locus
+        const sparseGenome = createGenome()
+        sparseGenome.chromosomeNames = undefined
+        sparseGenome.chromosomes = new Map([["chr1", sparseGenome.chromosomes.get("chr1")]])
+
+        const featureSource = FeatureSource({
+            url: "test/data/bed/myc.refgene",
+            format: "refgene",
+            searchable: true
+        }, sparseGenome)
+
+        const feature = await featureSource.search("MYC")
+        assert.ok(feature)
+        assert.equal(feature.chr, "chr8")
+    })
 })
 
