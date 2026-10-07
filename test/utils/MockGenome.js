@@ -39,6 +39,7 @@ class MockGenome {
             this.chromosomes.set(name, {name, bpLength: sizes[i]})
         }
 
+        this.chromosomeNames = chromosomeNames
         this.wgChromosomeNames = chromosomeNames
         this.chromAlias = new ChromAliasDefaults(this.id, chromosomeNames)
     }
