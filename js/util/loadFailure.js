@@ -17,7 +17,8 @@ function describeLoadError(error) {
  * @param error  The error the load failed with
  */
 function loadFailure(kind, url, error) {
-    return {kind, url, message: describeLoadError(error.cause || error)}
+    const resource = url?.name ?? String(url)
+    return {kind, url: resource, message: describeLoadError(error.cause || error)}
 }
 
 export {httpMessages, describeLoadError, loadFailure}
