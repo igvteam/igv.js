@@ -36,7 +36,9 @@ class TwobitSequence {
 
     async init() {
         if(this.bptURL) {
-            this.index = await BPTree.loadBpTree(this.bptURL, this.config, 0)
+            // The external index names the chromosomes, but the sequence is required: read its header too, so a
+            // missing or invalid file fails the load
+            [this.index] = await Promise.all([BPTree.loadBpTree(this.bptURL, this.config, 0), this._readHeader()])
         } else {
             const idx = await this._readIndex()
             this.index = {
@@ -118,19 +120,15 @@ class TwobitSequence {
     }
 
     /**
-     * Read the internal index of the 2bit file.  This is a list of sequence names and their offsets in the file.
+     * Read the 2bit file header: magic number, byte order, version, and sequence count.
      *
-     * @returns {Promise<Map<any, any>>}
+     * @returns {Promise<number>}  Promise for the file offset following the header
      * @private
      */
-    async _readIndex() {
+    async _readHeader() {
 
-        const index = new Map()
-        this.chromosomeNames = []
-
-        const loadRange = {start: 0, size: 64}
-        let arrayBuffer = await igvxhr.loadArrayBuffer(this.url, {range: loadRange})
-        let dataView = new DataView(arrayBuffer)
+        const arrayBuffer = await igvxhr.loadArrayBuffer(this.url, {range: {start: 0, size: 16}})
+        const dataView = new DataView(arrayBuffer)
 
         let ptr = 0
         const magicLE = dataView.getUint32(ptr, true)
@@ -154,6 +152,22 @@ class TwobitSequence {
 
         this.reserved = dataView.getUint32(ptr, this.littleEndian)
         ptr += 4
+
+        return ptr
+    }
+
+    /**
+     * Read the internal index of the 2bit file.  This is a list of sequence names and their offsets in the file.
+     *
+     * @returns {Promise<Map<any, any>>}
+     * @private
+     */
+    async _readIndex() {
+
+        const index = new Map()
+        this.chromosomeNames = []
+
+        let ptr = await this._readHeader()
 
         // Loop through sequences loading name and file offset.  We don't know the precise size in bytes in advance.
         let estSize

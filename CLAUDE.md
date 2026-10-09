@@ -92,6 +92,16 @@ So: don't rewrite working raw `ctx` code just to satisfy the rule, but check any
 
 `js/genome/genome.js` plus 2bit/indexed-FASTA sequence readers, cytobands, and — importantly — the chromosome **alias** layer (`chromAlias*.js`). Chromosome naming (`chr1` vs `1` vs RefSeq accessions) is normalized there; feature readers and search should rely on it rather than string-matching chromosome names. UCSC track hubs are loaded via `js/ucsc/hub`.
 
+### Load failures
+
+Loading a genome or session keeps going when *optional* parts fail. The rule:
+
+- **Required** (a failure aborts the load): the genome's sequence, and anything without which there is no chromosome to start on (e.g. chrom.sizes when the sequence can't list its own chromosome names). If you make something optional, check that the browser still has a usable initial locus without it.
+- **A required failure leaves the browser unchanged**: the genome is built before any browser state is cleared, so when `loadGenome`/`loadSession` rejects, the current genome and tracks are still there and the caller can carry on.
+- **Optional parts that fail while the genome is built** go into `genome.loadFailures` as `{kind, url, message}` (built with `loadFailure` from `js/util/loadFailure.js`). Tracks are loaded with `allSettled`, so one bad track doesn't block the others.
+- **Report each load once**: `Browser` combines the genome's and the tracks' failures into a single alert (the alert dialog is a single instance, so separate alerts would show only the last). There is no load-failure event or return value.
+- **Parts that load lazily** (e.g. cytobands, the alias file) fail after the load has returned. Log them, don't alert. Load the source once, so a failure isn't retried on every redraw.
+
 ### Session state
 
 `browser.toJSON()` / `loadSessionObject()` round-trip the browser; `TrackBase.getState()` defines what a track contributes (only simple types, and only values differing from `constructor.defaults`). Legacy IGV-desktop XML sessions are converted in `js/session/igvXmlSession.js`.

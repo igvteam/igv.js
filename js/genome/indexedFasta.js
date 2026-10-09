@@ -36,7 +36,16 @@ class FastaSequence {
     }
 
     async init() {
-        return this.getIndex()
+        // The sequence is required: read a byte, alongside the index, so a missing file fails the load.  If both
+        // fail, report the sequence
+        const results = await Promise.allSettled([
+            igvxhr.loadArrayBuffer(this.file, buildOptions(this.config, {range: {start: 0, size: 1}})),
+            this.getIndex()
+        ])
+        const failure = results.find(({status}) => status === 'rejected')
+        if (failure) {
+            throw failure.reason
+        }
     }
 
     get chromosomeNames() {
