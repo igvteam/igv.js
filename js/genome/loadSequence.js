@@ -18,7 +18,7 @@ async function loadSequence(reference, browser) {
     if ("chromsizes" === reference.format) {
         fasta = new ChromSizes(reference.fastaURL || reference.url)
     } else if ("2bit" === reference.format || reference.twoBitURL) {
-        fasta = new CachedSequence(new Twobit(reference), browser)
+        fasta = new CachedSequence(new Twobit(reference, browser), browser)
     } else if (isDataURL(reference.fastaURL) || !reference.indexURL) {
         fasta = new NonIndexedFasta(reference)
     } else if("gbk" === reference.format || reference.gbkURL) {

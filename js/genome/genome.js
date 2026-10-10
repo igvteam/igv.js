@@ -2,7 +2,7 @@ import {StringUtils} from "../../node_modules/igv-utils/src/index.js"
 import Chromosome from "./chromosome.js"
 import {loadSequence} from "./loadSequence.js"
 import ChromAliasBB from "./chromAliasBB.js"
-import ChromAliasFile from "./chromAliasFile.js"
+import ChromAliasFile, {chromAliasWarning} from "./chromAliasFile.js"
 import CytobandFileBB from "./cytobandFileBB.js"
 import CytobandFile from "./cytobandFile.js"
 
@@ -10,6 +10,7 @@ import {loadChromSizes} from "./chromSizes.js"
 import ChromAliasDefaults from "./chromAliasDefaults.js"
 import {updateReference} from "./updateReference.js"
 import BWSource from "../bigwig/bwSource.js"
+import {presentLoadWarning} from "../util/loadFailure.js"
 
 const ucsdIDMap = new Map([
     ["1kg_ref", "hg18"],
@@ -76,7 +77,9 @@ class Genome {
             try {
                 this.chromosomes = await loadChromSizes(config.chromSizesURL)
             } catch (error) {
-                console.error(error)
+                presentLoadWarning(this.browser,
+                    "Chromosome sizes could not be loaded, so whole-genome view and the chromosome list will not " +
+                    "be available.", config.chromSizesURL, error)
                 this.chromosomes = new Map()
             }
         } else {
@@ -142,7 +145,7 @@ class Genome {
             return await fn(chromAlias)
         } catch (error) {
             if (this.chromAlias === chromAlias) {   // Concurrent calls can fail together; fall back once
-                console.error(error)
+                presentLoadWarning(this.browser, chromAliasWarning, this.config.chromAliasBbURL, error)
                 this.chromAlias = this.#createChromAlias({...this.config, chromAliasBbURL: undefined})
             }
             return this.chromAlias ? fn(this.chromAlias) : undefined
@@ -257,7 +260,7 @@ class Genome {
     /**
      * Return the cytobands for a chromosome.  The cytobands load lazily, on first use, so a failure is an optional
      * part failing after the load: that chromosome's ideogram is drawn without them, other chromosomes still load
-     * theirs, and the failure is logged.
+     * theirs, and the user is warned once.
      */
     async getCytobands(chr) {
         if (this.cytobandSource) {
@@ -270,7 +273,13 @@ class Genome {
             } catch (error) {
                 if (!this.#cytobandFailures.has(chrName)) {    // Concurrent requests can fail together; log once
                     this.#cytobandFailures.add(chrName)
-                    console.error(error)
+                    if (1 === this.#cytobandFailures.size) {     // Alert for the first chromosome only
+                        presentLoadWarning(this.browser,
+                            "Cytobands could not be loaded, so chromosome ideograms will be drawn without bands.",
+                            this.config.cytobandURL || this.config.cytobandBbURL, error)
+                    } else {
+                        console.error(error)
+                    }
                 }
             }
         }

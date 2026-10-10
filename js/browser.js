@@ -48,7 +48,7 @@ import {loadHub} from "./ucsc/hub/hub.js"
 import {EventEmitter} from "./events.js"
 import Locus from "./locus.js"
 import {isLocalFile, isGoogleDriveURL} from "./util/sessionResourceValidator.js"
-import {describeLoadError, loadFailure} from "./util/loadFailure.js"
+import {describeLoadError, escapeHTML, loadFailure} from "./util/loadFailure.js"
 
 
 // css - $igv-scrollbar-outer-width: 14px;
@@ -2748,13 +2748,6 @@ toggleTrackLabels(trackViews, isVisible) {
             }
         }
     }
-}
-
-function escapeHTML(string) {
-    return String(string)
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
 }
 
 function describeTrackURL(config) {

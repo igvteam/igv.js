@@ -7,6 +7,7 @@
 import {igvxhr} from "../../node_modules/igv-utils/src/index.js"
 import BinaryParser from "../binary.js"
 import BPTree from "../bigwig/bpTree.js"
+import {presentLoadWarning} from "../util/loadFailure.js"
 
 const twoBit = ['T', 'C', 'A', 'G']
 const byteTo4Bases = []
@@ -26,9 +27,10 @@ class TwobitSequence {
     metaIndex = new Map()
     chromosomeNames
 
-    constructor(config) {
+    constructor(config, browser) {
         this.url = config.twoBitURL || config.fastaURL
         this.config = config
+        this.browser = browser
         if(config.twoBitBptURL) {
             this.bptURL = config.twoBitBptURL
         }
@@ -47,7 +49,9 @@ class TwobitSequence {
                 this.index = bpt.value
                 return
             }
-            console.error(bpt.reason)
+            presentLoadWarning(this.browser,
+                "The 2bit index (.bpt) could not be loaded, so the index inside the 2bit file is read instead. " +
+                "Loading this genome may be slow.", this.bptURL, bpt.reason)
         }
         const idx = await this._readIndex()
         this.index = {
