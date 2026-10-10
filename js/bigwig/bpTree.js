@@ -153,12 +153,8 @@ export default class BPTree {
     }
 
     async #getParserFor(start, size) {
-        try {
-            const data = await this.loader.loadArrayBuffer(this.path, buildOptions(this.config, {range: {start, size}}))
-            return new BinaryParser(new DataView(data), this.littleEndian)
-        } catch (e) {
-            console.error(e)
-        }
+        const data = await this.loader.loadArrayBuffer(this.path, buildOptions(this.config, {range: {start, size}}))
+        return new BinaryParser(new DataView(data), this.littleEndian)
     }
 
 }
