@@ -71,14 +71,11 @@ class Genome {
         if (this.sequence.chromosomes) {
             this.chromosomes = this.sequence.chromosomes
         } else if (config.chromSizesURL) {
-            // An optional part only if the sequence can name the chromosomes: if it fails, leave it out and load
-            // chromosomes from the sequence as they are needed.  Otherwise there is no chromosome to start on
+            // Optional: if it fails, leave it out and load chromosomes from the sequence as they are needed.  Without
+            // it there may be no chromosome to start on, which the browser checks before it uses the genome
             try {
                 this.chromosomes = await loadChromSizes(config.chromSizesURL)
             } catch (error) {
-                if (!this.sequence.chromosomeNames) {
-                    throw error
-                }
                 console.error(error)
                 this.chromosomes = new Map()
             }

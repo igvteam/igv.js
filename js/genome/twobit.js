@@ -36,15 +36,23 @@ class TwobitSequence {
 
     async init() {
         if(this.bptURL) {
-            // The external index names the chromosomes, but the sequence is required: read its header too, so a
-            // missing or invalid file fails the load
-            [this.index] = await Promise.all([BPTree.loadBpTree(this.bptURL, this.config, 0), this._readHeader()])
-        } else {
-            const idx = await this._readIndex()
-            this.index = {
-                search: async (name) =>  {
-                    return idx.has(name) ? {offset: idx.get(name)} : undefined
-                }
+            // The sequence is required: read its header alongside the external index, so a missing or invalid file
+            // fails the load.  The external index is optional: if it fails, use the file's internal index
+            const [bpt, header] =
+                await Promise.allSettled([BPTree.loadBpTree(this.bptURL, this.config, 0), this._readHeader()])
+            if (header.status === 'rejected') {
+                throw header.reason
+            }
+            if (bpt.status === 'fulfilled') {
+                this.index = bpt.value
+                return
+            }
+            console.error(bpt.reason)
+        }
+        const idx = await this._readIndex()
+        this.index = {
+            search: async (name) =>  {
+                return idx.has(name) ? {offset: idx.get(name)} : undefined
             }
         }
     }

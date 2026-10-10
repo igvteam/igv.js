@@ -459,7 +459,7 @@ class Browser {
             genomeConfig = StringUtils.isString(genomeOrReference) ?
                 await GenomeUtils.expandReference(this.alert, genomeOrReference) :
                 genomeOrReference
-            genome = await this.#createGenome(genomeConfig)
+            genome = await this.#createGenome(genomeConfig, genomeConfig.locus || session.locus)
         }
 
         // prepare to load a new session, discarding DOM and state
@@ -693,7 +693,7 @@ class Browser {
     async loadReference(genomeConfig, initialLocus, genome) {
 
         // Build the genome before clearing anything, so a genome that fails to load leaves the current one intact
-        genome ??= await this.#createGenome(genomeConfig)
+        genome ??= await this.#createGenome(genomeConfig, initialLocus)
 
         this.#unresolvedInitialLocus = undefined
 
@@ -749,10 +749,21 @@ class Browser {
         return genome
     }
 
-    async #createGenome(genomeConfig) {
-        return genomeConfig.gbkURL ?
-            loadGenbank(genomeConfig.gbkURL) :
-            Genome.createGenome(genomeConfig, this)
+    /**
+     * Build a genome, without changing the browser.  It fails if there is no locus to start on: neither initialLocus
+     * nor a default from the genome, which needs a locus in its config or chromosome names.
+     *
+     * @param genomeConfig
+     * @param initialLocus  Optional, the locus the genome will be shown at
+     */
+    async #createGenome(genomeConfig, initialLocus) {
+        const genome = genomeConfig.gbkURL ?
+            await loadGenbank(genomeConfig.gbkURL) :
+            await Genome.createGenome(genomeConfig, this)
+        if (!(initialLocus || genome.initialLocus)) {
+            throw Error(`No initial locus for genome ${genome.id}: specify a locus, or chromosome names (e.g. chromSizesURL)`)
+        }
+        return genome
     }
 
     async expandGenarkAccession(genarkAccession) {

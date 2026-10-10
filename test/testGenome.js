@@ -60,20 +60,34 @@ suite("testGenome", function () {
         assert.equal(genome.initialLocus, "chr1")
     })
 
-    test("chrom sizes failure is fatal when nothing else names the chromosomes", async function () {
+    test("chrom sizes failure is optional when nothing else names the chromosomes", async function () {
 
-        let error
-        try {
-            await Genome.createGenome({
-                id: "GCF_000002655.1",
-                twoBitURL: "test/data/twobit/foo.2bit",
-                twoBitBptURL: "test/data/twobit/GCF_000002655.1.2bit.bpt",
-                chromSizesURL: "test/data/twobit/missing.chrom.sizes"
-            })
-        } catch (e) {
-            error = e
+        const config = {
+            id: "GCF_000002655.1",
+            twoBitURL: "test/data/twobit/foo.2bit",
+            twoBitBptURL: "test/data/twobit/GCF_000002655.1.2bit.bpt",
+            chromSizesURL: "test/data/twobit/missing.chrom.sizes"
         }
-        assert.equal(error?.path, "test/data/twobit/missing.chrom.sizes")
+
+        // No chromosome names, so no default locus: the browser rejects the genome unless a locus is given
+        const genome = await Genome.createGenome(config)
+        assert.isUndefined(genome.chromosomeNames)
+        assert.isUndefined(genome.initialLocus)
+
+        const genomeWithLocus = await Genome.createGenome({...config, locus: "NC_007194.1:1-100"})
+        assert.equal(genomeWithLocus.initialLocus, "NC_007194.1:1-100")
+    })
+
+    test("a 2bit bpt index failure falls back to the internal index", async function () {
+
+        const genome = await Genome.createGenome({
+            id: "foo",
+            twoBitURL: "test/data/twobit/foo.2bit",
+            twoBitBptURL: "test/data/twobit/missing.2bit.bpt"
+        })
+
+        assert.deepEqual(genome.chromosomeNames, ["chr1"])
+        assert.equal(await genome.getSequence("chr1", 47, 50), "ACT")
     })
 
     test("an alias bigBed failure falls back to the default aliases, without preload", async function () {
