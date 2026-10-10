@@ -2,6 +2,28 @@ import DOMPurify from "../../../node_modules/dompurify/dist/purify.es.mjs"
 import makeDraggable from "../utils/draggable.js"
 import {httpMessages} from "../../util/loadFailure.js"
 
+// Alerts are shown one at a time across every dialog on the page: one presented while another is open waits, in
+// order, until it is dismissed, so no alert replaces another.  JavaScript is single threaded, so a queue is all the
+// "synchronization" needed.
+let openDialog
+const pending = []   // [dialog, alert, callback]
+
+function isOpen(dialog) {
+    // A dialog removed from the page (e.g. with its track) can no longer be dismissed; don't let it block the queue
+    return dialog !== undefined && dialog.container.isConnected && 'none' !== dialog.container.style.display
+}
+
+function showNext() {
+    openDialog = undefined
+    while (pending.length > 0) {
+        const [dialog, alert, callback] = pending.shift()
+        if (dialog.container.isConnected) {
+            dialog.show(alert, callback)
+            return
+        }
+    }
+}
+
 class AlertDialog {
     /**
      * Initialize a new alert dialog
@@ -57,6 +79,8 @@ class AlertDialog {
             }
             this.body.innerHTML = '';
             this.container.style.display = 'none'
+
+            showNext()
         }
 
         this.ok.addEventListener('click', event => {
@@ -76,7 +100,23 @@ class AlertDialog {
         this.container.style.display = 'none'
     }
 
+    /**
+     * Present an alert.  If an alert is already open, in this or any other dialog, this one waits until that is
+     * dismissed.
+     *
+     * @param alert  An Error, or a string (may contain HTML, which is sanitized)
+     * @param callback  Optional, called with "OK" when the alert is dismissed
+     */
     present(alert, callback) {
+        pending.push([this, alert, callback])
+        if (!isOpen(openDialog)) {
+            showNext()
+        }
+    }
+
+    show(alert, callback) {
+
+        openDialog = this
 
         this.errorHeadline.textContent = alert.message ? 'ERROR' : ''
         let string = alert.message || alert
