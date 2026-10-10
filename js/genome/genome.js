@@ -105,12 +105,12 @@ class Genome {
                     this.#wgChromosomeNames = config.chromosomeOrder.split(',').map(nm => nm.trim())
                 }
                 // Trim to remove non-existent chromosomes
-                await this.#preloadChromAlias(this.#wgChromosomeNames)
+                await this.#useChromAlias(chromAlias => chromAlias.preload(this.#wgChromosomeNames))
                 this.#wgChromosomeNames =
                     this.#wgChromosomeNames.map(c => this.getChromosomeName(c)).filter(c => this.chromosomes.has(c))
             } else {
                 this.#wgChromosomeNames = trimSmallChromosomes(this.chromosomes)
-                await this.#preloadChromAlias(this.#wgChromosomeNames)
+                await this.#useChromAlias(chromAlias => chromAlias.preload(this.#wgChromosomeNames))
             }
         }
 
@@ -133,16 +133,22 @@ class Genome {
     }
 
     /**
-     * Preload the chromosome alias, falling back if it fails.  Only the alias bigBed can fail here (the other alias
-     * sources preload nothing), and it is an optional part: it is left out, the next alias source is used, and the
-     * failure is logged.
+     * Call the chromosome alias source, falling back if it fails.  Only the alias bigBed can fail (the alias file
+     * logs its own failure, and the defaults read nothing), and it is an optional part: the failure is logged, the
+     * next alias source replaces it, and the call is repeated on that.
+     *
+     * @param fn  Function of the alias source, returning a promise
      */
-    async #preloadChromAlias(chrNames) {
+    async #useChromAlias(fn) {
+        const chromAlias = this.chromAlias
         try {
-            await this.chromAlias.preload(chrNames)
+            return await fn(chromAlias)
         } catch (error) {
-            console.error(error)
-            this.chromAlias = this.#createChromAlias({...this.config, chromAliasBbURL: undefined})
+            if (this.chromAlias === chromAlias) {   // Concurrent calls can fail together; fall back once
+                console.error(error)
+                this.chromAlias = this.#createChromAlias({...this.config, chromAliasBbURL: undefined})
+            }
+            return this.chromAlias ? fn(this.chromAlias) : undefined
         }
     }
 
@@ -226,9 +232,9 @@ class Genome {
             return this.#aliasRecordCache.get(chr)
         }
         if (this.chromAlias) {
-            let aliasRecord = await this.chromAlias.search(chr)
+            let aliasRecord = await this.#useChromAlias(chromAlias => chromAlias.search(chr))
             if (!aliasRecord && chr !== chr.toLowerCase()) {
-                aliasRecord = await this.chromAlias.search(chr.toLowerCase())
+                aliasRecord = await this.#useChromAlias(chromAlias => chromAlias.search(chr.toLowerCase()))
             }
             if (aliasRecord) {
                 // Add some aliases for case insensitivy

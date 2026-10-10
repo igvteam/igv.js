@@ -76,6 +76,21 @@ suite("testGenome", function () {
         assert.equal(error?.path, "test/data/twobit/missing.chrom.sizes")
     })
 
+    test("an alias bigBed failure falls back to the default aliases, without preload", async function () {
+
+        const genome = await Genome.createGenome({
+            id: "foo",
+            twoBitURL: "test/data/twobit/foo.2bit",
+            chromAliasBbURL: "test/data/twobit/missing.chromAlias.bb",
+            wholeGenomeView: false   // No preload: the alias bigBed is first read on a search
+        })
+
+        const aliasRecord = await genome.getAliasRecord("1")
+        assert.equal(aliasRecord.chr, "chr1")
+        assert.equal(genome.getChromosomeName("1"), "chr1")
+        assert.equal((await genome.loadChromosome("1")).name, "chr1")
+    })
+
     test("an indexed fasta genome loads its sequence", async function () {
 
         const genome = await Genome.createGenome({
