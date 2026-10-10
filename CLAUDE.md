@@ -96,9 +96,9 @@ So: don't rewrite working raw `ctx` code just to satisfy the rule, but check any
 
 Loading a genome or session keeps going when *optional* parts fail. The rule:
 
-- **Required** (a failure aborts the load): the genome's sequence, and anything without which there is no chromosome to start on (e.g. chrom.sizes when the sequence can't list its own chromosome names). If you make something optional, check that the browser still has a usable initial locus without it.
-- **A required failure leaves the browser unchanged**: the genome is built before any browser state is cleared, so when `loadGenome`/`loadSession` rejects, the current genome and tracks are still there and the caller can carry on.
-- **Optional genome parts that fail** (chrom.sizes when the sequence names the chromosomes, the alias bigBed) are logged and left out; the genome works without them.
+- **Required** (a failure aborts the load): the sequence file, a FASTA index that was specified, and a starting locus. The locus comes from the session or genome config, or else from chromosome names (from the sequence or chrom.sizes); `Browser.#createGenome` checks for one, since only the browser knows the session's locus.
+- **A required failure leaves the browser unchanged**: the genome is built and checked before any browser state is cleared, so when `loadGenome`/`loadSession` rejects, the current genome and tracks are still there and the caller can carry on.
+- **Optional genome parts that fail** (a 2bit `.bpt` index, chrom.sizes, the alias bigBed) are logged and left out, with a fallback: the 2bit's internal index, chromosomes loaded on demand, the next alias source.
 - **Tracks are loaded with `allSettled`**, so one bad track doesn't block the others. Failures are collected as `{kind, url, message}` with `loadFailure` from `js/util/loadFailure.js`.
 - **Report each load once**: `Browser` combines the failed tracks into a single alert (the alert dialog is a single instance, so separate alerts would show only the last). There is no load-failure event or return value.
 - **Parts that load lazily** (e.g. cytobands, the alias file) fail after the load has returned. Log them, don't alert. Load the source once, so a failure isn't retried on every redraw.
