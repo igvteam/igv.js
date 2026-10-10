@@ -69,10 +69,10 @@ suite("testGenome", function () {
             chromSizesURL: "test/data/twobit/missing.chrom.sizes"
         }
 
-        // No chromosome names, so no default locus: the browser rejects the genome unless a locus is given
+        // No chromosome names, so the default locus is the first sequence in the 2bit file
         const genome = await Genome.createGenome(config)
         assert.isUndefined(genome.chromosomeNames)
-        assert.isUndefined(genome.initialLocus)
+        assert.equal(genome.initialLocus, "chr1")
 
         const genomeWithLocus = await Genome.createGenome({...config, locus: "NC_007194.1:1-100"})
         assert.equal(genomeWithLocus.initialLocus, "NC_007194.1:1-100")

@@ -181,7 +181,8 @@ class Genome {
         } else if (this.chromosomeNames) {
             return this.chromosomeNames[0]
         } else {
-
+            // No list of names, e.g. a 2bit with an external index and no chrom.sizes: use the first sequence
+            return this.sequence?.getFirstChromosomeName?.()
         }
     }
 

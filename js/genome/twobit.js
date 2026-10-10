@@ -128,14 +128,24 @@ class TwobitSequence {
     }
 
     /**
-     * Read the 2bit file header: magic number, byte order, version, and sequence count.
+     * Return the name of the first sequence in the file, a default chromosome even when the external index means
+     * there is no list of names.
+     */
+    getFirstChromosomeName() {
+        return this.chromosomeNames ? this.chromosomeNames[0] : this.firstChromosomeName
+    }
+
+    /**
+     * Read the 2bit file header: magic number, byte order, version, and sequence count.  The same read takes in the
+     * first entry of the internal index, for the name of the first sequence.
      *
      * @returns {Promise<number>}  Promise for the file offset following the header
      * @private
      */
     async _readHeader() {
 
-        const arrayBuffer = await igvxhr.loadArrayBuffer(this.url, {range: {start: 0, size: 16}})
+        // 16 byte header, then the first index entry: name length (1 byte) and name (up to 255 bytes)
+        const arrayBuffer = await igvxhr.loadArrayBuffer(this.url, {range: {start: 0, size: 16 + 1 + 255}})
         const dataView = new DataView(arrayBuffer)
 
         let ptr = 0
@@ -160,6 +170,11 @@ class TwobitSequence {
 
         this.reserved = dataView.getUint32(ptr, this.littleEndian)
         ptr += 4
+
+        if (this.sequenceCount > 0) {
+            const nameLength = dataView.getUint8(ptr)
+            this.firstChromosomeName = String.fromCharCode(...new Uint8Array(arrayBuffer, ptr + 1, nameLength))
+        }
 
         return ptr
     }
