@@ -98,10 +98,9 @@ Loading a genome or session keeps going when *optional* parts fail. The rule:
 
 - **Required** (a failure aborts the load): the sequence file and a FASTA index that was specified. There must also be a starting locus: from the session or genome config, else the genome's first chromosome, which every sequence source supplies (a 2bit with an external `.bpt` index reads its first sequence name from the file header). If a given locus doesn't resolve, the browser falls back to that first chromosome. `Browser.#createGenome` keeps a check for a missing locus as a safety net.
 - **A required failure leaves the browser unchanged**: the genome is built and checked before any browser state is cleared, so when `loadGenome`/`loadSession` rejects, the current genome and tracks are still there and the caller can carry on.
-- **Optional genome parts that fail** (a 2bit `.bpt` index, chrom.sizes, the alias bigBed) are logged and left out, with a fallback: the 2bit's internal index, chromosomes loaded on demand, the next alias source.
-- **Tracks are loaded with `allSettled`**, so one bad track doesn't block the others. Failures are collected as `{kind, url, message}` with `loadFailure` from `js/util/loadFailure.js`.
-- **Report each load once**: `Browser` combines the failed tracks into a single alert (the alert dialog is a single instance, so separate alerts would show only the last). There is no load-failure event or return value.
-- **Parts that load lazily** (e.g. cytobands, the alias file) fail after the load has returned. Log them, don't alert. Load the source once, so a failure isn't retried on every redraw.
+- **Optional genome parts that fail** (a 2bit `.bpt` index, chrom.sizes, the alias bigBed, the alias file, cytobands) are left out with a fallback where there is one (the 2bit's internal index, chromosomes loaded on demand, the next alias source). Warn the user with `presentLoadWarning` from `js/util/loadFailure.js`: an alert saying what failed and its likely consequence (e.g. "Loading this genome may be slow"). Parts that load lazily (cytobands, the alias file) fail after the load has returned; warn once, and load the source once, so a failure isn't retried on every redraw.
+- **Tracks are loaded with `allSettled`**, so one bad track doesn't block the others. `Browser` lists the failed tracks of a load in one alert, collected as `{kind, url, message}` with `loadFailure`. There is no load-failure event or return value.
+- **Alerts are queued** (`js/ui/components/alertDialog.js`): an alert presented while another is open, in any dialog on the page, waits until that one is dismissed. So any code can call `browser.alert.present()` without hiding another alert.
 
 ### Session state
 
