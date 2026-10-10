@@ -98,8 +98,9 @@ Loading a genome or session keeps going when *optional* parts fail. The rule:
 
 - **Required** (a failure aborts the load): the genome's sequence, and anything without which there is no chromosome to start on (e.g. chrom.sizes when the sequence can't list its own chromosome names). If you make something optional, check that the browser still has a usable initial locus without it.
 - **A required failure leaves the browser unchanged**: the genome is built before any browser state is cleared, so when `loadGenome`/`loadSession` rejects, the current genome and tracks are still there and the caller can carry on.
-- **Optional parts that fail while the genome is built** go into `genome.loadFailures` as `{kind, url, message}` (built with `loadFailure` from `js/util/loadFailure.js`). Tracks are loaded with `allSettled`, so one bad track doesn't block the others.
-- **Report each load once**: `Browser` combines the genome's and the tracks' failures into a single alert (the alert dialog is a single instance, so separate alerts would show only the last). There is no load-failure event or return value.
+- **Optional genome parts that fail** (chrom.sizes when the sequence names the chromosomes, the alias bigBed) are logged and left out; the genome works without them.
+- **Tracks are loaded with `allSettled`**, so one bad track doesn't block the others. Failures are collected as `{kind, url, message}` with `loadFailure` from `js/util/loadFailure.js`.
+- **Report each load once**: `Browser` combines the failed tracks into a single alert (the alert dialog is a single instance, so separate alerts would show only the last). There is no load-failure event or return value.
 - **Parts that load lazily** (e.g. cytobands, the alias file) fail after the load has returned. Log them, don't alert. Load the source once, so a failure isn't retried on every redraw.
 
 ### Session state

@@ -10,7 +10,6 @@ import {loadChromSizes} from "./chromSizes.js"
 import ChromAliasDefaults from "./chromAliasDefaults.js"
 import {updateReference} from "./updateReference.js"
 import BWSource from "../bigwig/bwSource.js"
-import {loadFailure} from "../util/loadFailure.js"
 
 const ucsdIDMap = new Map([
     ["1kg_ref", "hg18"],
@@ -31,9 +30,6 @@ class Genome {
     #wgChromosomeNames
     #aliasRecordCache = new Map()
     #cytobandFailures = new Set()
-
-    // Optional parts that failed while the genome was built, as {kind, url, message}: left out, and reported by the browser
-    loadFailures = []
 
     static async createGenome(options, browser) {
 
@@ -84,7 +80,6 @@ class Genome {
                     throw error
                 }
                 console.error(error)
-                this.loadFailures.push(loadFailure('chromSizes', config.chromSizesURL, error))
                 this.chromosomes = new Map()
             }
         } else {
@@ -140,14 +135,13 @@ class Genome {
     /**
      * Preload the chromosome alias, falling back if it fails.  Only the alias bigBed can fail here (the other alias
      * sources preload nothing), and it is an optional part: it is left out, the next alias source is used, and the
-     * failure is recorded as a load failure.
+     * failure is logged.
      */
     async #preloadChromAlias(chrNames) {
         try {
             await this.chromAlias.preload(chrNames)
         } catch (error) {
             console.error(error)
-            this.loadFailures.push(loadFailure('chromAlias', this.config.chromAliasBbURL, error))
             this.chromAlias = this.#createChromAlias({...this.config, chromAliasBbURL: undefined})
         }
     }

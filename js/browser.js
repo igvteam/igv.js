@@ -627,7 +627,7 @@ class Browser {
         }
 
         // Load a hidden track -- used to populate searchable database without creating a track
-        const loadFailures = [...genome.loadFailures]
+        const loadFailures = []
         const failedHidden = new Set()
         const configHidden = nonLocalTrackConfigurations.filter(config => true === config.hidden)
         await Promise.all(configHidden.map(async config => {
@@ -750,11 +750,9 @@ class Browser {
     }
 
     async #createGenome(genomeConfig) {
-        const genome = genomeConfig.gbkURL ?
-            await loadGenbank(genomeConfig.gbkURL) :
-            await Genome.createGenome(genomeConfig, this)
-        genome.loadFailures ??= []   // A Genbank genome records none
-        return genome
+        return genomeConfig.gbkURL ?
+            loadGenbank(genomeConfig.gbkURL) :
+            Genome.createGenome(genomeConfig, this)
     }
 
     async expandGenarkAccession(genarkAccession) {
@@ -823,8 +821,7 @@ class Browser {
             tracks.push({type: "sequence", order: defaultSequenceTrackOrder})
         }
 
-        const trackFailures = await this.#loadTrackListTolerantly(tracks)
-        this.#reportLoadFailures([...this.genome.loadFailures, ...trackFailures])
+        this.#reportLoadFailures(await this.#loadTrackListTolerantly(tracks))
 
         return this.genome
     }

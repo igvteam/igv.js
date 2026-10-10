@@ -58,8 +58,6 @@ suite("testGenome", function () {
 
         assert.deepEqual(genome.chromosomeNames, ["chr1"])
         assert.equal(genome.initialLocus, "chr1")
-        assert.equal(genome.loadFailures.length, 1)
-        assert.equal(genome.loadFailures[0].kind, "chromSizes")
     })
 
     test("chrom sizes failure is fatal when nothing else names the chromosomes", async function () {
