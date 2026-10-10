@@ -96,7 +96,7 @@ So: don't rewrite working raw `ctx` code just to satisfy the rule, but check any
 
 Loading a genome or session keeps going when *optional* parts fail. The rule:
 
-- **Required** (a failure aborts the load): the sequence file, a FASTA index that was specified, and a starting locus. The locus comes from the session or genome config, or else from chromosome names (from the sequence or chrom.sizes); `Browser.#createGenome` checks for one, since only the browser knows the session's locus.
+- **Required** (a failure aborts the load): the sequence file and a FASTA index that was specified. There must also be a starting locus: from the session or genome config, else the genome's first chromosome, which every sequence source supplies (a 2bit with an external `.bpt` index reads its first sequence name from the file header). If a given locus doesn't resolve, the browser falls back to that first chromosome. `Browser.#createGenome` keeps a check for a missing locus as a safety net.
 - **A required failure leaves the browser unchanged**: the genome is built and checked before any browser state is cleared, so when `loadGenome`/`loadSession` rejects, the current genome and tracks are still there and the caller can carry on.
 - **Optional genome parts that fail** (a 2bit `.bpt` index, chrom.sizes, the alias bigBed) are logged and left out, with a fallback: the 2bit's internal index, chromosomes loaded on demand, the next alias source.
 - **Tracks are loaded with `allSettled`**, so one bad track doesn't block the others. Failures are collected as `{kind, url, message}` with `loadFailure` from `js/util/loadFailure.js`.
