@@ -12,11 +12,6 @@
 import {buildOptions} from "../util/igvUtils.js"
 import {igvxhr, StringUtils} from "../../node_modules/igv-utils/src/index.js"
 import ChromAliasDefaults from "./chromAliasDefaults.js"
-import {presentLoadWarning} from "../util/loadFailure.js"
-
-const chromAliasWarning =
-    "Chromosome aliases could not be loaded. Data files and searches that name chromosomes differently from this " +
-    "genome (e.g. RefSeq accessions rather than chr1) may not match."
 
 class ChromAliasFile {
 
@@ -103,12 +98,9 @@ class ChromAliasFile {
      * @returns {Promise<any>} promise to resolve to the alias record.
      */
     async search(alias) {
-        if (!this.#aliasesLoading) {
-            // The alias file loads lazily, on first search, so a failure is an optional part failing after the
-            // load: it is logged once and searches find nothing
-            this.#aliasesLoading = this.loadAliases()
-                .catch(error => presentLoadWarning(this.genome?.browser, chromAliasWarning, this.aliasURL, error))
-        }
+        // The alias file loads lazily, on first search, and once: if it fails, every search fails with the same
+        // error, which the genome handles by falling back to another alias source
+        this.#aliasesLoading ??= this.loadAliases()
         await this.#aliasesLoading
         return this.aliasRecordCache.get(alias)
 
@@ -116,4 +108,3 @@ class ChromAliasFile {
 }
 
 export default ChromAliasFile
-export {chromAliasWarning}

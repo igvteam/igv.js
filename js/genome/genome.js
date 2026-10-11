@@ -2,7 +2,7 @@ import {StringUtils} from "../../node_modules/igv-utils/src/index.js"
 import Chromosome from "./chromosome.js"
 import {loadSequence} from "./loadSequence.js"
 import ChromAliasBB from "./chromAliasBB.js"
-import ChromAliasFile, {chromAliasWarning} from "./chromAliasFile.js"
+import ChromAliasFile from "./chromAliasFile.js"
 import CytobandFileBB from "./cytobandFileBB.js"
 import CytobandFile from "./cytobandFile.js"
 
@@ -10,7 +10,11 @@ import {loadChromSizes} from "./chromSizes.js"
 import ChromAliasDefaults from "./chromAliasDefaults.js"
 import {updateReference} from "./updateReference.js"
 import BWSource from "../bigwig/bwSource.js"
-import {presentLoadWarning} from "../util/loadFailure.js"
+import {loadFailure} from "../util/loadFailure.js"
+
+const chromAliasWarning =
+    "Chromosome aliases could not be loaded. Data files and searches that name chromosomes differently from this " +
+    "genome (e.g. RefSeq accessions rather than chr1) may not match."
 
 const ucsdIDMap = new Map([
     ["1kg_ref", "hg18"],
@@ -31,6 +35,13 @@ class Genome {
     #wgChromosomeNames
     #aliasRecordCache = new Map()
     #cytobandFailures = new Set()
+    #chromAliasConfig
+
+    // Optional parts that failed to load, as {kind, url, message, warning}: left out, and reported by the browser
+    loadFailures = []
+
+    // Set by the browser once it has taken the genome: called with each later load failure.  See #recordLoadFailure
+    onLoadFailure
 
     static async createGenome(options, browser) {
 
@@ -57,6 +68,7 @@ class Genome {
 
         // Load sequence.  This is required: the genome loads if and only if its sequence source loads
         this.sequence = await loadSequence(config, this.browser)
+        this.loadFailures.push(...(this.sequence.loadFailures ?? []))
 
         // Load cytobands.  This is optional but required to support the ideogram.  Only needed for whole genome view
         if (false !== config.showIdeogram && false !== config.wholeGenomeView) {
@@ -77,9 +89,11 @@ class Genome {
             try {
                 this.chromosomes = await loadChromSizes(config.chromSizesURL)
             } catch (error) {
-                presentLoadWarning(this.browser,
-                    "Chromosome sizes could not be loaded, so whole-genome view and the chromosome list will not " +
-                    "be available.", config.chromSizesURL, error)
+                const lost = this.sequence.chromosomeNames ?
+                    "whole-genome view will not be available" :
+                    "whole-genome view and the chromosome list will not be available"
+                this.#recordLoadFailure('chromSizes', config.chromSizesURL, error,
+                    `Chromosome sizes could not be loaded, so ${lost}.`)
                 this.chromosomes = new Map()
             }
         } else {
@@ -94,6 +108,7 @@ class Genome {
         }
 
         // Chromosome alias
+        this.#chromAliasConfig = config
         this.chromAlias = this.#createChromAlias(config)
 
         if (false !== config.wholeGenomeView && this.chromosomes.size > 0) {
@@ -133,22 +148,52 @@ class Genome {
     }
 
     /**
-     * Call the chromosome alias source, falling back if it fails.  Only the alias bigBed can fail (the alias file
-     * logs its own failure, and the defaults read nothing), and it is an optional part: the failure is logged, the
-     * next alias source replaces it, and the call is repeated on that.
+     * Call the chromosome alias source, falling back if it fails.  The alias bigBed and the alias file are optional
+     * parts: if one fails, the failure is recorded, the next alias source replaces it (the alias file, the defaults,
+     * or none at all), and the call is repeated on that.
      *
      * @param fn  Function of the alias source, returning a promise
+     * @returns {Promise<*>}  Promise for the result of fn, or undefined if there is no alias source
      */
     async #useChromAlias(fn) {
         const chromAlias = this.chromAlias
+        if (!chromAlias) {
+            return undefined
+        }
         try {
             return await fn(chromAlias)
         } catch (error) {
-            if (this.chromAlias === chromAlias) {   // Concurrent calls can fail together; fall back once
-                presentLoadWarning(this.browser, chromAliasWarning, this.config.chromAliasBbURL, error)
-                this.chromAlias = this.#createChromAlias({...this.config, chromAliasBbURL: undefined})
+            const failedURL = chromAlias instanceof ChromAliasBB ? 'chromAliasBbURL' :
+                chromAlias instanceof ChromAliasFile ? 'aliasURL' : undefined
+            if (!failedURL) {
+                throw error   // The defaults load nothing, so this is not a load failure
             }
-            return this.chromAlias ? fn(this.chromAlias) : undefined
+            if (this.chromAlias === chromAlias) {   // Concurrent calls can fail together; fall back once
+                this.#recordLoadFailure('chromAlias', this.#chromAliasConfig[failedURL], error, chromAliasWarning)
+                this.#chromAliasConfig = {...this.#chromAliasConfig, [failedURL]: undefined}
+                this.chromAlias = this.#createChromAlias(this.#chromAliasConfig)
+            }
+            return this.#useChromAlias(fn)
+        }
+    }
+
+    /**
+     * Record that an optional part failed to load: log it, and either collect it in loadFailures, for the browser to
+     * report with the rest of the load, or, once the browser has taken the genome and set onLoadFailure, pass it to
+     * that, so a part that loads lazily (cytobands, aliases) is reported as it fails.
+     *
+     * @param kind  What failed, e.g. 'cytobands'
+     * @param url  The resource that failed
+     * @param error  The error it failed with
+     * @param warning  What failed and its likely consequence, for the user
+     */
+    #recordLoadFailure(kind, url, error, warning) {
+        console.error(error)
+        const failure = loadFailure(kind, url, error, warning)
+        if (this.onLoadFailure) {
+            this.onLoadFailure(failure)
+        } else {
+            this.loadFailures.push(failure)
         }
     }
 
@@ -273,10 +318,9 @@ class Genome {
             } catch (error) {
                 if (!this.#cytobandFailures.has(chrName)) {    // Concurrent requests can fail together; log once
                     this.#cytobandFailures.add(chrName)
-                    if (1 === this.#cytobandFailures.size) {     // Alert for the first chromosome only
-                        presentLoadWarning(this.browser,
-                            "Cytobands could not be loaded, so chromosome ideograms will be drawn without bands.",
-                            this.config.cytobandURL || this.config.cytobandBbURL, error)
+                    if (1 === this.#cytobandFailures.size) {     // Warn for the first chromosome only
+                        this.#recordLoadFailure('cytobands', this.config.cytobandURL || this.config.cytobandBbURL,
+                            error, "Cytobands could not be loaded, so chromosome ideograms will be drawn without bands.")
                     } else {
                         console.error(error)
                     }

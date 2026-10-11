@@ -26,24 +26,21 @@ function escapeHTML(string) {
  * @param kind  What failed to load, e.g. 'track' or 'chromAlias'
  * @param url  The resource that failed
  * @param error  The error the load failed with
+ * @param warning  Optional, for an optional part: what failed and its likely consequence, e.g. "Cytobands could not
+ *                 be loaded, so ..."
  */
-function loadFailure(kind, url, error) {
-    return {kind, url: describeResource(url), message: describeLoadError(error.cause || error)}
+function loadFailure(kind, url, error, warning) {
+    return {kind, url: describeResource(url), message: describeLoadError(error.cause || error), warning}
 }
 
 /**
- * Warn that an optional part failed to load: log the error, and alert the user with what failed and its likely
- * consequence, then the resource and the error.  Alerts are queued, so this never hides another.
+ * Describe a load failure for an alert: its warning, if any, then the resource and the error, one per line.
  *
- * @param browser  The browser to alert in; if undefined (e.g. in unit tests) the failure is only logged
- * @param message  What failed and its consequence, e.g. "Cytobands could not be loaded: ..."
- * @param url  The resource that failed
- * @param error  The error the load failed with
+ * @param loadFailure  {kind, url, message, warning}, from loadFailure()
+ * @returns {string}  HTML
  */
-function presentLoadWarning(browser, message, url, error) {
-    console.error(error)
-    browser?.alert?.present(
-        `${escapeHTML(message)}<br><br>${escapeHTML(describeResource(url))}<br>${escapeHTML(describeLoadError(error.cause || error))}`)
+function describeLoadFailure({url, message, warning}) {
+    return [warning, url, message].filter(line => line !== undefined).map(escapeHTML).join('<br>')
 }
 
-export {httpMessages, describeLoadError, escapeHTML, loadFailure, presentLoadWarning}
+export {httpMessages, describeLoadError, describeLoadFailure, escapeHTML, loadFailure}

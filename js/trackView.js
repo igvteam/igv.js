@@ -923,10 +923,6 @@ class TrackView {
             this[key] = undefined
         }
 
-        if (this.alert) {
-            this.alert.container.remove()    // This is quite obviously a hack, need a "dispose" method on AlertDialog
-        }
-
         this.disposed = true
     }
 

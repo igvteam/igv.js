@@ -138,6 +138,7 @@ class Viewport {
     addMouseHandlers() {}
 
     dispose() {
+        this.alert?.dispose()
         this.viewportElement.remove();
 
         // Nullify all properties to free memory

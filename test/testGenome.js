@@ -58,6 +58,12 @@ suite("testGenome", function () {
 
         assert.deepEqual(genome.chromosomeNames, ["chr1"])
         assert.equal(genome.initialLocus, "chr1")
+
+        assert.equal(genome.loadFailures.length, 1)
+        const [failure] = genome.loadFailures
+        assert.equal(failure.kind, "chromSizes")
+        assert.equal(failure.url, "test/data/twobit/missing.chrom.sizes")
+        assert.equal(failure.warning, "Chromosome sizes could not be loaded, so whole-genome view will not be available.")
     })
 
     test("chrom sizes failure is optional when nothing else names the chromosomes", async function () {
@@ -73,6 +79,9 @@ suite("testGenome", function () {
         const genome = await Genome.createGenome(config)
         assert.isUndefined(genome.chromosomeNames)
         assert.equal(genome.initialLocus, "chr1")
+        assert.equal(genome.loadFailures.length, 1)
+        assert.equal(genome.loadFailures[0].warning,
+            "Chromosome sizes could not be loaded, so whole-genome view and the chromosome list will not be available.")
 
         const genomeWithLocus = await Genome.createGenome({...config, locus: "NC_007194.1:1-100"})
         assert.equal(genomeWithLocus.initialLocus, "NC_007194.1:1-100")
@@ -88,6 +97,12 @@ suite("testGenome", function () {
 
         assert.deepEqual(genome.chromosomeNames, ["chr1"])
         assert.equal(await genome.getSequence("chr1", 47, 50), "ACT")
+
+        assert.equal(genome.loadFailures.length, 1)
+        const [failure] = genome.loadFailures
+        assert.equal(failure.kind, "twoBitBpt")
+        assert.equal(failure.url, "test/data/twobit/missing.2bit.bpt")
+        assert.include(failure.warning, "may be slow")
     })
 
     test("an alias bigBed failure falls back to the default aliases, without preload", async function () {
@@ -103,6 +118,62 @@ suite("testGenome", function () {
         assert.equal(aliasRecord.chr, "chr1")
         assert.equal(genome.getChromosomeName("1"), "chr1")
         assert.equal((await genome.loadChromosome("1")).name, "chr1")
+
+        assert.equal(genome.loadFailures.length, 1)
+        assert.equal(genome.loadFailures[0].kind, "chromAlias")
+        assert.equal(genome.loadFailures[0].url, "test/data/twobit/missing.chromAlias.bb")
+    })
+
+    test("an alias bigBed failure with nothing to fall back to is recorded once", async function () {
+
+        // No chromosome names (external 2bit index) and no alias file, so no alias source replaces the bigBed
+        const genome = await Genome.createGenome({
+            id: "GCF_000002655.1",
+            twoBitURL: "test/data/twobit/foo.2bit",
+            twoBitBptURL: "test/data/twobit/GCF_000002655.1.2bit.bpt",
+            chromAliasBbURL: "test/data/twobit/missing.chromAlias.bb",
+            wholeGenomeView: false
+        })
+
+        // Mixed case, so the lookup is retried in lower case: on no alias source at all, by then
+        assert.isUndefined(await genome.getAliasRecord("Chr1"))
+        assert.isUndefined(genome.chromAlias)
+        assert.equal(genome.loadFailures.length, 1)
+        assert.equal(genome.loadFailures[0].kind, "chromAlias")
+    })
+
+    test("an alias file failure falls back to the default aliases", async function () {
+
+        const genome = await Genome.createGenome({
+            id: "foo",
+            twoBitURL: "test/data/twobit/foo.2bit",
+            aliasURL: "test/data/twobit/missing.alias.txt"
+        })
+
+        assert.equal((await genome.getAliasRecord("1")).chr, "chr1")
+        assert.equal(genome.loadFailures.length, 1)
+        assert.equal(genome.loadFailures[0].kind, "chromAlias")
+        assert.equal(genome.loadFailures[0].url, "test/data/twobit/missing.alias.txt")
+    })
+
+    test("a failure after the browser takes the genome is passed to onLoadFailure", async function () {
+
+        const genome = await Genome.createGenome({
+            id: "foo",
+            twoBitURL: "test/data/twobit/foo.2bit",
+            cytobandURL: "test/data/cytobands/missing.cytoband.txt"
+        })
+        assert.equal(genome.loadFailures.length, 0)   // Cytobands load lazily
+
+        const reported = []
+        genome.onLoadFailure = failure => reported.push(failure)
+        assert.isUndefined(await genome.getCytobands("chr1"))
+
+        assert.equal(genome.loadFailures.length, 0)
+        assert.equal(reported.length, 1)
+        assert.equal(reported[0].kind, "cytobands")
+        assert.equal(reported[0].url, "test/data/cytobands/missing.cytoband.txt")
+        assert.include(reported[0].warning, "Cytobands could not be loaded")
     })
 
     test("an indexed fasta genome loads its sequence", async function () {

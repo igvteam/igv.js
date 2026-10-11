@@ -48,7 +48,7 @@ import {loadHub} from "./ucsc/hub/hub.js"
 import {EventEmitter} from "./events.js"
 import Locus from "./locus.js"
 import {isLocalFile, isGoogleDriveURL} from "./util/sessionResourceValidator.js"
-import {describeLoadError, escapeHTML, loadFailure} from "./util/loadFailure.js"
+import {describeLoadError, describeLoadFailure, loadFailure} from "./util/loadFailure.js"
 
 
 // css - $igv-scrollbar-outer-width: 14px;
@@ -627,7 +627,7 @@ class Browser {
         }
 
         // Load a hidden track -- used to populate searchable database without creating a track
-        const loadFailures = []
+        const loadFailures = [...genome.loadFailures]
         const failedHidden = new Set()
         const configHidden = nonLocalTrackConfigurations.filter(config => true === config.hidden)
         await Promise.all(configHidden.map(async config => {
@@ -706,6 +706,10 @@ class Browser {
 
         this.genome = genome
 
+        // Optional parts that failed while the genome was built are reported with the rest of the load; from here on,
+        // parts that load lazily (cytobands, aliases) are reported as they fail
+        genome.onLoadFailure = failure => this.#reportLoadFailures([failure])
+
         this.navbar.updateGenome(genome)
 
         let locus = initialLocus || genome.initialLocus
@@ -760,6 +764,7 @@ class Browser {
         const genome = genomeConfig.gbkURL ?
             await loadGenbank(genomeConfig.gbkURL) :
             await Genome.createGenome(genomeConfig, this)
+        genome.loadFailures ??= []   // A Genbank genome records none
         if (!(initialLocus || genome.initialLocus)) {
             throw Error(`No initial locus for genome ${genome.id}: specify a locus, or chromosome names (e.g. chromSizesURL)`)
         }
@@ -832,7 +837,8 @@ class Browser {
             tracks.push({type: "sequence", order: defaultSequenceTrackOrder})
         }
 
-        this.#reportLoadFailures(await this.#loadTrackListTolerantly(tracks))
+        const trackFailures = await this.#loadTrackListTolerantly(tracks)
+        this.#reportLoadFailures([...this.genome.loadFailures, ...trackFailures])
 
         return this.genome
     }
@@ -950,15 +956,15 @@ class Browser {
     }
 
     /**
-     * Report every failure in a session or genome load in one alert.  One, because the alert dialog is a single
-     * instance, so separate alerts would show only the last.
+     * Report every failure in a session or genome load in one alert, rather than one alert per failure, which the
+     * user would have to dismiss one by one.
      *
-     * @param loadFailures  Array of {kind, url, message}
+     * @param loadFailures  Array of {kind, url, message, warning}, from loadFailure()
      */
     #reportLoadFailures(loadFailures) {
         if (loadFailures.length > 0) {
-            const lines = loadFailures.map(({url, message}) => `${escapeHTML(url)}<br>${escapeHTML(message)}`)
-            this.alert.present(`Some resources could not be loaded:<br><br>${lines.join('<br><br>')}`)
+            const descriptions = loadFailures.map(describeLoadFailure)
+            this.alert.present(`Some resources could not be loaded:<br><br>${descriptions.join('<br><br>')}`)
         }
     }
 
@@ -1939,6 +1945,7 @@ class Browser {
 
     dispose() {
         this.removeEventHandlers()
+        this.alert.dispose()
         for (let trackView of this.trackViews) {
             trackView.dispose()
         }

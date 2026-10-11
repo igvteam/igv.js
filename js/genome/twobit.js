@@ -7,7 +7,7 @@
 import {igvxhr} from "../../node_modules/igv-utils/src/index.js"
 import BinaryParser from "../binary.js"
 import BPTree from "../bigwig/bpTree.js"
-import {presentLoadWarning} from "../util/loadFailure.js"
+import {loadFailure} from "../util/loadFailure.js"
 
 const twoBit = ['T', 'C', 'A', 'G']
 const byteTo4Bases = []
@@ -27,16 +27,19 @@ class TwobitSequence {
     metaIndex = new Map()
     chromosomeNames
 
-    constructor(config, browser) {
+    // Optional parts that failed to load, as {kind, url, message, warning}: left out, and reported by the browser
+    loadFailures = []
+
+    constructor(config) {
         this.url = config.twoBitURL || config.fastaURL
         this.config = config
-        this.browser = browser
         if(config.twoBitBptURL) {
             this.bptURL = config.twoBitBptURL
         }
      }
 
     async init() {
+        let headerEnd
         if(this.bptURL) {
             // The sequence is required: read its header alongside the external index, so a missing or invalid file
             // fails the load.  The external index is optional: if it fails, use the file's internal index
@@ -49,11 +52,13 @@ class TwobitSequence {
                 this.index = bpt.value
                 return
             }
-            presentLoadWarning(this.browser,
+            console.error(bpt.reason)
+            this.loadFailures.push(loadFailure('twoBitBpt', this.bptURL, bpt.reason,
                 "The 2bit index (.bpt) could not be loaded, so the index inside the 2bit file is read instead. " +
-                "Loading this genome may be slow.", this.bptURL, bpt.reason)
+                "Loading this genome may be slow."))
+            headerEnd = header.value
         }
-        const idx = await this._readIndex()
+        const idx = await this._readIndex(headerEnd)
         this.index = {
             search: async (name) =>  {
                 return idx.has(name) ? {offset: idx.get(name)} : undefined
@@ -186,15 +191,16 @@ class TwobitSequence {
     /**
      * Read the internal index of the 2bit file.  This is a list of sequence names and their offsets in the file.
      *
+     * @param headerEnd  Optional, the file offset following the header if it has been read already
      * @returns {Promise<Map<any, any>>}
      * @private
      */
-    async _readIndex() {
+    async _readIndex(headerEnd) {
 
         const index = new Map()
         this.chromosomeNames = []
 
-        let ptr = await this._readHeader()
+        let ptr = headerEnd ?? await this._readHeader()
 
         // Loop through sequences loading name and file offset.  We don't know the precise size in bytes in advance.
         let estSize

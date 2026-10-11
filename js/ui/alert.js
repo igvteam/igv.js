@@ -9,6 +9,10 @@ class Alert {
     present(alert, callback) {
         this.dialog.present(alert, callback)
     }
+
+    dispose() {
+        this.dialog.dispose()
+    }
 }
 
 export default Alert

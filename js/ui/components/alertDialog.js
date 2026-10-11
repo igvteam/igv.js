@@ -10,14 +10,14 @@ const pending = []   // [dialog, alert, callback]
 
 function isOpen(dialog) {
     // A dialog removed from the page (e.g. with its track) can no longer be dismissed; don't let it block the queue
-    return dialog !== undefined && dialog.container.isConnected && 'none' !== dialog.container.style.display
+    return dialog !== undefined && !dialog.isRemoved() && 'none' !== dialog.container.style.display
 }
 
 function showNext() {
     openDialog = undefined
     while (pending.length > 0) {
         const [dialog, alert, callback] = pending.shift()
-        if (dialog.container.isConnected) {
+        if (!dialog.isRemoved()) {
             dialog.show(alert, callback)
             return
         }
@@ -25,6 +25,9 @@ function showNext() {
 }
 
 class AlertDialog {
+
+    #disposed = false
+    #wasConnected = false   // Whether the dialog has been on the page, so a dialog that is not now has been removed
     /**
      * Initialize a new alert dialog
      * @param parent
@@ -80,7 +83,9 @@ class AlertDialog {
             this.body.innerHTML = '';
             this.container.style.display = 'none'
 
-            showNext()
+            if (openDialog === this) {
+                showNext()
+            }
         }
 
         this.ok.addEventListener('click', event => {
@@ -98,6 +103,33 @@ class AlertDialog {
         makeDraggable(this.container, header);
 
         this.container.style.display = 'none'
+        this.#noteConnected()
+    }
+
+    #noteConnected() {
+        this.#wasConnected ||= this.container.isConnected
+    }
+
+    /**
+     * Whether the dialog has been disposed of, or removed from the page (e.g. with its track): such a dialog can't
+     * show an alert, or be dismissed.  A dialog that has never been on the page (e.g. a browser created in a div
+     * that is attached to the page later) can: its alert is seen once the dialog is attached.
+     */
+    isRemoved() {
+        this.#noteConnected()
+        return this.#disposed || (this.#wasConnected && !this.container.isConnected)
+    }
+
+    /**
+     * Remove the dialog from the page.  An alert it is showing is dismissed, without its callback, and any alert
+     * presented to it is dropped.
+     */
+    dispose() {
+        this.#disposed = true
+        this.container.remove()
+        if (openDialog === this) {
+            showNext()
+        }
     }
 
     /**
@@ -117,6 +149,7 @@ class AlertDialog {
     show(alert, callback) {
 
         openDialog = this
+        this.#noteConnected()
 
         this.errorHeadline.textContent = alert.message ? 'ERROR' : ''
         let string = alert.message || alert
