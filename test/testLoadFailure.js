@@ -72,7 +72,7 @@ suite("testLoadFailure", function () {
 
     test("a genome load error without a genome name", function () {
         const error = genomeLoadError(undefined, new LoadError('hub', url, requestError(url, 0)))
-        assert.match(error.message, /^The genome could not be loaded: the track hub file could not be reached.\n/)
+        assert.match(error.message, /^The genome could not be loaded: the assembly hub file could not be reached.\n/)
     })
 
     test("a genome load error from any other error gives its message", function () {
@@ -127,7 +127,7 @@ suite("testLoadFailure", function () {
         const error = sessionLoadError(new LoadError('session', url, requestError(url, 404)))
         assert.equal(error.message, `The session file was not found (HTTP status 404).\n${url}`)
         const hubError = sessionLoadError(new LoadError('hub', url, requestError(url, 404)))
-        assert.equal(hubError.message, `The session could not be loaded: the track hub file was not found (HTTP status 404).\n${url}`)
+        assert.equal(hubError.message, `The session could not be loaded: the assembly hub file was not found (HTTP status 404).\n${url}`)
     })
 
     test("a load that rejects with nothing, or a track without a config, still gets a message", function () {
@@ -146,7 +146,7 @@ suite("testLoadFailure", function () {
         }
         assert.instanceOf(error, LoadError)
         assert.equal(error.kind, "hub")
-        assert.equal(error.message, "The track hub file could not be read: Genome not found in hub: none.\ntest/data/hubs/hub.txt")
-        assert.match(sessionLoadError(error).message, /^The session could not be loaded: the track hub file could not be read: Genome not found/)
+        assert.equal(error.message, "The assembly hub file could not be read: Genome not found in hub: none.\ntest/data/hubs/hub.txt")
+        assert.match(sessionLoadError(error).message, /^The session could not be loaded: the assembly hub file could not be read: Genome not found/)
     })
 })

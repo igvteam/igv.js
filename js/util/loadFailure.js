@@ -108,7 +108,7 @@ const partNames = {
     fastaIndex: "FASTA index (.fai) file",
     chromSizes: "chromosome sizes file",
     genbank: "GenBank file",
-    hub: "track hub file",
+    hub: "assembly hub file",
     session: "session file",
     track: "file",
     trackConfig: "track configuration",
