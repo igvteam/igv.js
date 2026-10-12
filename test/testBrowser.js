@@ -67,7 +67,7 @@ suite("testBrowser", function () {
         test("a hub session whose hub cannot be read names the hub", async function () {
             const error = await loadError({url: "test/data/hubs/missing/hub.txt"})
             assert.equal(error.cause.kind, "hub")
-            assert.match(error.message, /^The session could not be loaded: the track hub file could not be read: ENOENT.*\ntest\/data\/hubs\/missing\/hub.txt$/)
+            assert.match(error.message, /^The session could not be loaded: the assembly hub file could not be read: ENOENT.*\ntest\/data\/hubs\/missing\/hub.txt$/)
         })
     })
 })
