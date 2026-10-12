@@ -81,29 +81,31 @@ suite("testLoadFailure", function () {
         assert.equal(error.message, "Genome foo could not be loaded.\nIt has no chromosome to start on.")
     })
 
-    test("a track load error names the track by its file, and the file by what happened to it", function () {
+    test("a track load error says what happened to the track, then its URL, without a name derived from it", function () {
         const cause = requestError("https://foo.com/b.wig", 0)
         const error = trackLoadError({url: "https://foo.com/b.wig"}, cause)
         assert.equal(error.cause.cause, cause)
         assert.deepEqual(error.message.split("\n"), [
-            "Track b.wig could not be reached.",
+            "The track could not be reached.",
             "https://foo.com/b.wig",
             explainLoadError(cause).hint
         ])
     })
 
-    test("a track load error uses the configured name, and a local file's name", function () {
+    test("a track load error names the track by a configured name", function () {
         const error = trackLoadError({name: "My track", url: {name: "b.bed"}}, requestError("b.bed", 404))
         assert.equal(error.message, "Track My track was not found (HTTP status 404).\nb.bed")
         const fileError = trackLoadError({url: {name: "b.bed"}}, new Error("Unknown chromosome"))
-        assert.equal(fileError.message, "Track b.bed could not be read: Unknown chromosome.\nb.bed")
+        assert.equal(fileError.message, "The track could not be read: Unknown chromosome.\nb.bed")
     })
 
     test("a track load error keeps a reader's LoadError, which names the part that failed", function () {
         const loadError = new LoadError('index', "https://foo.com/b.bam.bai", requestError("https://foo.com/b.bam.bai", 404))
         const error = trackLoadError({url: "https://foo.com/b.bam"}, loadError)
         assert.equal(error.cause, loadError)
-        assert.equal(error.message, "Track b.bam could not be loaded: the index file was not found (HTTP status 404).\nhttps://foo.com/b.bam.bai")
+        assert.equal(error.message, "The track could not be loaded: the index file was not found (HTTP status 404).\nhttps://foo.com/b.bam.bai")
+        const named = trackLoadError({name: "Reads", url: "https://foo.com/b.bam"}, loadError)
+        assert.equal(named.message, "Track Reads could not be loaded: the index file was not found (HTTP status 404).\nhttps://foo.com/b.bam.bai")
     })
 
     test("a track load error without a file", function () {
@@ -116,7 +118,7 @@ suite("testLoadFailure", function () {
     test("a load failure alert describes an error by its lines", function () {
         const error = trackLoadError({url: "https://foo.com/<b>.wig"}, requestError("https://foo.com/<b>.wig", 404))
         assert.equal(describeLoadFailure(error),
-            "Track &lt;b&gt;.wig was not found (HTTP status 404).<br>https://foo.com/&lt;b&gt;.wig")
+            "The track was not found (HTTP status 404).<br>https://foo.com/&lt;b&gt;.wig")
         assert.equal(describeLoadFailure({url: "u", message: "m", warning: "w"}), "w<br>u<br>m")
     })
 

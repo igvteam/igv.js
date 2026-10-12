@@ -1,5 +1,3 @@
-import {FileUtils} from "../../node_modules/igv-utils/src/index.js"
-
 const httpMessages = {
     "401": "Access unauthorized",
     "403": "Access forbidden",
@@ -181,9 +179,10 @@ function sessionLoadError(error) {
 }
 
 /**
- * The error loading a track fails with.  The track's file is the track, so what happened to it is said once: "Track
- * b.wig could not be reached."  A LoadError from a reader names another part that failed (an index), and is given
- * as for genomeLoadError: "Track b.bam could not be loaded: the index file was not found ...".
+ * The error loading a track fails with.  The track's file is the track, so what happened to it is said once: "The
+ * track could not be reached."  The track is named only by a configured name, since one derived from the URL would
+ * just repeat the URL on the next line.  A LoadError from a reader names another part that failed (an index), and is
+ * given as for genomeLoadError: "Track Reads could not be loaded: the index file was not found ...".
  *
  * @param config  The track configuration, or the json string of one (which may be what failed to parse)
  * @param error  The error the load failed with
@@ -193,17 +192,12 @@ function trackLoadError(config, error) {
     if (typeof config === 'string') {
         return new Error(new LoadError('trackConfig', undefined, error).message, {cause: error})
     }
-    const url = config.url || config.fastaURL
-    const name = config.name || (url && !isDataURL(url) ? FileUtils.getFilename(url) : undefined)
+    const name = config.name
     if (error instanceof LoadError && error.kind !== 'track') {
         return failedLoadError(name ? `Track ${name} could not be loaded` : "The track could not be loaded", error)
     }
-    const loadError = error instanceof LoadError ? error : new LoadError('track', url, error)
+    const loadError = error instanceof LoadError ? error : new LoadError('track', config.url || config.fastaURL, error)
     return new Error(loadError.describeAs(name ? `Track ${name}` : "The track"), {cause: loadError})
-}
-
-function isDataURL(url) {
-    return typeof url === 'string' && /^(data|blob):/.test(url)
 }
 
 /**
