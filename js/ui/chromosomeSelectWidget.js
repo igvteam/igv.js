@@ -61,7 +61,7 @@ class ChromosomeSelectWidget {
 
         const alreadyAdded = genome.wgChromosomeNames ? new Set(genome.wgChromosomeNames) : new Set()
 
-        if (this.showAllChromosomes && genome.chromosomeNames.length > 1) {
+        if (this.showAllChromosomes && genome.chromosomeNames?.length > 1) {
             const exclude = new Set(list)
             let count = alreadyAdded.size
             for (let nm of genome.chromosomeNames) {

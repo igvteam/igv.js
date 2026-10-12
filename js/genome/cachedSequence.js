@@ -20,6 +20,10 @@ class CachedSequence {
         return this.sequenceReader.chromosomes
     }
 
+    get loadFailures() {
+        return this.sequenceReader.loadFailures
+    }
+
     async getSequenceRecord(chr) {
         return this.sequenceReader.getSequenceRecord(chr)
     }

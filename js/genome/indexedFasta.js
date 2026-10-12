@@ -3,6 +3,7 @@ import {BGZip, igvxhr, StringUtils} from "../../node_modules/igv-utils/src/index
 import GenomicInterval from "./genomicInterval.js"
 import Chromosome from "./chromosome.js"
 import {buildOptions} from "../util/igvUtils.js"
+import {LoadError} from "../util/loadFailure.js"
 
 const splitLines = StringUtils.splitLines
 
@@ -38,13 +39,15 @@ class FastaSequence {
     async init() {
         // The sequence is required: read a byte, alongside the index, so a missing file fails the load.  If both
         // fail, report the sequence
-        const results = await Promise.allSettled([
+        const [sequence, index] = await Promise.allSettled([
             igvxhr.loadArrayBuffer(this.file, buildOptions(this.config, {range: {start: 0, size: 1}})),
             this.getIndex()
         ])
-        const failure = results.find(({status}) => status === 'rejected')
-        if (failure) {
-            throw failure.reason
+        if (sequence.status === 'rejected') {
+            throw new LoadError('fasta', this.file, sequence.reason)
+        }
+        if (index.status === 'rejected') {
+            throw new LoadError('fastaIndex', this.indexFile, index.reason)
         }
     }
 

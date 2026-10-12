@@ -1,6 +1,7 @@
 import {igvxhr, StringUtils} from "../../node_modules/igv-utils/src/index.js"
 import {convertToHubURL} from "../ucsc/ucscUtils.js"
-import {loadHub} from "../ucsc/hub/hub.js"
+import {loadHubGenomeConfig} from "../ucsc/hub/hub.js"
+import {genomeLoadError} from "../util/loadFailure.js"
 
 const DEFAULT_GENOMES_URL = "https://igv.org/genomes/genomes3.json"
 const BACKUP_GENOMES_URL = "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/genomes/web/genomes.json"
@@ -55,7 +56,7 @@ const GenomeUtils = {
     },
 
     // Expand a genome id to a reference object, if needed
-    expandReference: async function (alert, idOrConfig) {
+    expandReference: async function (idOrConfig) {
 
         // idOrConfig might be a json string?  I'm actually not sure how this arises.
         if (StringUtils.isString(idOrConfig) && idOrConfig.startsWith("{")) {
@@ -81,17 +82,16 @@ const GenomeUtils = {
             let reference = knownGenomes[genomeID]
             if (!reference) {
                 if ((genomeID.startsWith("GCA_") || genomeID.startsWith("GCF_")) && genomeID.length >= 13) {
+                    // A GenArk accession: its hub is the genome, so a hub that cannot be read fails the load
                     try {
-                        const hubURL = convertToHubURL(genomeID)
-                        const hub = await loadHub(hubURL)
-                        reference = hub.getGenomeConfig(genomeID)
+                        reference = await loadHubGenomeConfig(convertToHubURL(genomeID), genomeID)
                     } catch (e) {
-                        console.error(e)
+                        throw genomeLoadError(genomeID, e)
                     }
                 }
 
                 if (!reference) {
-                    alert.present(new Error(`Unknown genome id: ${genomeID}`), undefined)
+                    throw Error(`Unknown genome id: ${genomeID}`)
                 }
             }
             return reference

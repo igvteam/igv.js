@@ -2,8 +2,8 @@
 
 //$igv-alert-dialog-width: 300px;
 $igv-alert-dialog-width: 400px;
-$igv-alert-dialog-height: 200px;
-$igv-alert-dialog-margin: -150px;
+$igv-alert-dialog-min-height: 200px;
+$igv-alert-dialog-max-height: 70vh;   // The dialog starts 20% down the page, so this keeps it on screen
 
 $igv-alert-dialog-header-height: 24px;
 $igv-alert-dialog-ok-container-height: 64px;
@@ -23,7 +23,11 @@ $igv-alert-dialog-body-copy-margin: 16px;
   box-sizing: content-box;
 
   width:$igv-alert-dialog-width;
-  height:$igv-alert-dialog-height;
+
+  // Tall enough for the whole message, up to a limit, beyond which the body scrolls
+  height: auto;
+  min-height: $igv-alert-dialog-min-height;
+  max-height: $igv-alert-dialog-max-height;
 
   border-color: $igv-trackgear-grey-color;
   border-radius: $igv-trackgear-popover-border-radius;
@@ -83,9 +87,10 @@ $igv-alert-dialog-body-copy-margin: 16px;
     color: $igv-dark-grey-color;
 
     width: 100%;
-    height: calc(100% - #{$igv-alert-dialog-header-height} - #{$igv-alert-dialog-ok-container-height});
+    flex: 1 1 auto;
+    min-height: 0;   // Let it shrink below its content, so it scrolls instead of overflowing the dialog
 
-    overflow-y: scroll;
+    overflow-y: auto;
 
     .igv-ui-alert-dialog-body-copy {
       //cursor: pointer;

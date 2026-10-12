@@ -12,6 +12,10 @@ import {updateReference} from "./updateReference.js"
 import BWSource from "../bigwig/bwSource.js"
 import {loadFailure} from "../util/loadFailure.js"
 
+const chromAliasWarning =
+    "Chromosome aliases could not be loaded. Data files and searches that name chromosomes differently from this " +
+    "genome (e.g. RefSeq accessions rather than chr1) may not match."
+
 const ucsdIDMap = new Map([
     ["1kg_ref", "hg18"],
     ["1kg_v37", "hg19"],
@@ -31,9 +35,13 @@ class Genome {
     #wgChromosomeNames
     #aliasRecordCache = new Map()
     #cytobandFailures = new Set()
+    #chromAliasConfig
 
-    // Optional parts that failed while the genome was built, as {kind, url, message}: left out, and reported by the browser
+    // Optional parts that failed to load, as {kind, url, message, warning}: left out, and reported by the browser
     loadFailures = []
+
+    // Set by the browser once it has taken the genome: called with each later load failure.  See #recordLoadFailure
+    onLoadFailure
 
     static async createGenome(options, browser) {
 
@@ -60,6 +68,7 @@ class Genome {
 
         // Load sequence.  This is required: the genome loads if and only if its sequence source loads
         this.sequence = await loadSequence(config, this.browser)
+        this.loadFailures.push(...(this.sequence.loadFailures ?? []))
 
         // Load cytobands.  This is optional but required to support the ideogram.  Only needed for whole genome view
         if (false !== config.showIdeogram && false !== config.wholeGenomeView) {
@@ -75,16 +84,16 @@ class Genome {
         if (this.sequence.chromosomes) {
             this.chromosomes = this.sequence.chromosomes
         } else if (config.chromSizesURL) {
-            // An optional part only if the sequence can name the chromosomes: if it fails, leave it out and load
-            // chromosomes from the sequence as they are needed.  Otherwise there is no chromosome to start on
+            // Optional: if it fails, leave it out and load chromosomes from the sequence as they are needed.  Without
+            // it there may be no chromosome to start on, which the browser checks before it uses the genome
             try {
                 this.chromosomes = await loadChromSizes(config.chromSizesURL)
             } catch (error) {
-                if (!this.sequence.chromosomeNames) {
-                    throw error
-                }
-                console.error(error)
-                this.loadFailures.push(loadFailure('chromSizes', config.chromSizesURL, error))
+                const lost = this.sequence.chromosomeNames ?
+                    "whole-genome view will not be available" :
+                    "whole-genome view and the chromosome list will not be available"
+                this.#recordLoadFailure('chromSizes', config.chromSizesURL, error,
+                    `Chromosome sizes could not be loaded, so ${lost}.`)
                 this.chromosomes = new Map()
             }
         } else {
@@ -99,6 +108,7 @@ class Genome {
         }
 
         // Chromosome alias
+        this.#chromAliasConfig = config
         this.chromAlias = this.#createChromAlias(config)
 
         if (false !== config.wholeGenomeView && this.chromosomes.size > 0) {
@@ -110,12 +120,12 @@ class Genome {
                     this.#wgChromosomeNames = config.chromosomeOrder.split(',').map(nm => nm.trim())
                 }
                 // Trim to remove non-existent chromosomes
-                await this.#preloadChromAlias(this.#wgChromosomeNames)
+                await this.#useChromAlias(chromAlias => chromAlias.preload(this.#wgChromosomeNames))
                 this.#wgChromosomeNames =
                     this.#wgChromosomeNames.map(c => this.getChromosomeName(c)).filter(c => this.chromosomes.has(c))
             } else {
                 this.#wgChromosomeNames = trimSmallChromosomes(this.chromosomes)
-                await this.#preloadChromAlias(this.#wgChromosomeNames)
+                await this.#useChromAlias(chromAlias => chromAlias.preload(this.#wgChromosomeNames))
             }
         }
 
@@ -127,28 +137,62 @@ class Genome {
         }
     }
 
+    // There is always an alias source, so code that uses one needn't check: the defaults know nothing without
+    // chromosome names, but answer
     #createChromAlias(config) {
         if (config.chromAliasBbURL) {
             return new ChromAliasBB(config.chromAliasBbURL, Object.assign({}, config), this)
         } else if (config.aliasURL) {
             return new ChromAliasFile(config.aliasURL, Object.assign({}, config), this)
-        } else if (this.chromosomeNames) {
+        } else {
             return new ChromAliasDefaults(this.id, this.chromosomeNames)
         }
     }
 
     /**
-     * Preload the chromosome alias, falling back if it fails.  Only the alias bigBed can fail here (the other alias
-     * sources preload nothing), and it is an optional part: it is left out, the next alias source is used, and the
-     * failure is recorded as a load failure.
+     * Call the chromosome alias source, falling back if it fails.  The alias bigBed and the alias file are optional
+     * parts: if one fails, the failure is recorded, the next alias source replaces it (the alias file, else the
+     * defaults), and the call is repeated on that.
+     *
+     * @param fn  Function of the alias source, returning a promise
+     * @returns {Promise<*>}  Promise for the result of fn
      */
-    async #preloadChromAlias(chrNames) {
+    async #useChromAlias(fn) {
+        const chromAlias = this.chromAlias
         try {
-            await this.chromAlias.preload(chrNames)
+            return await fn(chromAlias)
         } catch (error) {
-            console.error(error)
-            this.loadFailures.push(loadFailure('chromAlias', this.config.chromAliasBbURL, error))
-            this.chromAlias = this.#createChromAlias({...this.config, chromAliasBbURL: undefined})
+            const failedURL = chromAlias instanceof ChromAliasBB ? 'chromAliasBbURL' :
+                chromAlias instanceof ChromAliasFile ? 'aliasURL' : undefined
+            if (!failedURL) {
+                throw error   // The defaults load nothing, so this is not a load failure
+            }
+            if (this.chromAlias === chromAlias) {   // Concurrent calls can fail together; fall back once
+                this.#recordLoadFailure('chromAlias', this.#chromAliasConfig[failedURL], error, chromAliasWarning)
+                this.#chromAliasConfig = {...this.#chromAliasConfig, [failedURL]: undefined}
+                this.chromAlias = this.#createChromAlias(this.#chromAliasConfig)
+            }
+            return this.#useChromAlias(fn)
+        }
+    }
+
+    /**
+     * Record that an optional part failed to load: log it, and either collect it in loadFailures, for the browser to
+     * report with the rest of the load, or, once the browser has taken the genome and set onLoadFailure, pass it to
+     * that, so a part that loads lazily (cytobands, aliases) is reported as it fails.
+     *
+     * @param kind  What failed, e.g. 'cytobands'
+     * @param url  The resource that failed
+     * @param error  The error it failed with
+     * @param warning  What failed and its likely consequence, for the user
+     */
+    #recordLoadFailure(kind, url, error, warning) {
+        console.error(error)
+        const failure = loadFailure(kind, url, error, warning)
+        if (this.onLoadFailure) {
+            this.onLoadFailure(failure)
+        } else {
+            this.loadFailures.push(failure)
         }
     }
 
@@ -184,7 +228,8 @@ class Genome {
         } else if (this.chromosomeNames) {
             return this.chromosomeNames[0]
         } else {
-
+            // No list of names, e.g. a 2bit with an external index and no chrom.sizes: use the first sequence
+            return this.sequence?.getFirstChromosomeName?.()
         }
     }
 
@@ -232,9 +277,9 @@ class Genome {
             return this.#aliasRecordCache.get(chr)
         }
         if (this.chromAlias) {
-            let aliasRecord = await this.chromAlias.search(chr)
+            let aliasRecord = await this.#useChromAlias(chromAlias => chromAlias.search(chr))
             if (!aliasRecord && chr !== chr.toLowerCase()) {
-                aliasRecord = await this.chromAlias.search(chr.toLowerCase())
+                aliasRecord = await this.#useChromAlias(chromAlias => chromAlias.search(chr.toLowerCase()))
             }
             if (aliasRecord) {
                 // Add some aliases for case insensitivy
@@ -259,7 +304,7 @@ class Genome {
     /**
      * Return the cytobands for a chromosome.  The cytobands load lazily, on first use, so a failure is an optional
      * part failing after the load: that chromosome's ideogram is drawn without them, other chromosomes still load
-     * theirs, and the failure is logged.
+     * theirs, and the user is warned once.
      */
     async getCytobands(chr) {
         if (this.cytobandSource) {
@@ -272,7 +317,12 @@ class Genome {
             } catch (error) {
                 if (!this.#cytobandFailures.has(chrName)) {    // Concurrent requests can fail together; log once
                     this.#cytobandFailures.add(chrName)
-                    console.error(error)
+                    if (1 === this.#cytobandFailures.size) {     // Warn for the first chromosome only
+                        this.#recordLoadFailure('cytobands', this.config.cytobandURL || this.config.cytobandBbURL,
+                            error, "Cytobands could not be loaded, so chromosome ideograms will be drawn without bands.")
+                    } else {
+                        console.error(error)
+                    }
                 }
             }
         }

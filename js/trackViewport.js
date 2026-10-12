@@ -11,6 +11,7 @@ import GenomeUtils from "./genome/genomeUtils.js"
 import {bppSequenceThreshold} from "./sequenceTrack.js"
 import makeDraggable from "./ui/utils/draggable.js"
 import {createIcon} from "./ui/utils/icons.js"
+import {trackLoadError} from "./util/loadFailure.js"
 
 const NOT_LOADED_MESSAGE = 'Error loading track data'
 
@@ -294,7 +295,7 @@ class TrackViewport extends Viewport {
             // Track might have been removed during load
             if (this.trackView && this.trackView.disposed !== true) {
                 this.showMessage(NOT_LOADED_MESSAGE)
-                this.browser.alert.present(error)
+                this.browser.alert.present(trackLoadError(this.track.config, error))
                 console.error(error)
             }
         } finally {

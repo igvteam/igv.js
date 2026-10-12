@@ -7,6 +7,8 @@
 import {igvxhr} from "../../node_modules/igv-utils/src/index.js"
 import BinaryParser from "../binary.js"
 import BPTree from "../bigwig/bpTree.js"
+import {loadFailure, LoadError} from "../util/loadFailure.js"
+import {buildOptions} from "../util/igvUtils.js"
 
 const twoBit = ['T', 'C', 'A', 'G']
 const byteTo4Bases = []
@@ -26,6 +28,9 @@ class TwobitSequence {
     metaIndex = new Map()
     chromosomeNames
 
+    // Optional parts that failed to load, as {kind, url, message, warning}: left out, and reported by the browser
+    loadFailures = []
+
     constructor(config) {
         this.url = config.twoBitURL || config.fastaURL
         this.config = config
@@ -35,16 +40,34 @@ class TwobitSequence {
      }
 
     async init() {
+        let headerEnd
         if(this.bptURL) {
-            // The external index names the chromosomes, but the sequence is required: read its header too, so a
-            // missing or invalid file fails the load
-            [this.index] = await Promise.all([BPTree.loadBpTree(this.bptURL, this.config, 0), this._readHeader()])
-        } else {
-            const idx = await this._readIndex()
-            this.index = {
-                search: async (name) =>  {
-                    return idx.has(name) ? {offset: idx.get(name)} : undefined
-                }
+            // The sequence is required: read its header alongside the external index, so a missing or invalid file
+            // fails the load.  The external index is optional: if it fails, use the file's internal index
+            const [bpt, header] =
+                await Promise.allSettled([BPTree.loadBpTree(this.bptURL, this.config, 0), this._readHeader()])
+            if (header.status === 'rejected') {
+                throw new LoadError('twoBit', this.url, header.reason)
+            }
+            if (bpt.status === 'fulfilled') {
+                this.index = bpt.value
+                return
+            }
+            console.error(bpt.reason)
+            this.loadFailures.push(loadFailure('twoBitBpt', this.bptURL, bpt.reason,
+                "The 2bit index (.bpt) could not be loaded, so the index inside the 2bit file is read instead. " +
+                "Loading this genome may be slow."))
+            headerEnd = header.value
+        }
+        let idx
+        try {
+            idx = await this._readIndex(headerEnd)
+        } catch (error) {
+            throw new LoadError('twoBit', this.url, error)
+        }
+        this.index = {
+            search: async (name) =>  {
+                return idx.has(name) ? {offset: idx.get(name)} : undefined
             }
         }
     }
@@ -83,7 +106,7 @@ class TwobitSequence {
         const start = record.packedPos + baseBytesOffset
         const size = Math.floor(regionEnd / 4) - baseBytesOffset + 1
 
-        const baseBytesArrayBuffer = await igvxhr.loadArrayBuffer(this.url, {range: {start, size}})
+        const baseBytesArrayBuffer = await igvxhr.loadArrayBuffer(this.url, buildOptions(this.config, {range: {start, size}}))
         const baseBytes = new Uint8Array(baseBytesArrayBuffer)
 
         let sequenceBases = ''
@@ -120,14 +143,24 @@ class TwobitSequence {
     }
 
     /**
-     * Read the 2bit file header: magic number, byte order, version, and sequence count.
+     * Return the name of the first sequence in the file, a default chromosome even when the external index means
+     * there is no list of names.
+     */
+    getFirstChromosomeName() {
+        return this.chromosomeNames ? this.chromosomeNames[0] : this.firstChromosomeName
+    }
+
+    /**
+     * Read the 2bit file header: magic number, byte order, version, and sequence count.  The same read takes in the
+     * first entry of the internal index, for the name of the first sequence.
      *
      * @returns {Promise<number>}  Promise for the file offset following the header
      * @private
      */
     async _readHeader() {
 
-        const arrayBuffer = await igvxhr.loadArrayBuffer(this.url, {range: {start: 0, size: 16}})
+        // 16 byte header, then the first index entry: name length (1 byte) and name (up to 255 bytes)
+        const arrayBuffer = await igvxhr.loadArrayBuffer(this.url, buildOptions(this.config, {range: {start: 0, size: 16 + 1 + 255}}))
         const dataView = new DataView(arrayBuffer)
 
         let ptr = 0
@@ -141,7 +174,7 @@ class TwobitSequence {
         } else if (magicBE === magic) {
             this.littleEndian = false
         } else {
-            throw Error(`Bad magic number ${magic}`)
+            throw Error("Not a 2bit file (bad magic number)")
         }
 
         this.version = dataView.getUint32(ptr, this.littleEndian)
@@ -153,21 +186,27 @@ class TwobitSequence {
         this.reserved = dataView.getUint32(ptr, this.littleEndian)
         ptr += 4
 
+        if (this.sequenceCount > 0) {
+            const nameLength = dataView.getUint8(ptr)
+            this.firstChromosomeName = String.fromCharCode(...new Uint8Array(arrayBuffer, ptr + 1, nameLength))
+        }
+
         return ptr
     }
 
     /**
      * Read the internal index of the 2bit file.  This is a list of sequence names and their offsets in the file.
      *
+     * @param headerEnd  Optional, the file offset following the header if it has been read already
      * @returns {Promise<Map<any, any>>}
      * @private
      */
-    async _readIndex() {
+    async _readIndex(headerEnd) {
 
         const index = new Map()
         this.chromosomeNames = []
 
-        let ptr = await this._readHeader()
+        let ptr = headerEnd ?? await this._readHeader()
 
         // Loop through sequences loading name and file offset.  We don't know the precise size in bytes in advance.
         let estSize
@@ -310,7 +349,7 @@ class TwobitSequence {
     }
 
     async _loadBinaryBuffer(start, size) {
-        const arrayBuffer = await igvxhr.loadArrayBuffer(this.url, {range: {start, size}})
+        const arrayBuffer = await igvxhr.loadArrayBuffer(this.url, buildOptions(this.config, {range: {start, size}}))
         return new BinaryParser(new DataView(arrayBuffer), this.littleEndian)
     }
 }

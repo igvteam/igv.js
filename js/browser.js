@@ -44,11 +44,11 @@ import {convertToHubURL} from "./ucsc/ucscUtils.js"
 import CursorGuide from "./ui/cursorGuide.js"
 import SliderDialog from "./ui/components/sliderDialog.js"
 import {createBlatTrack} from "./blat/blatTrack.js"
-import {loadHub} from "./ucsc/hub/hub.js"
+import {loadHubGenomeConfig} from "./ucsc/hub/hub.js"
 import {EventEmitter} from "./events.js"
 import Locus from "./locus.js"
 import {isLocalFile, isGoogleDriveURL} from "./util/sessionResourceValidator.js"
-import {describeLoadError, loadFailure} from "./util/loadFailure.js"
+import {describeLoadFailure, genomeLoadError, LoadError, sessionLoadError, trackLoadError} from "./util/loadFailure.js"
 
 
 // css - $igv-scrollbar-outer-width: 14px;
@@ -404,7 +404,8 @@ class Browser {
     }
 
     /**
-     * Load and parse a session uri or file, and return a session object.  Handles data uris as well as urls.
+     * Load and parse a session uri or file, and return a session object.  Handles data uris as well as urls.  A file
+     * that cannot be read or parsed fails with an error for the user, see sessionLoadError.
      *
      * @param options
      * @returns {Promise<*|XMLSession>}
@@ -413,11 +414,12 @@ class Browser {
 
         const urlOrFile = options.url || options.file
 
-        let config
-        if (options.url && StringUtils.isString(options.url) && (options.url.startsWith("blob:") || options.url.startsWith("data:"))) {
-            const json = Browser.uncompressSession(options.url)
-            config = JSON.parse(json)
-        } else {
+        try {
+            if (options.url && StringUtils.isString(options.url) && (options.url.startsWith("blob:") || options.url.startsWith("data:"))) {
+                const json = Browser.uncompressSession(options.url)
+                return JSON.parse(json)
+            }
+
             let filename = options.filename
             if (!filename) {
                 filename = (options.url ? FileUtils.getFilename(options.url) : options.file.name)
@@ -426,20 +428,15 @@ class Browser {
             if (filename.endsWith(".xml")) {
                 const knownGenomes = GenomeUtils.KNOWN_GENOMES
                 const string = await igvxhr.loadString(urlOrFile)
-                config = await new XMLSession(string, knownGenomes).init()
-
+                return await new XMLSession(string, knownGenomes).init()
             } else if (filename.endsWith("hub.txt")) {
-                const hub = await loadHub(urlOrFile, options)
-                const genomeConfig = hub.getGenomeConfig()
-                config = {
-                    reference: genomeConfig
-                }
+                return {reference: await loadHubGenomeConfig(urlOrFile)}
             } else {
-                config = await igvxhr.loadJson(urlOrFile)
+                return await igvxhr.loadJson(urlOrFile)
             }
+        } catch (error) {
+            throw sessionLoadError(error instanceof LoadError ? error : new LoadError('session', urlOrFile, error))
         }
-
-        return config
     }
 
     /**
@@ -457,9 +454,9 @@ class Browser {
         let genomeConfig, genome
         if (genomeOrReference) {
             genomeConfig = StringUtils.isString(genomeOrReference) ?
-                await GenomeUtils.expandReference(this.alert, genomeOrReference) :
+                await GenomeUtils.expandReference(genomeOrReference) :
                 genomeOrReference
-            genome = await this.#createGenome(genomeConfig)
+            genome = await this.#createGenome(genomeConfig, genomeConfig.locus || session.locus)
         }
 
         // prepare to load a new session, discarding DOM and state
@@ -636,7 +633,7 @@ class Browser {
                 await featureSource.getFeatures({chr: "1", start: 0, end: Number.MAX_SAFE_INTEGER})
             } catch (error) {
                 console.error(error)
-                loadFailures.push(trackLoadFailure(config, error))
+                loadFailures.push(trackLoadError(config, error))
                 failedHidden.add(config)   // Already reported; don't load it again as a track
             }
         }))
@@ -693,7 +690,7 @@ class Browser {
     async loadReference(genomeConfig, initialLocus, genome) {
 
         // Build the genome before clearing anything, so a genome that fails to load leaves the current one intact
-        genome ??= await this.#createGenome(genomeConfig)
+        genome ??= await this.#createGenome(genomeConfig, initialLocus)
 
         this.#unresolvedInitialLocus = undefined
 
@@ -704,7 +701,14 @@ class Browser {
 
         const genomeChange = undefined === this.genome || (this.genome.id !== genome.id)
 
+        if (this.genome) {
+            this.genome.onLoadFailure = undefined   // A failure of the genome being replaced is no longer of interest
+        }
         this.genome = genome
+
+        // Optional parts that failed while the genome was built are reported with the rest of the load; from here on,
+        // parts that load lazily (cytobands, aliases) are reported as they fail
+        genome.onLoadFailure = failure => this.#reportLoadFailures([failure])
 
         this.navbar.updateGenome(genome)
 
@@ -749,19 +753,49 @@ class Browser {
         return genome
     }
 
-    async #createGenome(genomeConfig) {
-        const genome = genomeConfig.gbkURL ?
-            await loadGenbank(genomeConfig.gbkURL) :
-            await Genome.createGenome(genomeConfig, this)
-        genome.loadFailures ??= []   // A Genbank genome records none
-        return genome
+    /**
+     * Build a genome, without changing the browser.  It fails if there is no locus to start on: neither initialLocus
+     * nor a default from the genome, which needs a locus in its config or chromosome names.
+     *
+     * @param genomeConfig
+     * @param initialLocus  Optional, the locus the genome will be shown at
+     */
+    async #createGenome(genomeConfig, initialLocus) {
+        try {
+            const genome = genomeConfig.gbkURL ?
+                await loadGenbank(genomeConfig.gbkURL).catch(error => {
+                    throw new LoadError('genbank', genomeConfig.gbkURL, error)
+                }) :
+                await Genome.createGenome(genomeConfig, this)
+            genome.loadFailures ??= []   // A Genbank genome records none
+            if (!(initialLocus || genome.initialLocus)) {
+                throw Error("It has no chromosome to start on: specify a locus, or chromosome names (e.g. chromSizesURL).")
+            }
+            return genome
+        } catch (error) {
+            // The error is for the user: the genome, and what went wrong
+            throw genomeLoadError(genomeConfig.id || genomeConfig.name, error)
+        }
+    }
+
+    /**
+     * Load a UCSC track hub and return its genome config.  A hub that cannot be read fails the genome load.
+     *
+     * @param url  The hub.txt URL
+     * @param genomeName  The genome's id or name, if known, for the error if the hub cannot be read
+     */
+    async #loadHubGenomeConfig(url, genomeName) {
+        try {
+            return await loadHubGenomeConfig(url)
+        } catch (error) {
+            throw genomeLoadError(genomeName, error)
+        }
     }
 
     async expandGenarkAccession(genarkAccession) {
 
         const url = convertToHubURL(genarkAccession)
-        const hub = await loadHub(url)
-        const genomeConfig = hub.getGenomeConfig()
+        const genomeConfig = await this.#loadHubGenomeConfig(url, genarkAccession)
         genomeConfig.nameSet = "ucsc"
         return genomeConfig
     }
@@ -794,11 +828,10 @@ class Browser {
 
             const isHubGenome = idOrConfig.hubURL || (idOrConfig.url && StringUtils.isString(idOrConfig.url) && idOrConfig.url.endsWith("/hub.txt"))
             if (isHubGenome) {
-                const hub = await loadHub(idOrConfig.hubURL || idOrConfig.url, idOrConfig)
-                genomeConfig = hub.getGenomeConfig()
+                genomeConfig = await this.#loadHubGenomeConfig(idOrConfig.hubURL || idOrConfig.url, idOrConfig.id || idOrConfig.name)
             } else if (StringUtils.isString(idOrConfig) || !(idOrConfig.url || idOrConfig.fastaURL || idOrConfig.twoBitURL || idOrConfig.gbkURL)) {
                 // Either an ID, a json string, or an object missing required properties.
-                genomeConfig = await GenomeUtils.expandReference(this.alert, idOrConfig)
+                genomeConfig = await GenomeUtils.expandReference(idOrConfig)
             } else {
                 genomeConfig = idOrConfig
             }
@@ -931,26 +964,26 @@ class Browser {
      * added, and the ones that fail are returned rather than thrown.
      *
      * @param configList  Array of track configurations
-     * @returns {Promise<Array>}  Promise for one {kind, url, message} per track that failed
+     * @returns {Promise<Array>}  Promise for the error of each track that failed, from trackLoadError
      */
     async #loadTrackListTolerantly(configList) {
 
         const results = await this.#settleTrackList(configList)
 
-        return results.flatMap(({status, reason}, i) =>
-            status === 'rejected' ? [trackLoadFailure(configList[i], reason)] : [])
+        return results.filter(({status}) => status === 'rejected').map(({reason}) => reason)
     }
 
     /**
-     * Report every failure in a session or genome load in one alert.  One, because the alert dialog is a single
-     * instance, so separate alerts would show only the last.
+     * Report every failure in a session or genome load in one alert, rather than one alert per failure, which the
+     * user would have to dismiss one by one.
      *
-     * @param loadFailures  Array of {kind, url, message}
+     * @param loadFailures  Array of {kind, url, message, warning}, from loadFailure(), and of errors from
+     *                      trackLoadError
      */
     #reportLoadFailures(loadFailures) {
         if (loadFailures.length > 0) {
-            const lines = loadFailures.map(({url, message}) => `${escapeHTML(url)}<br>${escapeHTML(message)}`)
-            this.alert.present(`Some resources could not be loaded:<br><br>${lines.join('<br><br>')}`)
+            const descriptions = loadFailures.map(describeLoadFailure)
+            this.alert.present(`Some resources could not be loaded:<br><br>${descriptions.join('<br><br>')}`)
         }
     }
 
@@ -1015,32 +1048,29 @@ class Browser {
         return loadedTracks[0]
     }
 
+    /**
+     * Load one track: create it, initialize it, and add it to the browser.  Whatever fails along the way, the load
+     * rejects with an error for the user, see trackLoadError.
+     */
     async #loadTrackHelper(config) {
 
-        // config might be json
-        if (StringUtils.isString(config)) {
-            config = JSON.parse(config)
-        }
-
-        if (config.format && config.format.toLowerCase() === 'sampleinfo') {
-            return this.loadSampleInfo(config)
-        }
-
-        let track
         try {
-            track = await this.createTrack(config)
+            // config might be json
+            if (StringUtils.isString(config)) {
+                config = JSON.parse(config)
+            }
+
+            if (config.format && config.format.toLowerCase() === 'sampleinfo') {
+                return await this.loadSampleInfo(config)
+            }
+
+            const track = await this.createTrack(config)
+            return track ? await this.addTrack(track) : undefined
 
         } catch (error) {
-            const err = new Error(`${describeLoadError(error)} : ${describeTrackURL(config)}`, {cause: error})
+            const err = trackLoadError(config, error)
             console.error(err)
             throw err
-        }
-
-
-        if (track) {
-            return await this.addTrack(track)
-        } else {
-            return undefined
         }
     }
 
@@ -1931,6 +1961,10 @@ class Browser {
 
     dispose() {
         this.removeEventHandlers()
+        if (this.genome) {
+            this.genome.onLoadFailure = undefined
+        }
+        this.alert.dispose()
         for (let trackView of this.trackViews) {
             trackView.dispose()
         }
@@ -2740,34 +2774,6 @@ toggleTrackLabels(trackViews, isVisible) {
             }
         }
     }
-}
-
-function escapeHTML(string) {
-    return String(string)
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-}
-
-function describeTrackURL(config) {
-    return FileUtils.isFile(config.url) ? config.url.name : config.url
-}
-
-/**
- * A track load failure, as {kind, url, message}.
- *
- * @param config  The track configuration, possibly as json
- * @param error  The error the track load rejected with
- */
-function trackLoadFailure(config, error) {
-    if (StringUtils.isString(config)) {
-        try {
-            config = JSON.parse(config)
-        } catch {
-            return loadFailure('track', config, error)   // The json itself is what failed
-        }
-    }
-    return loadFailure('track', describeTrackURL(config) || config.fastaURL || config.name, error)
 }
 
 export default Browser
