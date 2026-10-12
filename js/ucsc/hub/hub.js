@@ -9,6 +9,7 @@
 import TrackDbHub from "./trackDbHub.js"
 import {loadStanzas} from "./hubParser.js"
 import {igvxhr} from "../../../node_modules/igv-utils/src/index.js"
+import {LoadError} from "../../util/loadFailure.js"
 
 const idMappings = new Map([
     ["hg38", "GCF_000001405.40"],
@@ -418,4 +419,20 @@ async function loadHub(url) {
 }
 
 export default Hub
-export {loadHub}
+/**
+ * Load a hub and return the config of one of its genomes.  A hub that cannot be read, or that has no such genome,
+ * fails with a LoadError naming the hub.
+ *
+ * @param url  The hub.txt URL
+ * @param genomeId  Optional, the genome wanted; else the hub's first
+ */
+async function loadHubGenomeConfig(url, genomeId) {
+    try {
+        const hub = await loadHub(url)
+        return hub.getGenomeConfig(genomeId)
+    } catch (error) {
+        throw new LoadError('hub', url, error)
+    }
+}
+
+export {loadHub, loadHubGenomeConfig}

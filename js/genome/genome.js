@@ -137,29 +137,28 @@ class Genome {
         }
     }
 
+    // There is always an alias source, so code that uses one needn't check: the defaults know nothing without
+    // chromosome names, but answer
     #createChromAlias(config) {
         if (config.chromAliasBbURL) {
             return new ChromAliasBB(config.chromAliasBbURL, Object.assign({}, config), this)
         } else if (config.aliasURL) {
             return new ChromAliasFile(config.aliasURL, Object.assign({}, config), this)
-        } else if (this.chromosomeNames) {
+        } else {
             return new ChromAliasDefaults(this.id, this.chromosomeNames)
         }
     }
 
     /**
      * Call the chromosome alias source, falling back if it fails.  The alias bigBed and the alias file are optional
-     * parts: if one fails, the failure is recorded, the next alias source replaces it (the alias file, the defaults,
-     * or none at all), and the call is repeated on that.
+     * parts: if one fails, the failure is recorded, the next alias source replaces it (the alias file, else the
+     * defaults), and the call is repeated on that.
      *
      * @param fn  Function of the alias source, returning a promise
-     * @returns {Promise<*>}  Promise for the result of fn, or undefined if there is no alias source
+     * @returns {Promise<*>}  Promise for the result of fn
      */
     async #useChromAlias(fn) {
         const chromAlias = this.chromAlias
-        if (!chromAlias) {
-            return undefined
-        }
         try {
             return await fn(chromAlias)
         } catch (error) {

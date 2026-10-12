@@ -9,8 +9,10 @@ let openDialog
 const pending = []   // [dialog, alert, callback]
 
 function isOpen(dialog) {
-    // A dialog removed from the page (e.g. with its track) can no longer be dismissed; don't let it block the queue
-    return dialog !== undefined && !dialog.isRemoved() && 'none' !== dialog.container.style.display
+    // A dialog that is not on the page can't be dismissed, whether removed (e.g. with its track) or never attached
+    // (a browser in a detached div, whose alert is seen once the div is attached); don't let it block the queue
+    return dialog !== undefined && dialog.container.isConnected && !dialog.isRemoved() &&
+        'none' !== dialog.container.style.display
 }
 
 function showNext() {

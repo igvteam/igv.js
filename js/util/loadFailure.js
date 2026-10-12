@@ -18,6 +18,9 @@ const unreachableHint =
  * @returns {{phrase: string, hint?: string}}
  */
 function explainLoadError(error) {
+    if (error == null) {
+        return {phrase: "could not be read"}   // Rejected with nothing: there is no more to say
+    }
     const msg = String(error.message || error.error || error.toString()).replaceAll('\n', ' ')
     const status = typeof error.status === 'number' ? error.status : httpMessages.hasOwnProperty(msg) ? Number(msg) : undefined
     switch (status) {
@@ -184,7 +187,8 @@ function sessionLoadError(error) {
  * just repeat the URL on the next line.  A LoadError from a reader names another part that failed (an index), and is
  * given as for genomeLoadError: "Track Reads could not be loaded: the index file was not found ...".
  *
- * @param config  The track configuration, or the json string of one (which may be what failed to parse)
+ * @param config  The track configuration, or the json string of one (which may be what failed to parse), or
+ *                nothing, for a track without one
  * @param error  The error the load failed with
  * @returns {Error}  With the error as its cause
  */
@@ -192,6 +196,7 @@ function trackLoadError(config, error) {
     if (typeof config === 'string') {
         return new Error(new LoadError('trackConfig', undefined, error).message, {cause: error})
     }
+    config ??= {}
     const name = config.name
     if (error instanceof LoadError && error.kind !== 'track') {
         return failedLoadError(name ? `Track ${name} could not be loaded` : "The track could not be loaded", error)

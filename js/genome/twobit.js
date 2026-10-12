@@ -8,6 +8,7 @@ import {igvxhr} from "../../node_modules/igv-utils/src/index.js"
 import BinaryParser from "../binary.js"
 import BPTree from "../bigwig/bpTree.js"
 import {loadFailure, LoadError} from "../util/loadFailure.js"
+import {buildOptions} from "../util/igvUtils.js"
 
 const twoBit = ['T', 'C', 'A', 'G']
 const byteTo4Bases = []
@@ -105,7 +106,7 @@ class TwobitSequence {
         const start = record.packedPos + baseBytesOffset
         const size = Math.floor(regionEnd / 4) - baseBytesOffset + 1
 
-        const baseBytesArrayBuffer = await igvxhr.loadArrayBuffer(this.url, {range: {start, size}})
+        const baseBytesArrayBuffer = await igvxhr.loadArrayBuffer(this.url, buildOptions(this.config, {range: {start, size}}))
         const baseBytes = new Uint8Array(baseBytesArrayBuffer)
 
         let sequenceBases = ''
@@ -159,7 +160,7 @@ class TwobitSequence {
     async _readHeader() {
 
         // 16 byte header, then the first index entry: name length (1 byte) and name (up to 255 bytes)
-        const arrayBuffer = await igvxhr.loadArrayBuffer(this.url, {range: {start: 0, size: 16 + 1 + 255}})
+        const arrayBuffer = await igvxhr.loadArrayBuffer(this.url, buildOptions(this.config, {range: {start: 0, size: 16 + 1 + 255}}))
         const dataView = new DataView(arrayBuffer)
 
         let ptr = 0
@@ -348,7 +349,7 @@ class TwobitSequence {
     }
 
     async _loadBinaryBuffer(start, size) {
-        const arrayBuffer = await igvxhr.loadArrayBuffer(this.url, {range: {start, size}})
+        const arrayBuffer = await igvxhr.loadArrayBuffer(this.url, buildOptions(this.config, {range: {start, size}}))
         return new BinaryParser(new DataView(arrayBuffer), this.littleEndian)
     }
 }

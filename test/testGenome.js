@@ -1,6 +1,7 @@
 import "./utils/mockObjects.js"
 import Genome from "../js/genome/genome.js"
 import {LoadError} from "../js/util/loadFailure.js"
+import ChromAliasDefaults from "../js/genome/chromAliasDefaults.js"
 import {updateReference} from "../js/genome/updateReference.js"
 import {assert} from 'chai'
 import {shortenChromsomeName} from "../js/rulerTrack.js"
@@ -138,7 +139,7 @@ suite("testGenome", function () {
 
         // Mixed case, so the lookup is retried in lower case: on no alias source at all, by then
         assert.isUndefined(await genome.getAliasRecord("Chr1"))
-        assert.isUndefined(genome.chromAlias)
+        assert.instanceOf(genome.chromAlias, ChromAliasDefaults)   // Which knows nothing, but is there
         assert.equal(genome.loadFailures.length, 1)
         assert.equal(genome.loadFailures[0].kind, "chromAlias")
     })

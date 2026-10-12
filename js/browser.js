@@ -44,7 +44,7 @@ import {convertToHubURL} from "./ucsc/ucscUtils.js"
 import CursorGuide from "./ui/cursorGuide.js"
 import SliderDialog from "./ui/components/sliderDialog.js"
 import {createBlatTrack} from "./blat/blatTrack.js"
-import {loadHub} from "./ucsc/hub/hub.js"
+import {loadHubGenomeConfig} from "./ucsc/hub/hub.js"
 import {EventEmitter} from "./events.js"
 import Locus from "./locus.js"
 import {isLocalFile, isGoogleDriveURL} from "./util/sessionResourceValidator.js"
@@ -430,10 +430,7 @@ class Browser {
                 const string = await igvxhr.loadString(urlOrFile)
                 return await new XMLSession(string, knownGenomes).init()
             } else if (filename.endsWith("hub.txt")) {
-                const hub = await loadHub(urlOrFile, options).catch(error => {
-                    throw new LoadError('hub', urlOrFile, error)
-                })
-                return {reference: hub.getGenomeConfig()}
+                return {reference: await loadHubGenomeConfig(urlOrFile)}
             } else {
                 return await igvxhr.loadJson(urlOrFile)
             }
@@ -704,6 +701,9 @@ class Browser {
 
         const genomeChange = undefined === this.genome || (this.genome.id !== genome.id)
 
+        if (this.genome) {
+            this.genome.onLoadFailure = undefined   // A failure of the genome being replaced is no longer of interest
+        }
         this.genome = genome
 
         // Optional parts that failed while the genome was built are reported with the rest of the load; from here on,
@@ -782,22 +782,20 @@ class Browser {
      * Load a UCSC track hub and return its genome config.  A hub that cannot be read fails the genome load.
      *
      * @param url  The hub.txt URL
-     * @param options
      * @param genomeName  The genome's id or name, if known, for the error if the hub cannot be read
      */
-    async #loadHubGenomeConfig(url, options, genomeName) {
+    async #loadHubGenomeConfig(url, genomeName) {
         try {
-            const hub = await loadHub(url, options)
-            return hub.getGenomeConfig()
+            return await loadHubGenomeConfig(url)
         } catch (error) {
-            throw genomeLoadError(genomeName, new LoadError('hub', url, error))
+            throw genomeLoadError(genomeName, error)
         }
     }
 
     async expandGenarkAccession(genarkAccession) {
 
         const url = convertToHubURL(genarkAccession)
-        const genomeConfig = await this.#loadHubGenomeConfig(url, undefined, genarkAccession)
+        const genomeConfig = await this.#loadHubGenomeConfig(url, genarkAccession)
         genomeConfig.nameSet = "ucsc"
         return genomeConfig
     }
@@ -830,7 +828,7 @@ class Browser {
 
             const isHubGenome = idOrConfig.hubURL || (idOrConfig.url && StringUtils.isString(idOrConfig.url) && idOrConfig.url.endsWith("/hub.txt"))
             if (isHubGenome) {
-                genomeConfig = await this.#loadHubGenomeConfig(idOrConfig.hubURL || idOrConfig.url, idOrConfig, idOrConfig.id || idOrConfig.name)
+                genomeConfig = await this.#loadHubGenomeConfig(idOrConfig.hubURL || idOrConfig.url, idOrConfig.id || idOrConfig.name)
             } else if (StringUtils.isString(idOrConfig) || !(idOrConfig.url || idOrConfig.fastaURL || idOrConfig.twoBitURL || idOrConfig.gbkURL)) {
                 // Either an ID, a json string, or an object missing required properties.
                 genomeConfig = await GenomeUtils.expandReference(idOrConfig)
@@ -1963,6 +1961,9 @@ class Browser {
 
     dispose() {
         this.removeEventHandlers()
+        if (this.genome) {
+            this.genome.onLoadFailure = undefined
+        }
         this.alert.dispose()
         for (let trackView of this.trackViews) {
             trackView.dispose()

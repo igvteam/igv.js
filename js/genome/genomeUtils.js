@@ -1,7 +1,7 @@
 import {igvxhr, StringUtils} from "../../node_modules/igv-utils/src/index.js"
 import {convertToHubURL} from "../ucsc/ucscUtils.js"
-import {loadHub} from "../ucsc/hub/hub.js"
-import {genomeLoadError, LoadError} from "../util/loadFailure.js"
+import {loadHubGenomeConfig} from "../ucsc/hub/hub.js"
+import {genomeLoadError} from "../util/loadFailure.js"
 
 const DEFAULT_GENOMES_URL = "https://igv.org/genomes/genomes3.json"
 const BACKUP_GENOMES_URL = "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/genomes/web/genomes.json"
@@ -82,13 +82,11 @@ const GenomeUtils = {
             let reference = knownGenomes[genomeID]
             if (!reference) {
                 if ((genomeID.startsWith("GCA_") || genomeID.startsWith("GCF_")) && genomeID.length >= 13) {
-                    // A GenArk accession, whose hub cannot be read
-                    const hubURL = convertToHubURL(genomeID)
+                    // A GenArk accession: its hub is the genome, so a hub that cannot be read fails the load
                     try {
-                        const hub = await loadHub(hubURL)
-                        reference = hub.getGenomeConfig(genomeID)
+                        reference = await loadHubGenomeConfig(convertToHubURL(genomeID), genomeID)
                     } catch (e) {
-                        throw genomeLoadError(genomeID, new LoadError('hub', hubURL, e))
+                        throw genomeLoadError(genomeID, e)
                     }
                 }
 

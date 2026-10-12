@@ -1,6 +1,7 @@
 import "./utils/mockObjects.js"
 import {assert} from 'chai'
 import {describeLoadError, describeLoadFailure, explainLoadError, genomeLoadError, LoadError, sessionLoadError, trackLoadError} from "../js/util/loadFailure.js"
+import {loadHubGenomeConfig} from "../js/ucsc/hub/hub.js"
 
 // A request failure, as igvxhr rejects with
 function requestError(url, status, message = `Error accessing resource: ${url} status: ${status}`) {
@@ -127,5 +128,25 @@ suite("testLoadFailure", function () {
         assert.equal(error.message, `The session file was not found (HTTP status 404).\n${url}`)
         const hubError = sessionLoadError(new LoadError('hub', url, requestError(url, 404)))
         assert.equal(hubError.message, `The session could not be loaded: the track hub file was not found (HTTP status 404).\n${url}`)
+    })
+
+    test("a load that rejects with nothing, or a track without a config, still gets a message", function () {
+        assert.deepEqual(explainLoadError(undefined), {phrase: "could not be read"})
+        assert.equal(new LoadError('twoBit', url, undefined).message, `The 2bit sequence file could not be read.\n${url}`)
+        assert.equal(trackLoadError(undefined, new Error("boom")).message, "The track could not be read: boom.")
+        assert.equal(trackLoadError(undefined, undefined).message, "The track could not be read.")
+    })
+
+    test("a hub that loads but has no such genome fails as a hub failure", async function () {
+        let error
+        try {
+            await loadHubGenomeConfig("test/data/hubs/hub.txt", "none")
+        } catch (e) {
+            error = e
+        }
+        assert.instanceOf(error, LoadError)
+        assert.equal(error.kind, "hub")
+        assert.equal(error.message, "The track hub file could not be read: Genome not found in hub: none.\ntest/data/hubs/hub.txt")
+        assert.match(sessionLoadError(error).message, /^The session could not be loaded: the track hub file could not be read: Genome not found/)
     })
 })
