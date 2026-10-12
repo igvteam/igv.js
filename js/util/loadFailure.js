@@ -11,11 +11,11 @@ const unreachableMessage =
     "access from this web page (CORS)."
 
 /**
- * Describe the error a load failed with, for the user.  A request failure (from igvxhr, which gives it a numeric
- * status) is described by its HTTP status, as its own message repeats the URL; any other error by its message.
+ * Describe the error a load failed with, for the user, on one line.  A request failure (from igvxhr, which gives it a
+ * numeric status) is described by its HTTP status, as its own message repeats the URL; any other error by its message.
  */
 function describeLoadError(error) {
-    const msg = error.message || error.error || error.toString()
+    const msg = String(error.message || error.error || error.toString()).replaceAll('\n', ' ')
     if (httpMessages.hasOwnProperty(msg)) {
         return httpMessages[msg]
     }
@@ -31,8 +31,16 @@ function describeLoadError(error) {
     return msg
 }
 
+/**
+ * Name a resource for the user: a local File by its name, a URL as is, except a data or blob URL, which carries the
+ * content itself and is cut short.
+ */
 function describeResource(url) {
-    return url?.name ?? String(url)   // A local File, or a URL
+    if (url?.name !== undefined) {
+        return url.name   // A local File
+    }
+    const string = String(url)
+    return /^(data|blob):/.test(string) && string.length > 60 ? `${string.slice(0, 60)}…` : string
 }
 
 function escapeHTML(string) {
@@ -106,7 +114,21 @@ class LoadError extends Error {
  * @returns {Error}  With the error as its cause
  */
 function genomeLoadError(genomeName, error) {
-    const headline = genomeName ? `Genome ${genomeName} could not be loaded` : "The genome could not be loaded"
+    return failedLoadError(genomeName ? `Genome ${genomeName} could not be loaded` : "The genome could not be loaded", error)
+}
+
+/**
+ * The error loading a session file fails with: that the session could not be loaded, then what went wrong, as for
+ * genomeLoadError.
+ *
+ * @param error  The error the load failed with
+ * @returns {Error}  With the error as its cause
+ */
+function sessionLoadError(error) {
+    return failedLoadError("The session could not be loaded", error)
+}
+
+function failedLoadError(headline, error) {
     const message = error instanceof LoadError ?
         `${headline}: ${lowerFirst(error.message)}` :
         `${headline}.\n${describeLoadError(error)}`
@@ -117,4 +139,4 @@ function lowerFirst(string) {
     return string.charAt(0).toLowerCase() + string.slice(1)
 }
 
-export {httpMessages, describeLoadError, describeLoadFailure, escapeHTML, loadFailure, LoadError, genomeLoadError}
+export {httpMessages, describeLoadError, describeLoadFailure, escapeHTML, loadFailure, LoadError, genomeLoadError, sessionLoadError}

@@ -34,6 +34,8 @@ suite("testLoadFailure", function () {
         assert.equal(describeLoadError(new Error("Not a 2bit file (bad magic number)")), "Not a 2bit file (bad magic number)")
         assert.equal(describeLoadError(new Error("404")), "Not found")
         assert.equal(describeLoadError("something"), "something")
+        assert.equal(describeLoadError(new Error("Unexpected token '>', \">chr1\nNNNN\"... is not valid JSON")),
+            "Unexpected token '>', \">chr1 NNNN\"... is not valid JSON")
     })
 
     test("a LoadError names the part, the resource, and the error, one per line", function () {

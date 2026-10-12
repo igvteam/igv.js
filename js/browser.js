@@ -48,7 +48,7 @@ import {loadHub} from "./ucsc/hub/hub.js"
 import {EventEmitter} from "./events.js"
 import Locus from "./locus.js"
 import {isLocalFile, isGoogleDriveURL} from "./util/sessionResourceValidator.js"
-import {describeLoadError, describeLoadFailure, genomeLoadError, loadFailure, LoadError} from "./util/loadFailure.js"
+import {describeLoadError, describeLoadFailure, genomeLoadError, loadFailure, LoadError, sessionLoadError} from "./util/loadFailure.js"
 
 
 // css - $igv-scrollbar-outer-width: 14px;
@@ -404,7 +404,8 @@ class Browser {
     }
 
     /**
-     * Load and parse a session uri or file, and return a session object.  Handles data uris as well as urls.
+     * Load and parse a session uri or file, and return a session object.  Handles data uris as well as urls.  A file
+     * that cannot be read or parsed fails with an error for the user, see sessionLoadError.
      *
      * @param options
      * @returns {Promise<*|XMLSession>}
@@ -413,11 +414,12 @@ class Browser {
 
         const urlOrFile = options.url || options.file
 
-        let config
-        if (options.url && StringUtils.isString(options.url) && (options.url.startsWith("blob:") || options.url.startsWith("data:"))) {
-            const json = Browser.uncompressSession(options.url)
-            config = JSON.parse(json)
-        } else {
+        try {
+            if (options.url && StringUtils.isString(options.url) && (options.url.startsWith("blob:") || options.url.startsWith("data:"))) {
+                const json = Browser.uncompressSession(options.url)
+                return JSON.parse(json)
+            }
+
             let filename = options.filename
             if (!filename) {
                 filename = (options.url ? FileUtils.getFilename(options.url) : options.file.name)
@@ -426,20 +428,18 @@ class Browser {
             if (filename.endsWith(".xml")) {
                 const knownGenomes = GenomeUtils.KNOWN_GENOMES
                 const string = await igvxhr.loadString(urlOrFile)
-                config = await new XMLSession(string, knownGenomes).init()
-
+                return await new XMLSession(string, knownGenomes).init()
             } else if (filename.endsWith("hub.txt")) {
-                const hub = await loadHub(urlOrFile, options)
-                const genomeConfig = hub.getGenomeConfig()
-                config = {
-                    reference: genomeConfig
-                }
+                const hub = await loadHub(urlOrFile, options).catch(error => {
+                    throw new LoadError('hub', urlOrFile, error)
+                })
+                return {reference: hub.getGenomeConfig()}
             } else {
-                config = await igvxhr.loadJson(urlOrFile)
+                return await igvxhr.loadJson(urlOrFile)
             }
+        } catch (error) {
+            throw sessionLoadError(error instanceof LoadError ? error : new LoadError('session', urlOrFile, error))
         }
-
-        return config
     }
 
     /**
