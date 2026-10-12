@@ -1,6 +1,6 @@
 import "./utils/mockObjects.js"
 import {assert} from 'chai'
-import {describeLoadError, describeLoadFailure, explainLoadError, genomeLoadError, LoadError, trackLoadError} from "../js/util/loadFailure.js"
+import {describeLoadError, describeLoadFailure, explainLoadError, genomeLoadError, LoadError, sessionLoadError, trackLoadError} from "../js/util/loadFailure.js"
 
 // A request failure, as igvxhr rejects with
 function requestError(url, status, message = `Error accessing resource: ${url} status: ${status}`) {
@@ -86,7 +86,7 @@ suite("testLoadFailure", function () {
         const error = trackLoadError({url: "https://foo.com/b.wig"}, cause)
         assert.equal(error.cause.cause, cause)
         assert.deepEqual(error.message.split("\n"), [
-            "Track b.wig could not be loaded: the file could not be reached.",
+            "Track b.wig could not be reached.",
             "https://foo.com/b.wig",
             explainLoadError(cause).hint
         ])
@@ -94,9 +94,9 @@ suite("testLoadFailure", function () {
 
     test("a track load error uses the configured name, and a local file's name", function () {
         const error = trackLoadError({name: "My track", url: {name: "b.bed"}}, requestError("b.bed", 404))
-        assert.equal(error.message, "Track My track could not be loaded: the file was not found (HTTP status 404).\nb.bed")
+        assert.equal(error.message, "Track My track was not found (HTTP status 404).\nb.bed")
         const fileError = trackLoadError({url: {name: "b.bed"}}, new Error("Unknown chromosome"))
-        assert.equal(fileError.message, "Track b.bed could not be loaded: the file could not be read: Unknown chromosome.\nb.bed")
+        assert.equal(fileError.message, "Track b.bed could not be read: Unknown chromosome.\nb.bed")
     })
 
     test("a track load error keeps a reader's LoadError, which names the part that failed", function () {
@@ -108,15 +108,22 @@ suite("testLoadFailure", function () {
 
     test("a track load error without a file", function () {
         const error = trackLoadError({features: []}, new Error("boom"))
-        assert.equal(error.message, "The track could not be loaded: the file could not be read: boom.")
+        assert.equal(error.message, "The track could not be read: boom.")
         const jsonError = trackLoadError("{not json", new SyntaxError("Unexpected token n"))
-        assert.equal(jsonError.message, "The track could not be loaded: the track configuration could not be read: Unexpected token n.")
+        assert.equal(jsonError.message, "The track configuration could not be read: Unexpected token n.")
     })
 
     test("a load failure alert describes an error by its lines", function () {
         const error = trackLoadError({url: "https://foo.com/<b>.wig"}, requestError("https://foo.com/<b>.wig", 404))
         assert.equal(describeLoadFailure(error),
-            "Track &lt;b&gt;.wig could not be loaded: the file was not found (HTTP status 404).<br>https://foo.com/&lt;b&gt;.wig")
+            "Track &lt;b&gt;.wig was not found (HTTP status 404).<br>https://foo.com/&lt;b&gt;.wig")
         assert.equal(describeLoadFailure({url: "u", message: "m", warning: "w"}), "w<br>u<br>m")
+    })
+
+    test("a session load error says once what happened to the session file", function () {
+        const error = sessionLoadError(new LoadError('session', url, requestError(url, 404)))
+        assert.equal(error.message, `The session file was not found (HTTP status 404).\n${url}`)
+        const hubError = sessionLoadError(new LoadError('hub', url, requestError(url, 404)))
+        assert.equal(hubError.message, `The session could not be loaded: the track hub file was not found (HTTP status 404).\n${url}`)
     })
 })

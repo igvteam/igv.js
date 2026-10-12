@@ -46,14 +46,14 @@ suite("testBrowser", function () {
             assert.equal(error.cause.kind, "session")
             assert.equal(error.cause.url, "test/data/session/missing.json")
             assert.match(error.message,
-                /^The session could not be loaded: the session file could not be read: ENOENT.*\ntest\/data\/session\/missing.json$/)
+                /^The session file could not be read: ENOENT.*\ntest\/data\/session\/missing.json$/)
         })
 
         test("a session file that is not JSON fails with the parse error", async function () {
             const error = await loadError({url: "test/data/twobit/foo.2bit.fa", filename: "session.json"})
             assert.equal(error.cause.kind, "session")
             assert.instanceOf(error.cause.cause, SyntaxError)
-            assert.match(error.message, /^The session could not be loaded: the session file could not be read: .+JSON.\ntest\/data\/twobit\/foo.2bit.fa$/)
+            assert.match(error.message, /^The session file could not be read: .+JSON.\ntest\/data\/twobit\/foo.2bit.fa$/)
         })
 
         test("a corrupt compressed session URL is cut short in the message", async function () {

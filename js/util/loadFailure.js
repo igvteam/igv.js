@@ -129,14 +129,30 @@ class LoadError extends Error {
     constructor(kind, url, cause) {
         const resource = url == null ? undefined : describeResource(url)
         const {phrase, hint} = explainLoadError(cause)
-        const lines = [sentence(`The ${partNames[kind] ?? kind}`, phrase)]
-        if (resource !== undefined) lines.push(resource)
-        if (hint) lines.push(hint)
-        super(lines.join('\n'), {cause})
+        super(describeFailure(`The ${partNames[kind] ?? kind}`, phrase, resource, hint), {cause})
         this.name = 'LoadError'
         this.kind = kind
         this.url = resource
+        this.phrase = phrase
+        this.hint = hint
     }
+
+    /**
+     * This error's message with another subject in place of the part's name, for when the part is the thing being
+     * loaded: "Track b.wig could not be reached." rather than "Track b.wig could not be loaded: the file could not be
+     * reached."
+     */
+    describeAs(subject) {
+        return describeFailure(subject, this.phrase, this.url, this.hint)
+    }
+}
+
+// What happened to the subject, then the resource and the hint if there are any, one per line
+function describeFailure(subject, phrase, resource, hint) {
+    const lines = [sentence(subject, phrase)]
+    if (resource !== undefined) lines.push(resource)
+    if (hint) lines.push(hint)
+    return lines.join('\n')
 }
 
 /**
@@ -152,41 +168,38 @@ function genomeLoadError(genomeName, error) {
 }
 
 /**
- * The error loading a session file fails with: that the session could not be loaded, then what went wrong, as for
- * genomeLoadError.
+ * The error loading a session file fails with.  The session file is the session, so what happened to it is said
+ * once: "The session file could not be reached."  A failure of another part (a hub) is as for genomeLoadError.
  *
  * @param error  The error the load failed with
  * @returns {Error}  With the error as its cause
  */
 function sessionLoadError(error) {
-    return failedLoadError("The session could not be loaded", error)
+    return error instanceof LoadError && error.kind === 'session' ?
+        new Error(error.describeAs("The session file"), {cause: error}) :
+        failedLoadError("The session could not be loaded", error)
 }
 
 /**
- * The error loading a track fails with: the track, then what went wrong, as for genomeLoadError.  A LoadError from a
- * reader names the part that failed; for any other error the track's file is taken to be what failed.
+ * The error loading a track fails with.  The track's file is the track, so what happened to it is said once: "Track
+ * b.wig could not be reached."  A LoadError from a reader names another part that failed (an index), and is given
+ * as for genomeLoadError: "Track b.bam could not be loaded: the index file was not found ...".
  *
  * @param config  The track configuration, or the json string of one (which may be what failed to parse)
  * @param error  The error the load failed with
  * @returns {Error}  With the error as its cause
  */
 function trackLoadError(config, error) {
-    if (error instanceof LoadError) {
-        return failedLoadError(trackHeadline(config), error)
-    }
     if (typeof config === 'string') {
-        return failedLoadError(trackHeadline(config), new LoadError('trackConfig', undefined, error))
+        return new Error(new LoadError('trackConfig', undefined, error).message, {cause: error})
     }
-    return failedLoadError(trackHeadline(config), new LoadError('track', config.url || config.fastaURL, error))
-}
-
-function trackHeadline(config) {
-    if (typeof config !== 'string') {
-        const url = config.url || config.fastaURL
-        const name = config.name || (url && !isDataURL(url) ? FileUtils.getFilename(url) : undefined)
-        if (name) return `Track ${name} could not be loaded`
+    const url = config.url || config.fastaURL
+    const name = config.name || (url && !isDataURL(url) ? FileUtils.getFilename(url) : undefined)
+    if (error instanceof LoadError && error.kind !== 'track') {
+        return failedLoadError(name ? `Track ${name} could not be loaded` : "The track could not be loaded", error)
     }
-    return "The track could not be loaded"
+    const loadError = error instanceof LoadError ? error : new LoadError('track', url, error)
+    return new Error(loadError.describeAs(name ? `Track ${name}` : "The track"), {cause: loadError})
 }
 
 function isDataURL(url) {
