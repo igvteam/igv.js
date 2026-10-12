@@ -1,3 +1,5 @@
+import {FileUtils} from "../../node_modules/igv-utils/src/index.js"
+
 const httpMessages = {
     "401": "Access unauthorized",
     "403": "Access forbidden",
@@ -85,13 +87,17 @@ function loadFailure(kind, url, error, warning) {
 }
 
 /**
- * Describe a load failure for an alert: its warning, if any, then the resource and the error, one per line.
+ * Describe a load failure for an alert, one line each: for an optional part, its warning, if any, then the resource
+ * and the error; for a failed load, the lines of its error's message.
  *
- * @param loadFailure  {kind, url, message, warning}, from loadFailure()
+ * @param loadFailure  {kind, url, message, warning}, from loadFailure(), or the Error a load failed with
  * @returns {string}  HTML
  */
-function describeLoadFailure({url, message, warning}) {
-    return [warning, url, message].filter(line => line !== undefined).map(escapeHTML).join('<br>')
+function describeLoadFailure(loadFailure) {
+    const lines = loadFailure instanceof Error ?
+        loadFailure.message.split('\n') :
+        [loadFailure.warning, loadFailure.url, loadFailure.message].filter(line => line !== undefined)
+    return lines.map(escapeHTML).join('<br>')
 }
 
 // What each kind of required part is called in a message to the user
@@ -102,7 +108,10 @@ const partNames = {
     chromSizes: "chromosome sizes file",
     genbank: "GenBank file",
     hub: "track hub file",
-    session: "session file"
+    session: "session file",
+    track: "file",
+    trackConfig: "track configuration",
+    index: "index file"
 }
 
 /**
@@ -114,13 +123,14 @@ class LoadError extends Error {
 
     /**
      * @param kind  The part that failed, a key of partNames
-     * @param url  The resource that failed
+     * @param url  The resource that failed, if there is one
      * @param cause  The error it failed with
      */
     constructor(kind, url, cause) {
-        const resource = describeResource(url)
+        const resource = url == null ? undefined : describeResource(url)
         const {phrase, hint} = explainLoadError(cause)
-        const lines = [sentence(`The ${partNames[kind] ?? kind}`, phrase), resource]
+        const lines = [sentence(`The ${partNames[kind] ?? kind}`, phrase)]
+        if (resource !== undefined) lines.push(resource)
         if (hint) lines.push(hint)
         super(lines.join('\n'), {cause})
         this.name = 'LoadError'
@@ -152,6 +162,41 @@ function sessionLoadError(error) {
     return failedLoadError("The session could not be loaded", error)
 }
 
+/**
+ * The error loading a track fails with: the track, then what went wrong, as for genomeLoadError.  A LoadError from a
+ * reader names the part that failed; for any other error the track's file is taken to be what failed.
+ *
+ * @param config  The track configuration, or the json string of one (which may be what failed to parse)
+ * @param error  The error the load failed with
+ * @returns {Error}  With the error as its cause
+ */
+function trackLoadError(config, error) {
+    if (error instanceof LoadError) {
+        return failedLoadError(trackHeadline(config), error)
+    }
+    if (typeof config === 'string') {
+        return failedLoadError(trackHeadline(config), new LoadError('trackConfig', undefined, error))
+    }
+    return failedLoadError(trackHeadline(config), new LoadError('track', config.url || config.fastaURL, error))
+}
+
+function trackHeadline(config) {
+    if (typeof config !== 'string') {
+        const url = config.url || config.fastaURL
+        const name = config.name || (url && !isDataURL(url) ? FileUtils.getFilename(url) : undefined)
+        if (name) return `Track ${name} could not be loaded`
+    }
+    return "The track could not be loaded"
+}
+
+function isDataURL(url) {
+    return typeof url === 'string' && /^(data|blob):/.test(url)
+}
+
+/**
+ * An error whose message leads with what could not be loaded, then what went wrong: a LoadError on the same line,
+ * since it says which part failed, any other error by its message on the next.
+ */
 function failedLoadError(headline, error) {
     const message = error instanceof LoadError ?
         `${headline}: ${lowerFirst(error.message)}` :
@@ -163,4 +208,4 @@ function lowerFirst(string) {
     return string.charAt(0).toLowerCase() + string.slice(1)
 }
 
-export {httpMessages, explainLoadError, describeLoadError, describeLoadFailure, escapeHTML, loadFailure, LoadError, genomeLoadError, sessionLoadError}
+export {httpMessages, explainLoadError, describeLoadError, describeLoadFailure, escapeHTML, loadFailure, LoadError, genomeLoadError, sessionLoadError, trackLoadError}

@@ -48,7 +48,7 @@ import {loadHub} from "./ucsc/hub/hub.js"
 import {EventEmitter} from "./events.js"
 import Locus from "./locus.js"
 import {isLocalFile, isGoogleDriveURL} from "./util/sessionResourceValidator.js"
-import {describeLoadError, describeLoadFailure, genomeLoadError, loadFailure, LoadError, sessionLoadError} from "./util/loadFailure.js"
+import {describeLoadFailure, genomeLoadError, LoadError, sessionLoadError, trackLoadError} from "./util/loadFailure.js"
 
 
 // css - $igv-scrollbar-outer-width: 14px;
@@ -636,7 +636,7 @@ class Browser {
                 await featureSource.getFeatures({chr: "1", start: 0, end: Number.MAX_SAFE_INTEGER})
             } catch (error) {
                 console.error(error)
-                loadFailures.push(trackLoadFailure(config, error))
+                loadFailures.push(trackLoadError(config, error))
                 failedHidden.add(config)   // Already reported; don't load it again as a track
             }
         }))
@@ -966,21 +966,21 @@ class Browser {
      * added, and the ones that fail are returned rather than thrown.
      *
      * @param configList  Array of track configurations
-     * @returns {Promise<Array>}  Promise for one {kind, url, message} per track that failed
+     * @returns {Promise<Array>}  Promise for the error of each track that failed, from trackLoadError
      */
     async #loadTrackListTolerantly(configList) {
 
         const results = await this.#settleTrackList(configList)
 
-        return results.flatMap(({status, reason}, i) =>
-            status === 'rejected' ? [trackLoadFailure(configList[i], reason)] : [])
+        return results.filter(({status}) => status === 'rejected').map(({reason}) => reason)
     }
 
     /**
      * Report every failure in a session or genome load in one alert, rather than one alert per failure, which the
      * user would have to dismiss one by one.
      *
-     * @param loadFailures  Array of {kind, url, message, warning}, from loadFailure()
+     * @param loadFailures  Array of {kind, url, message, warning}, from loadFailure(), and of errors from
+     *                      trackLoadError
      */
     #reportLoadFailures(loadFailures) {
         if (loadFailures.length > 0) {
@@ -1050,32 +1050,29 @@ class Browser {
         return loadedTracks[0]
     }
 
+    /**
+     * Load one track: create it, initialize it, and add it to the browser.  Whatever fails along the way, the load
+     * rejects with an error for the user, see trackLoadError.
+     */
     async #loadTrackHelper(config) {
 
-        // config might be json
-        if (StringUtils.isString(config)) {
-            config = JSON.parse(config)
-        }
-
-        if (config.format && config.format.toLowerCase() === 'sampleinfo') {
-            return this.loadSampleInfo(config)
-        }
-
-        let track
         try {
-            track = await this.createTrack(config)
+            // config might be json
+            if (StringUtils.isString(config)) {
+                config = JSON.parse(config)
+            }
+
+            if (config.format && config.format.toLowerCase() === 'sampleinfo') {
+                return await this.loadSampleInfo(config)
+            }
+
+            const track = await this.createTrack(config)
+            return track ? await this.addTrack(track) : undefined
 
         } catch (error) {
-            const err = new Error(`${describeLoadError(error)}\n${describeTrackURL(config)}`, {cause: error})
+            const err = trackLoadError(config, error)
             console.error(err)
             throw err
-        }
-
-
-        if (track) {
-            return await this.addTrack(track)
-        } else {
-            return undefined
         }
     }
 
@@ -2776,27 +2773,6 @@ toggleTrackLabels(trackViews, isVisible) {
             }
         }
     }
-}
-
-function describeTrackURL(config) {
-    return FileUtils.isFile(config.url) ? config.url.name : config.url
-}
-
-/**
- * A track load failure, as {kind, url, message}.
- *
- * @param config  The track configuration, possibly as json
- * @param error  The error the track load rejected with
- */
-function trackLoadFailure(config, error) {
-    if (StringUtils.isString(config)) {
-        try {
-            config = JSON.parse(config)
-        } catch {
-            return loadFailure('track', config, error)   // The json itself is what failed
-        }
-    }
-    return loadFailure('track', describeTrackURL(config) || config.fastaURL || config.name, error)
 }
 
 export default Browser
