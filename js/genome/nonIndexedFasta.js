@@ -1,6 +1,7 @@
 import {BGZip, igvxhr, StringUtils} from "../../node_modules/igv-utils/src/index.js"
 import Chromosome from "./chromosome.js"
 import {buildOptions, isDataURL} from "../util/igvUtils.js"
+import {LoadError} from "../util/loadFailure.js"
 import SequenceInterval from "./sequenceInterval.js"
 
 const splitLines = StringUtils.splitLines
@@ -31,7 +32,11 @@ class NonIndexedFasta {
 
 
     async init() {
-        return this.loadAll()
+        try {
+            await this.loadAll()
+        } catch (error) {
+            throw new LoadError('fasta', this.fastaURL, error)
+        }
     }
 
     getSequenceRecord(chr) {

@@ -1,6 +1,7 @@
 import {BGZip, igvxhr, StringUtils} from "../../node_modules/igv-utils/src/index.js"
 import Chromosome from "./chromosome.js"
 import {isDataURL} from "../util/igvUtils.js"
+import {LoadError} from "../util/loadFailure.js"
 
 const splitLines = StringUtils.splitLines
 
@@ -19,7 +20,11 @@ class ChromSizes {
     }
 
     async init() {
-        return this.loadAll()
+        try {
+            await this.loadAll()
+        } catch (error) {
+            throw new LoadError('chromSizes', this.url, error)
+        }
     }
 
     getSequenceRecord(chr) {

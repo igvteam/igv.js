@@ -48,7 +48,7 @@ import {loadHub} from "./ucsc/hub/hub.js"
 import {EventEmitter} from "./events.js"
 import Locus from "./locus.js"
 import {isLocalFile, isGoogleDriveURL} from "./util/sessionResourceValidator.js"
-import {describeLoadError, describeLoadFailure, loadFailure} from "./util/loadFailure.js"
+import {describeLoadError, describeLoadFailure, genomeLoadError, loadFailure, LoadError} from "./util/loadFailure.js"
 
 
 // css - $igv-scrollbar-outer-width: 14px;
@@ -457,7 +457,7 @@ class Browser {
         let genomeConfig, genome
         if (genomeOrReference) {
             genomeConfig = StringUtils.isString(genomeOrReference) ?
-                await GenomeUtils.expandReference(this.alert, genomeOrReference) :
+                await GenomeUtils.expandReference(genomeOrReference) :
                 genomeOrReference
             genome = await this.#createGenome(genomeConfig, genomeConfig.locus || session.locus)
         }
@@ -761,21 +761,43 @@ class Browser {
      * @param initialLocus  Optional, the locus the genome will be shown at
      */
     async #createGenome(genomeConfig, initialLocus) {
-        const genome = genomeConfig.gbkURL ?
-            await loadGenbank(genomeConfig.gbkURL) :
-            await Genome.createGenome(genomeConfig, this)
-        genome.loadFailures ??= []   // A Genbank genome records none
-        if (!(initialLocus || genome.initialLocus)) {
-            throw Error(`No initial locus for genome ${genome.id}: specify a locus, or chromosome names (e.g. chromSizesURL)`)
+        try {
+            const genome = genomeConfig.gbkURL ?
+                await loadGenbank(genomeConfig.gbkURL).catch(error => {
+                    throw new LoadError('genbank', genomeConfig.gbkURL, error)
+                }) :
+                await Genome.createGenome(genomeConfig, this)
+            genome.loadFailures ??= []   // A Genbank genome records none
+            if (!(initialLocus || genome.initialLocus)) {
+                throw Error("It has no chromosome to start on: specify a locus, or chromosome names (e.g. chromSizesURL).")
+            }
+            return genome
+        } catch (error) {
+            // The error is for the user: the genome, and what went wrong
+            throw genomeLoadError(genomeConfig.id || genomeConfig.name, error)
         }
-        return genome
+    }
+
+    /**
+     * Load a UCSC track hub and return its genome config.  A hub that cannot be read fails the genome load.
+     *
+     * @param url  The hub.txt URL
+     * @param options
+     * @param genomeName  The genome's id or name, if known, for the error if the hub cannot be read
+     */
+    async #loadHubGenomeConfig(url, options, genomeName) {
+        try {
+            const hub = await loadHub(url, options)
+            return hub.getGenomeConfig()
+        } catch (error) {
+            throw genomeLoadError(genomeName, new LoadError('hub', url, error))
+        }
     }
 
     async expandGenarkAccession(genarkAccession) {
 
         const url = convertToHubURL(genarkAccession)
-        const hub = await loadHub(url)
-        const genomeConfig = hub.getGenomeConfig()
+        const genomeConfig = await this.#loadHubGenomeConfig(url, undefined, genarkAccession)
         genomeConfig.nameSet = "ucsc"
         return genomeConfig
     }
@@ -808,11 +830,10 @@ class Browser {
 
             const isHubGenome = idOrConfig.hubURL || (idOrConfig.url && StringUtils.isString(idOrConfig.url) && idOrConfig.url.endsWith("/hub.txt"))
             if (isHubGenome) {
-                const hub = await loadHub(idOrConfig.hubURL || idOrConfig.url, idOrConfig)
-                genomeConfig = hub.getGenomeConfig()
+                genomeConfig = await this.#loadHubGenomeConfig(idOrConfig.hubURL || idOrConfig.url, idOrConfig, idOrConfig.id || idOrConfig.name)
             } else if (StringUtils.isString(idOrConfig) || !(idOrConfig.url || idOrConfig.fastaURL || idOrConfig.twoBitURL || idOrConfig.gbkURL)) {
                 // Either an ID, a json string, or an object missing required properties.
-                genomeConfig = await GenomeUtils.expandReference(this.alert, idOrConfig)
+                genomeConfig = await GenomeUtils.expandReference(idOrConfig)
             } else {
                 genomeConfig = idOrConfig
             }

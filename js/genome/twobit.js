@@ -7,7 +7,7 @@
 import {igvxhr} from "../../node_modules/igv-utils/src/index.js"
 import BinaryParser from "../binary.js"
 import BPTree from "../bigwig/bpTree.js"
-import {loadFailure} from "../util/loadFailure.js"
+import {loadFailure, LoadError} from "../util/loadFailure.js"
 
 const twoBit = ['T', 'C', 'A', 'G']
 const byteTo4Bases = []
@@ -46,7 +46,7 @@ class TwobitSequence {
             const [bpt, header] =
                 await Promise.allSettled([BPTree.loadBpTree(this.bptURL, this.config, 0), this._readHeader()])
             if (header.status === 'rejected') {
-                throw header.reason
+                throw new LoadError('twoBit', this.url, header.reason)
             }
             if (bpt.status === 'fulfilled') {
                 this.index = bpt.value
@@ -58,7 +58,12 @@ class TwobitSequence {
                 "Loading this genome may be slow."))
             headerEnd = header.value
         }
-        const idx = await this._readIndex(headerEnd)
+        let idx
+        try {
+            idx = await this._readIndex(headerEnd)
+        } catch (error) {
+            throw new LoadError('twoBit', this.url, error)
+        }
         this.index = {
             search: async (name) =>  {
                 return idx.has(name) ? {offset: idx.get(name)} : undefined
@@ -168,7 +173,7 @@ class TwobitSequence {
         } else if (magicBE === magic) {
             this.littleEndian = false
         } else {
-            throw Error(`Bad magic number ${magic}`)
+            throw Error("Not a 2bit file (bad magic number)")
         }
 
         this.version = dataView.getUint32(ptr, this.littleEndian)

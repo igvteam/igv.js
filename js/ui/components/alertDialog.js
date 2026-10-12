@@ -136,7 +136,7 @@ class AlertDialog {
      * Present an alert.  If an alert is already open, in this or any other dialog, this one waits until that is
      * dismissed.
      *
-     * @param alert  An Error, or a string (may contain HTML, which is sanitized)
+     * @param alert  An Error, or a string (may contain HTML, which is sanitized).  Line breaks are kept
      * @param callback  Optional, called with "OK" when the alert is dismissed
      */
     present(alert, callback) {
@@ -158,7 +158,7 @@ class AlertDialog {
             string = httpMessages[string];
         }
 
-        this.body.innerHTML = DOMPurify.sanitize(string)
+        this.body.innerHTML = DOMPurify.sanitize(string).replaceAll('\n', '<br>')
 
         this.callback = callback
         this.container.style.display = 'flex'
