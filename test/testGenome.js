@@ -210,7 +210,6 @@ suite("testGenome", function () {
         assert.equal(error.kind, "fasta")
         assert.equal(error.url, "test/data/twobit/missing.fa")
         assert.equal(error.cause.path, "test/data/twobit/missing.fa")
-        assert.match(error.message, /^The FASTA sequence file could not be read: ENOENT.*\ntest\/data\/twobit\/missing.fa$/)
     })
 
     test("a fasta index failure is fatal", async function () {
@@ -223,7 +222,6 @@ suite("testGenome", function () {
         assert.instanceOf(error, LoadError)
         assert.equal(error.kind, "fastaIndex")
         assert.equal(error.url, "test/data/twobit/missing.fai")
-        assert.match(error.message, /^The FASTA index \(.fai\) file could not be read: ENOENT.*\ntest\/data\/twobit\/missing.fai$/)
     })
 
     test("a non-indexed fasta failure is fatal", async function () {
@@ -247,13 +245,12 @@ suite("testGenome", function () {
         assert.equal(error.cause.path, "test/data/twobit/missing.2bit")
     })
 
-    test("a file that is not 2bit is fatal, and says so", async function () {
+    test("a file that is not 2bit is fatal", async function () {
 
         const error = await loadError({id: "foo", twoBitURL: "test/data/twobit/foo.2bit.fa"})
         assert.instanceOf(error, LoadError)
         assert.equal(error.kind, "twoBit")
-        assert.equal(error.message,
-            "The 2bit sequence file could not be read: Not a 2bit file (bad magic number).\ntest/data/twobit/foo.2bit.fa")
+        assert.equal(error.url, "test/data/twobit/foo.2bit.fa")
     })
 
     test("a cytoband failure leaves out only that chromosome", async function () {

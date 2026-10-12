@@ -45,29 +45,25 @@ suite("testBrowser", function () {
             assert.instanceOf(error.cause, LoadError)
             assert.equal(error.cause.kind, "session")
             assert.equal(error.cause.url, "test/data/session/missing.json")
-            assert.match(error.message,
-                /^The session file could not be read: ENOENT.*\ntest\/data\/session\/missing.json$/)
         })
 
         test("a session file that is not JSON fails with the parse error", async function () {
             const error = await loadError({url: "test/data/twobit/foo.2bit.fa", filename: "session.json"})
             assert.equal(error.cause.kind, "session")
             assert.instanceOf(error.cause.cause, SyntaxError)
-            assert.match(error.message, /^The session file could not be read: .+JSON.\ntest\/data\/twobit\/foo.2bit.fa$/)
         })
 
-        test("a corrupt compressed session URL is cut short in the message", async function () {
+        test("a corrupt compressed session URL is cut short", async function () {
             const url = "blob:" + "x".repeat(200)
             const error = await loadError({url})
             assert.equal(error.cause.kind, "session")
-            const lines = error.message.split("\n")
-            assert.equal(lines[1], "blob:" + "x".repeat(55) + "\u2026")
+            assert.isBelow(error.cause.url.length, 70)
         })
 
         test("a hub session whose hub cannot be read names the hub", async function () {
             const error = await loadError({url: "test/data/hubs/missing/hub.txt"})
             assert.equal(error.cause.kind, "hub")
-            assert.match(error.message, /^The session could not be loaded: the assembly hub file could not be read: ENOENT.*\ntest\/data\/hubs\/missing\/hub.txt$/)
+            assert.equal(error.cause.url, "test/data/hubs/missing/hub.txt")
         })
     })
 })

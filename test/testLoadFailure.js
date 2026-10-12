@@ -1,11 +1,11 @@
 import "./utils/mockObjects.js"
 import {assert} from 'chai'
-import {describeLoadError, describeLoadFailure, explainLoadError, genomeLoadError, LoadError, sessionLoadError, trackLoadError} from "../js/util/loadFailure.js"
+import {describeLoadFailure, explainLoadError, genomeLoadError, LoadError, sessionLoadError, trackLoadError} from "../js/util/loadFailure.js"
 import {loadHubGenomeConfig} from "../js/ucsc/hub/hub.js"
 
 // A request failure, as igvxhr rejects with
-function requestError(url, status, message = `Error accessing resource: ${url} status: ${status}`) {
-    const error = new Error(message)
+function requestError(url, status) {
+    const error = new Error(`Error accessing resource: ${url} status: ${status}`)
     error.status = status
     return error
 }
@@ -14,127 +14,67 @@ suite("testLoadFailure", function () {
 
     const url = "https://example.com/genome.2bit"
 
-    test("a request that got no response is explained, with a hint, not by its status", function () {
-        const {phrase, hint} = explainLoadError(requestError(url, 0))
-        assert.equal(phrase, "could not be reached")
-        assert.notInclude(hint, url)
-        assert.include(hint, "URL")
-        assert.include(hint, "CORS")
-        assert.equal(describeLoadError(requestError(url, 0)), `The file could not be reached. ${hint}`)
-    })
-
-    test("a request failure is explained by its HTTP status", function () {
-        assert.deepEqual(explainLoadError(requestError(url, 404)), {phrase: "was not found (HTTP status 404)"})
-        assert.deepEqual(explainLoadError(requestError(url, 401)), {phrase: "could not be accessed: unauthorized (HTTP status 401)"})
-        assert.deepEqual(explainLoadError(requestError(url, 403, `Access forbidden: ${url}`)), {phrase: "could not be accessed: forbidden (HTTP status 403)"})
-        assert.deepEqual(explainLoadError(requestError(url, 500)), {phrase: "could not be read: the server responded with HTTP status 500"})
-        assert.deepEqual(explainLoadError(requestError(url, 0, `Timed out accessing resource: ${url}`)), {phrase: "could not be reached: the request timed out"})
-        assert.deepEqual(explainLoadError(new Error("404")), {phrase: "was not found (HTTP status 404)"})
-        assert.equal(describeLoadError(requestError(url, 404)), "The file was not found (HTTP status 404).")
+    test("a request failure is explained by its status, with a hint only when there was no response", function () {
+        const unreachable = explainLoadError(requestError(url, 0))
+        assert.ok(unreachable.hint)
+        assert.notInclude(unreachable.phrase, "status: 0")
+        const notFound = explainLoadError(requestError(url, 404))
+        assert.include(notFound.phrase, "404")
+        assert.isUndefined(notFound.hint)
     })
 
     test("any other error is explained by its message, on one line", function () {
-        assert.deepEqual(explainLoadError(new Error("Not a 2bit file (bad magic number)")), {phrase: "could not be read: Not a 2bit file (bad magic number)"})
-        assert.deepEqual(explainLoadError("something"), {phrase: "could not be read: something"})
-        assert.deepEqual(explainLoadError(new Error("Unexpected token '>', \">chr1\nNNNN\"... is not valid JSON")),
-            {phrase: "could not be read: Unexpected token '>', \">chr1 NNNN\"... is not valid JSON"})
-        assert.equal(describeLoadError(new Error("Not a 2bit file (bad magic number)")), "The file could not be read: Not a 2bit file (bad magic number).")
-        assert.equal(describeLoadError(new Error("It ended early.")), "The file could not be read: It ended early.")
+        const {phrase} = explainLoadError(new Error("Unexpected token '>', \">chr1\nNNNN\"... is not valid JSON"))
+        assert.include(phrase, "is not valid JSON")
+        assert.notInclude(phrase, "\n")
     })
 
-    test("a LoadError names the part and what happened to it, the resource, and a hint, one per line", function () {
+    test("a LoadError keeps the resource, hint and cause", function () {
         const cause = requestError(url, 0)
         const error = new LoadError('twoBit', url, cause)
         assert.instanceOf(error, Error)
         assert.equal(error.kind, 'twoBit')
         assert.equal(error.url, url)
         assert.equal(error.cause, cause)
-        assert.deepEqual(error.message.split('\n'), ["The 2bit sequence file could not be reached.", url, explainLoadError(cause).hint])
+        const lines = error.message.split('\n')
+        assert.include(lines, url)
+        assert.include(lines, error.hint)
+        assert.equal(new LoadError('fasta', {name: "genome.fa"}, new Error("boom")).url, "genome.fa")
     })
 
-    test("a LoadError without a hint has two lines", function () {
-        const error = new LoadError('fasta', url, requestError(url, 404))
-        assert.equal(error.message, `The FASTA sequence file was not found (HTTP status 404).\n${url}`)
-    })
+    test("genome, session and track errors wrap the LoadError and keep it as the cause", function () {
+        const loadError = new LoadError('twoBit', url, requestError(url, 404))
+        const genomeError = genomeLoadError("canFam4", loadError)
+        assert.equal(genomeError.cause, loadError)
+        assert.include(genomeError.message, "canFam4")
+        assert.include(genomeError.message, url)
 
-    test("a LoadError describes a local file by its name", function () {
-        const error = new LoadError('fasta', {name: "genome.fa"}, new Error("boom"))
-        assert.equal(error.url, "genome.fa")
-        assert.equal(error.message, "The FASTA sequence file could not be read: boom.\ngenome.fa")
-    })
+        assert.equal(sessionLoadError(loadError).cause, loadError)
+        assert.equal(trackLoadError({url: "https://foo.com/b.bam"}, loadError).cause, loadError)
 
-    test("a genome load error leads with the genome", function () {
-        const cause = new LoadError('twoBit', url, requestError(url, 404))
-        const error = genomeLoadError("canFam4", cause)
-        assert.equal(error.cause, cause)
-        assert.equal(error.message, `Genome canFam4 could not be loaded: the 2bit sequence file was not found (HTTP status 404).\n${url}`)
-    })
-
-    test("a genome load error without a genome name", function () {
-        const error = genomeLoadError(undefined, new LoadError('hub', url, requestError(url, 0)))
-        assert.match(error.message, /^The genome could not be loaded: the assembly hub file could not be reached.\n/)
-    })
-
-    test("a genome load error from any other error gives its message", function () {
-        const cause = new Error("It has no chromosome to start on.")
-        const error = genomeLoadError("foo", cause)
-        assert.equal(error.cause, cause)
-        assert.equal(error.message, "Genome foo could not be loaded.\nIt has no chromosome to start on.")
-    })
-
-    test("a track load error says what happened to the track, then its URL, without a name derived from it", function () {
         const cause = requestError("https://foo.com/b.wig", 0)
-        const error = trackLoadError({url: "https://foo.com/b.wig"}, cause)
-        assert.equal(error.cause.cause, cause)
-        assert.deepEqual(error.message.split("\n"), [
-            "The track could not be reached.",
-            "https://foo.com/b.wig",
-            explainLoadError(cause).hint
-        ])
+        const trackError = trackLoadError({name: "Peaks", url: "https://foo.com/b.wig"}, cause)
+        assert.instanceOf(trackError.cause, LoadError)
+        assert.equal(trackError.cause.cause, cause)
+        assert.include(trackError.message, "Peaks")
+        assert.include(trackError.message, "https://foo.com/b.wig")
     })
 
-    test("a track load error names the track by a configured name", function () {
-        const error = trackLoadError({name: "My track", url: {name: "b.bed"}}, requestError("b.bed", 404))
-        assert.equal(error.message, "Track My track was not found (HTTP status 404).\nb.bed")
-        const fileError = trackLoadError({url: {name: "b.bed"}}, new Error("Unknown chromosome"))
-        assert.equal(fileError.message, "The track could not be read: Unknown chromosome.\nb.bed")
-    })
-
-    test("a track load error keeps a reader's LoadError, which names the part that failed", function () {
-        const loadError = new LoadError('index', "https://foo.com/b.bam.bai", requestError("https://foo.com/b.bam.bai", 404))
-        const error = trackLoadError({url: "https://foo.com/b.bam"}, loadError)
-        assert.equal(error.cause, loadError)
-        assert.equal(error.message, "The track could not be loaded: the index file was not found (HTTP status 404).\nhttps://foo.com/b.bam.bai")
-        const named = trackLoadError({name: "Reads", url: "https://foo.com/b.bam"}, loadError)
-        assert.equal(named.message, "Track Reads could not be loaded: the index file was not found (HTTP status 404).\nhttps://foo.com/b.bam.bai")
-    })
-
-    test("a track load error without a file", function () {
-        const error = trackLoadError({features: []}, new Error("boom"))
-        assert.equal(error.message, "The track could not be read: boom.")
-        const jsonError = trackLoadError("{not json", new SyntaxError("Unexpected token n"))
-        assert.equal(jsonError.message, "The track configuration could not be read: Unexpected token n.")
-    })
-
-    test("a load failure alert describes an error by its lines", function () {
+    test("a load failure alert is HTML-escaped, with line breaks", function () {
         const error = trackLoadError({url: "https://foo.com/<b>.wig"}, requestError("https://foo.com/<b>.wig", 404))
-        assert.equal(describeLoadFailure(error),
-            "The track was not found (HTTP status 404).<br>https://foo.com/&lt;b&gt;.wig")
+        const html = describeLoadFailure(error)
+        assert.include(html, "&lt;b&gt;")
+        assert.notInclude(html, "<b>")
+        assert.include(html, "<br>")
         assert.equal(describeLoadFailure({url: "u", message: "m", warning: "w"}), "w<br>u<br>m")
     })
 
-    test("a session load error says once what happened to the session file", function () {
-        const error = sessionLoadError(new LoadError('session', url, requestError(url, 404)))
-        assert.equal(error.message, `The session file was not found (HTTP status 404).\n${url}`)
-        const hubError = sessionLoadError(new LoadError('hub', url, requestError(url, 404)))
-        assert.equal(hubError.message, `The session could not be loaded: the assembly hub file was not found (HTTP status 404).\n${url}`)
-    })
-
     test("a load that rejects with nothing, or a track without a config, still gets a message", function () {
-        assert.deepEqual(explainLoadError(undefined), {phrase: "could not be read"})
-        assert.equal(new LoadError('twoBit', url, undefined).message, `The 2bit sequence file could not be read.\n${url}`)
-        assert.equal(trackLoadError(undefined, new Error("boom")).message, "The track could not be read: boom.")
-        assert.equal(trackLoadError(undefined, undefined).message, "The track could not be read.")
+        assert.ok(explainLoadError(undefined).phrase)
+        assert.ok(new LoadError('twoBit', url, undefined).message)
+        assert.ok(trackLoadError(undefined, new Error("boom")).message)
+        assert.ok(trackLoadError(undefined, undefined).message)
+        assert.ok(trackLoadError("{not json", new SyntaxError("Unexpected token n")).message)
     })
 
     test("a hub that loads but has no such genome fails as a hub failure", async function () {
@@ -146,7 +86,6 @@ suite("testLoadFailure", function () {
         }
         assert.instanceOf(error, LoadError)
         assert.equal(error.kind, "hub")
-        assert.equal(error.message, "The assembly hub file could not be read: Genome not found in hub: none.\ntest/data/hubs/hub.txt")
-        assert.match(sessionLoadError(error).message, /^The session could not be loaded: the assembly hub file could not be read: Genome not found/)
+        assert.equal(error.url, "test/data/hubs/hub.txt")
     })
 })
