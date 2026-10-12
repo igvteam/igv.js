@@ -1066,7 +1066,7 @@ class Browser {
             track = await this.createTrack(config)
 
         } catch (error) {
-            const err = new Error(`${describeLoadError(error)} : ${describeTrackURL(config)}`, {cause: error})
+            const err = new Error(`${describeLoadError(error)}\n${describeTrackURL(config)}`, {cause: error})
             console.error(err)
             throw err
         }

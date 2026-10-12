@@ -6,29 +6,50 @@ const httpMessages = {
 
 // A request that got no response: the browser reports status 0 for a network error, a blocked cross-origin request,
 // and a response the server sent without CORS headers (an error page, for a wrong URL, often has none)
-const unreachableMessage =
-    "The file could not be reached. Check that the URL is correct. The server may also be down, or may not allow " +
-    "access from this web page (CORS)."
+const unreachableHint =
+    "Check that the URL is correct. The server may also be down, or may not allow access from this web page (CORS)."
 
 /**
- * Describe the error a load failed with, for the user, on one line.  A request failure (from igvxhr, which gives it a
- * numeric status) is described by its HTTP status, as its own message repeats the URL; any other error by its message.
+ * Explain the error a load failed with, for the user, as what happened to the file: a phrase to follow its name, e.g.
+ * "could not be reached", and for some failures a hint on what to do about it.  A request failure (from igvxhr,
+ * which gives it a numeric status) is explained by its HTTP status, as its own message repeats the URL; any other
+ * error by its message.
+ *
+ * @returns {{phrase: string, hint?: string}}
+ */
+function explainLoadError(error) {
+    const msg = String(error.message || error.error || error.toString()).replaceAll('\n', ' ')
+    const status = typeof error.status === 'number' ? error.status : httpMessages.hasOwnProperty(msg) ? Number(msg) : undefined
+    switch (status) {
+        case undefined:
+            return {phrase: `could not be read: ${msg}`}
+        case 0:
+            return msg.startsWith("Timed out") ?
+                {phrase: "could not be reached: the request timed out"} :
+                {phrase: "could not be reached", hint: unreachableHint}
+        case 401:
+            return {phrase: "could not be accessed: unauthorized (HTTP status 401)"}
+        case 403:
+            return {phrase: "could not be accessed: forbidden (HTTP status 403)"}
+        case 404:
+            return {phrase: "was not found (HTTP status 404)"}
+        default:
+            return {phrase: `could not be read: the server responded with HTTP status ${status}`}
+    }
+}
+
+function sentence(subject, phrase) {
+    return `${subject} ${phrase}${/[.!?]$/.test(phrase) ? '' : '.'}`
+}
+
+/**
+ * Describe the error a load failed with, for the user, as a sentence about the file, e.g. "The file could not be
+ * reached. Check that the URL is correct. ..."
  */
 function describeLoadError(error) {
-    const msg = String(error.message || error.error || error.toString()).replaceAll('\n', ' ')
-    if (httpMessages.hasOwnProperty(msg)) {
-        return httpMessages[msg]
-    }
-    if (typeof error.status === 'number') {
-        const status = error.status
-        if (status === 0) {
-            return msg.startsWith("Timed out") ? "The request timed out." : unreachableMessage
-        }
-        return httpMessages.hasOwnProperty(status) ?
-            `${httpMessages[status]} (HTTP status ${status}).` :
-            `The server responded with HTTP status ${status}.`
-    }
-    return msg
+    const {phrase, hint} = explainLoadError(error)
+    const description = sentence("The file", phrase)
+    return hint ? `${description} ${hint}` : description
 }
 
 /**
@@ -85,9 +106,9 @@ const partNames = {
 }
 
 /**
- * The error a load fails with when a required part could not be read: which part, the resource, and what went wrong.
- * Its message is for the user, one line each.  Readers throw it; the browser wraps it with what was being loaded, see
- * genomeLoadError.
+ * The error a load fails with when a required part could not be read.  Its message is for the user: which part and
+ * what happened to it ("The 2bit sequence file could not be reached."), the resource, and a hint if there is one, one
+ * line each.  Readers throw it; the browser wraps it with what was being loaded, see genomeLoadError.
  */
 class LoadError extends Error {
 
@@ -98,7 +119,10 @@ class LoadError extends Error {
      */
     constructor(kind, url, cause) {
         const resource = describeResource(url)
-        super(`The ${partNames[kind] ?? kind} could not be read.\n${resource}\n${describeLoadError(cause)}`, {cause})
+        const {phrase, hint} = explainLoadError(cause)
+        const lines = [sentence(`The ${partNames[kind] ?? kind}`, phrase), resource]
+        if (hint) lines.push(hint)
+        super(lines.join('\n'), {cause})
         this.name = 'LoadError'
         this.kind = kind
         this.url = resource
@@ -131,7 +155,7 @@ function sessionLoadError(error) {
 function failedLoadError(headline, error) {
     const message = error instanceof LoadError ?
         `${headline}: ${lowerFirst(error.message)}` :
-        `${headline}.\n${describeLoadError(error)}`
+        `${headline}.\n${String(error.message || error).replaceAll('\n', ' ')}`
     return new Error(message, {cause: error})
 }
 
@@ -139,4 +163,4 @@ function lowerFirst(string) {
     return string.charAt(0).toLowerCase() + string.slice(1)
 }
 
-export {httpMessages, describeLoadError, describeLoadFailure, escapeHTML, loadFailure, LoadError, genomeLoadError, sessionLoadError}
+export {httpMessages, explainLoadError, describeLoadError, describeLoadFailure, escapeHTML, loadFailure, LoadError, genomeLoadError, sessionLoadError}
