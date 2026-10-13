@@ -72,6 +72,31 @@ suite("testBigWig", function () {
     })
 
     /**
+     * Test a big-endian bigwig.  It holds 20 intervals chr1:i*100-(i*100+50) with value i+1, and one zoom level of
+     * 800 bp.
+     */
+    test("bigwig - big endian", async function () {
+
+        this.timeout(10000)
+
+        const url = "test/data/bb/bigEndian.bw"
+        const chr = "chr1"
+        const bwReader = new BWReader({url: url})
+        assert.equal(await bwReader.getType(), "bigwig")
+
+        const features = await bwReader.readFeatures(chr, 0, chr, 2000, undefined, "none")
+        assert.equal(features.length, 20)
+        for (let i = 0; i < 20; i++) {
+            assert.equal(features[i].start, i * 100)
+            assert.equal(features[i].end, i * 100 + 50)
+            assert.equal(features[i].value, i + 1)
+        }
+
+        const zoomFeatures = await bwReader.readFeatures(chr, 0, chr, 2000, 1000, "mean")
+        assert.deepEqual(zoomFeatures.map(f => [f.start, f.end, f.value]), [[0, 750, 4.5], [800, 1550, 12.5], [1600, 1950, 18.5]])
+    })
+
+    /**
      * Test a bigwig with a very large reduction level value.  This value overflows a 32-bit signed integer,
      */
     test("bigwig - big reductionLevel", async function () {
