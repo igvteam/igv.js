@@ -160,7 +160,7 @@ class BWReader {
                 } else {
                     plain = uint8Array
                 }
-                await decodeFunction.call(this, new DataView(plain.buffer), chrIdx1, bpStart, chrIdx2, bpEnd, features, windowFunction)
+                await decodeFunction.call(this, new DataView(plain.buffer, plain.byteOffset, plain.byteLength), chrIdx1, bpStart, chrIdx2, bpEnd, features, windowFunction)
             }
 
             features.sort(function (a, b) {
