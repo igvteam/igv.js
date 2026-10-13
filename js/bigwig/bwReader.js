@@ -11,9 +11,7 @@ import ChunkLoader from "./chunkLoader.js"
 
 
 const BIGWIG_MAGIC_LTH = 0x888FFC26 // BigWig Magic Low to High
-const BIGWIG_MAGIC_HTL = 0x26FC8F66 // BigWig Magic High to Low
 const BIGBED_MAGIC_LTH = 0x8789F2EB // BigBed Magic Low to High
-const BIGBED_MAGIC_HTL = 0xEBF28987 // BigBed Magic High to Low
 const BBFILE_HEADER_SIZE = 64
 const BBFILE_EXTENDED_HEADER_HEADER_SIZE = 64
 const BUFFER_SIZE = 512000     //  buffer
@@ -346,9 +344,10 @@ class BWReader {
                 binaryParser.position = 0
                 let magic = binaryParser.getUInt()
 
-                if (magic === BIGWIG_MAGIC_HTL) {
+                // Read in the file's own byte order, so its magic number has the same value as a little-endian file's
+                if (magic === BIGWIG_MAGIC_LTH) {
                     this.type = "bigwig"
-                } else if (magic === BIGBED_MAGIC_HTL) {
+                } else if (magic === BIGBED_MAGIC_LTH) {
                     this.type = "bigbed"
                 } else {
                     // TODO -- error, unknown file type  or BE
@@ -602,9 +601,9 @@ function zoomLevelForScale(bpPerPixel, zoomLevelHeaders) {
 }
 
 
-async function decodeWigData(data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, windowFunction, littleEndian) {
+async function decodeWigData(data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, windowFunction) {
 
-    const binaryParser = new BinaryParser(data, littleEndian)
+    const binaryParser = new BinaryParser(data, this.littleEndian)
     const chromId = binaryParser.getInt()
     const blockStart = binaryParser.getInt()
     let chromStart = blockStart
@@ -677,9 +676,9 @@ function getBedDataDecoder() {
     }
 }
 
-async function decodeZoomData(data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, windowFunction, littleEndian) {
+async function decodeZoomData(data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, windowFunction) {
 
-    const binaryParser = new BinaryParser(data, littleEndian)
+    const binaryParser = new BinaryParser(data, this.littleEndian)
     const minSize = 8 * 4  // Minimum # of bytes required for a zoom record
 
 
