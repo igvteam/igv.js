@@ -57,4 +57,24 @@ suite("test bbChromTree", function () {
 
     })
 
+    /**
+     * Test a tree with more than one level and names whose byte order, which the tree is sorted by, differs from
+     * their locale order.  Written by bedGraphToBigWig -blockSize=4, which puts 4 names in each leaf and numbers the
+     * chromosomes in byte order.
+     */
+    test("Name lookup - multi-level tree", async function () {
+
+        this.timeout(10000)
+
+        const url = "test/data/bb/chromTreeByteOrder.bw"
+        const bbChromTree = new ChromTree(url, {}, 344)
+        await bbChromTree.init()
+        assert.equal(bbChromTree.getItemCount(), 8)
+
+        const chrNames = ["Scaffold_1", "Scaffold_2", "chr1", "chr10", "chr1_KZ114834v1_alt", "chr2", "contig_1", "contig_2"]
+        for (let id = 0; id < chrNames.length; id++) {
+            assert.equal(await bbChromTree.getIdForName(chrNames[id]), id, chrNames[id])
+        }
+    })
+
 })

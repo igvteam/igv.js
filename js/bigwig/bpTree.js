@@ -83,9 +83,10 @@ export default class BPTree {
                 // Read and discard the first key.
                 let childOffset = node.items[0].offset
 
+                // Keys are sorted by byte value (strcmp), not by locale, so compare by character code
                 for (let i = 1; i < node.items.length; i++) {
                     const key = node.items[i].key
-                    if (term.localeCompare(key) < 0) {
+                    if (term < key) {
                         break
                     }
                     childOffset = node.items[i].offset
