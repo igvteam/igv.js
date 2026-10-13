@@ -97,4 +97,30 @@ suite("testBigWig", function () {
         assert.equal(zoomLevelHeaders.length, 0)
     })
 
+    /**
+     * Test an uncompressed bigwig (uncompressBuffSize = 0) with several data blocks in the query range.  Written by
+     * bedGraphToBigWig -unc -itemsPerSlot=2 -blockSize=4 from 20 intervals chr1:i*100-(i*100+50) with value i+1, so
+     * there are 2 items per data block and up to 2 records per zoom block.
+     */
+    test("bigwig - uncompressed", async function () {
+
+        this.timeout(10000)
+
+        const url = "test/data/bb/uncompressed.bw"
+        const chr = "chr1"
+        const bwReader = new BWReader({url: url})
+
+        const features = await bwReader.readFeatures(chr, 0, chr, 2000, undefined, "none")
+        assert.equal(features.length, 20)
+        for (let i = 0; i < 20; i++) {
+            assert.equal(features[i].start, i * 100)
+            assert.equal(features[i].end, i * 100 + 50)
+            assert.equal(features[i].value, i + 1)
+        }
+
+        // 800 bp zoom level, 3 records in 2 blocks
+        const zoomFeatures = await bwReader.readFeatures(chr, 0, chr, 2000, 1000, "mean")
+        assert.deepEqual(zoomFeatures.map(f => [f.start, f.end, f.value]), [[0, 800, 4.5], [800, 1600, 12.5], [1600, 2400, 18.5]])
+    })
+
 })
