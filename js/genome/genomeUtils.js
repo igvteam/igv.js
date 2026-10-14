@@ -1,7 +1,7 @@
-import {igvxhr, StringUtils} from "../../node_modules/igv-utils/src/index.js"
+import {igvxhr, StringUtils, FileUtils} from "../../node_modules/igv-utils/src/index.js"
 import {convertToHubURL} from "../ucsc/ucscUtils.js"
 import {loadHubGenomeConfig} from "../ucsc/hub/hub.js"
-import {genomeLoadError} from "../util/loadFailure.js"
+import {genomeLoadError, LoadError} from "../util/loadFailure.js"
 
 const DEFAULT_GENOMES_URL = "https://igv.org/genomes/genomes3.json"
 const BACKUP_GENOMES_URL = "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/genomes/web/genomes.json"
@@ -55,7 +55,33 @@ const GenomeUtils = {
         return 'all' === chr.toLowerCase()
     },
 
-    // Expand a genome id to a reference object, if needed
+    /**
+     * Whether a genome string names a genome definition file (a json file holding a reference object, as in the
+     * genome list) rather than a genome id.
+     */
+    isGenomeURL: function (string) {
+        return StringUtils.isString(string) && "json" === FileUtils.getExtension(string)
+    },
+
+    /**
+     * Load a genome definition file: a json file holding a reference object.  A file that cannot be read or parsed
+     * fails the load with an error for the user.
+     */
+    loadGenomeURL: async function (url) {
+        let reference
+        try {
+            reference = await igvxhr.loadJson(url)
+        } catch (e) {
+            throw genomeLoadError(undefined, new LoadError('genome', url, e))
+        }
+        if (Array.isArray(reference)) {
+            const cause = new Error("it holds a list of genomes, not a single genome definition")
+            throw genomeLoadError(undefined, new LoadError('genome', url, cause))
+        }
+        return reference
+    },
+
+    // Expand a genome id, or the url of a genome definition file, to a reference object, if needed
     expandReference: async function (idOrConfig) {
 
         // idOrConfig might be a json string?  I'm actually not sure how this arises.
@@ -78,6 +104,10 @@ const GenomeUtils = {
         }
 
         if (genomeID) {
+            // A genome id never ends in .json, so such a string is the url of a genome definition file
+            if (GenomeUtils.isGenomeURL(genomeID)) {
+                return GenomeUtils.loadGenomeURL(genomeID)
+            }
             const knownGenomes = GenomeUtils.KNOWN_GENOMES
             let reference = knownGenomes[genomeID]
             if (!reference) {

@@ -157,13 +157,14 @@ function extractQuery(config) {
                     // IGV desktop style index parameter
                     names = value.split(',')
                 } else if ('genome' === key) {
-                    if ((value.startsWith("https://") || value.startsWith("http://")) && !value.endsWith(".json")) {
+                    if ((value.startsWith("https://") || value.startsWith("http://")) && !GenomeUtils.isGenomeURL(value)) {
                         // IGV desktop compatibility -- assuming url to fasta
                         config['reference'] = {
                             fastaURL: value,
                             indexURL: value + ".fai"
                         }
                     } else {
+                        // A genome id, or the url of a genome definition (json) file, see GenomeUtils.expandReference
                         config[key] = value
                         config['reference'] = undefined
                     }

@@ -891,6 +891,9 @@ class Browser {
             const isHubGenome = idOrConfig.hubURL || (idOrConfig.url && StringUtils.isString(idOrConfig.url) && idOrConfig.url.endsWith("/hub.txt"))
             if (isHubGenome) {
                 genomeConfig = await this.#loadHubGenomeConfig(idOrConfig.hubURL || idOrConfig.url, idOrConfig.id || idOrConfig.name)
+            } else if (GenomeUtils.isGenomeURL(idOrConfig.url)) {
+                // The url of a genome definition (json) file
+                genomeConfig = await GenomeUtils.loadGenomeURL(idOrConfig.url)
             } else if (StringUtils.isString(idOrConfig) || !(idOrConfig.url || idOrConfig.fastaURL || idOrConfig.twoBitURL || idOrConfig.gbkURL)) {
                 // Either an ID, a json string, or an object missing required properties.
                 genomeConfig = await GenomeUtils.expandReference(idOrConfig)

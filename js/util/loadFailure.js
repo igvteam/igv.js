@@ -109,6 +109,7 @@ const partNames = {
     chromSizes: "chromosome sizes file",
     genbank: "GenBank file",
     hub: "assembly hub file",
+    genome: "genome file",
     session: "session file",
     track: "file",
     trackConfig: "track configuration",
@@ -159,12 +160,17 @@ function describeFailure(subject, phrase, resource, hint) {
 /**
  * The error loading a genome fails with.  Its message is for the user: the genome, then what went wrong.  A LoadError
  * says which part could not be read; any other error (an invalid file, a missing locus, a bug) is given by its message.
+ * A genome definition file is the genome, so what happened to it is said once: "The genome file could not be
+ * reached."
  *
  * @param genomeName  The genome's id or name, if known
  * @param error  The error the load failed with
  * @returns {Error}  With the error as its cause
  */
 function genomeLoadError(genomeName, error) {
+    if (error instanceof LoadError && error.kind === 'genome') {
+        return new Error(error.describeAs("The genome file"), {cause: error})
+    }
     return failedLoadError(genomeName ? `Genome ${genomeName} could not be loaded` : "The genome could not be loaded", error)
 }
 
