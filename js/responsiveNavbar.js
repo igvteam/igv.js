@@ -188,9 +188,10 @@ class ResponsiveNavbar {
     }
 
     updateGenome(genome) {
-        let genomeLabel = (genome.id && genome.id.length < 20
-            ? genome.id
-            : `${genome.id.substring(0, 8)}...${genome.id.substring(genome.id.length - 8)}`);
+        const id = genome.id || ''
+        let genomeLabel = (id.length < 20
+            ? id
+            : `${id.substring(0, 8)}...${id.substring(id.length - 8)}`);
 
         // Update genome label text
         this.currentGenome.textContent = genomeLabel;

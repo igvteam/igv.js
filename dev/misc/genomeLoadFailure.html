@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="https://igv.org/web/img/favicon.ico">
+    <title>Genome load failure</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 20px;
+        }
+        #status {
+            white-space: pre-wrap;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background: #f7f7f7;
+            margin-bottom: 10px;
+        }
+        button {
+            margin-right: 8px;
+        }
+    </style>
+</head>
+
+<body>
+
+<h2>Browser whose initial genome fails to load</h2>
+
+<p>
+    The browser below is created with a genome whose sequence URL does not exist. <code>igv.createBrowser</code>
+    rejects, but the browser is kept, with an empty genome, and is attached to the error as <code>error.browser</code>.
+    Use the buttons to recover.
+</p>
+
+<div id="status">Creating browser…</div>
+
+<p>
+    <button id="loadGenome">browser.loadGenome("hg38")</button>
+    <button id="loadSession">browser.loadSession(hg19 session)</button>
+    <button id="loadTrack">browser.loadTrack(...) (fails until a genome is loaded)</button>
+    <button id="toJSON">browser.toJSON() to console</button>
+</p>
+
+<div id="igvDiv"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js"
+
+    const status = document.getElementById("status")
+    const log = message => {
+        status.textContent = message
+        console.log(message)
+    }
+
+    let browser
+    try {
+        browser = await igv.createBrowser(document.getElementById("igvDiv"), {
+            reference: {
+                id: "broken",
+                name: "A genome that does not exist",
+                fastaURL: "https://igv.org/genomes/does-not-exist.fa",
+                indexURL: "https://igv.org/genomes/does-not-exist.fa.fai"
+            },
+            locus: "chr1:1-1000"
+        })
+        log("Unexpected: the browser loaded")
+    } catch (error) {
+        browser = error.browser
+        log(`createBrowser rejected, as expected:\n${error.message}\n\nerror.browser ${browser ? "is set" : "is NOT set"}, ` +
+            `genome.isEmpty = ${browser?.genome?.isEmpty}`)
+    }
+
+    const run = async (label, fn) => {
+        try {
+            const result = await fn()
+            log(`${label}: ok${result !== undefined ? `\n${JSON.stringify(result, null, 1).slice(0, 400)}` : ""}`)
+        } catch (error) {
+            console.error(error)
+            log(`${label} failed:\n${error.message}`)
+        }
+    }
+
+    document.getElementById("loadGenome").onclick = () => run('loadGenome("hg38")', () => browser.loadGenome("hg38"))
+
+    // The session names its reference: a session without one inherits the browser's configured reference, which is
+    // the one that failed (see setDefaults in loadSessionObject)
+    document.getElementById("loadSession").onclick = () => run("loadSession", () => browser.loadSession({
+        reference: {
+            id: "hg19",
+            name: "Human (hg19)",
+            twoBitURL: "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/bigZips/hg19.2bit",
+            chromSizesURL: "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/bigZips/hg19.chrom.sizes",
+            cytobandURL: "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/cytoBandIdeo.txt.gz"
+        },
+        locus: "chr8:128,747,267-128,754,546",
+        tracks: [{
+            url: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/bam/csi/gstt1_sample.bam",
+            indexURL: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/bam/csi/gstt1_sample.bam.csi",
+            name: "GSTT1 sample"
+        }]
+    }))
+
+    document.getElementById("loadTrack").onclick = () => run("loadTrack", () => browser.loadTrack({
+        url: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/bam/csi/gstt1_sample.bam",
+        indexURL: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/bam/csi/gstt1_sample.bam.csi"
+    }))
+
+    document.getElementById("toJSON").onclick = () => run("toJSON", () => browser.toJSON())
+
+</script>
+
+</body>
+</html>

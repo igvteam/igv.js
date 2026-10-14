@@ -279,4 +279,23 @@ suite("testGenome", function () {
         assert.deepEqual(requests, ["chr2", "chr3", "chr1"])
     })
 
+    test("an empty genome answers every query with nothing", async function () {
+
+        const genome = Genome.empty()
+
+        assert.isTrue(genome.isEmpty)
+        assert.isString(genome.id)   // The navbar shows it
+        assert.equal(genome.chromosomes.size, 0)
+        assert.isFalse(genome.showWholeGenomeView())
+        assert.isUndefined(genome.wgChromosomeNames)
+        assert.isUndefined(genome.initialLocus)
+        assert.isUndefined(genome.getChromosome("chr1"))
+        assert.isUndefined(await genome.loadChromosome("chr1"))
+        assert.isUndefined(await genome.getAliasRecord("chr1"))
+        assert.isUndefined(await genome.getSequence("chr1", 0, 10))
+        assert.equal(genome.getChromosomeName("chr1"), "chr1")
+        assert.equal(genome.getChromosomeDisplayName("chr1"), "chr1")
+        assert.equal(genome.loadFailures.length, 0)
+    })
+
 })

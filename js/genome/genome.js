@@ -51,6 +51,33 @@ class Genome {
         return genome
     }
 
+    /**
+     * A genome with no sequence and no chromosomes, for a browser that has no genome: one created without a genome,
+     * or whose genome failed to load.  It answers every query with nothing (no chromosome, no sequence, no alias),
+     * so the navbar, the locus search, and loadGenome work on such a browser without checking for a genome; code
+     * that needs a real genome can check isEmpty.  A browser leaves this state by loading a genome or session.
+     */
+    static empty() {
+        const genome = new Genome({id: "", name: "", description: "No genome loaded", wholeGenomeView: false})
+        genome.isEmpty = true
+        genome.sequence = {
+            async getSequenceRecord() {
+                return undefined
+            },
+            async getSequence() {
+                return undefined
+            },
+            getFirstChromosomeName() {
+                return undefined
+            }
+        }
+        genome.chromosomes = new Map()
+        genome.chromosomeNames = []
+        genome.wholeGenomeView = false
+        genome.loadChromosome = async () => undefined   // Genome.loadChromosome would cache a miss per name
+        return genome
+    }
+
     constructor(config, browser) {
         this.config = config
         this.browser = browser

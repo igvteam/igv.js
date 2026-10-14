@@ -18,7 +18,7 @@ import {searchFeatures, searchWebService} from "./searchFeatures.js"
  */
 async function search(browser, string) {
 
-    if (undefined === string || '' === string.trim()) {
+    if (undefined === string || '' === string.trim() || browser.genome?.isEmpty) {
         return
     }
 
@@ -82,6 +82,9 @@ async function search(browser, string) {
         // Force load chromosome here (a side effect, but neccessary to do this in an async function so it's available)
         if (locusObject) {
             chromosome = chromosome || await browser.genome.loadChromosome(locusObject.chr)
+            if (!chromosome) {
+                return undefined   // A feature on a chromosome the genome does not have (or no genome at all)
+            }
             locusObject.chr = chromosome.name    // Replace possible alias with canonical name
             if (locusObject.start === undefined && locusObject.end === undefined) {
                 locusObject.start = 0

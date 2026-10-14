@@ -51,7 +51,11 @@ async function createBrowser(parentDiv, config) {
     const browser = new Browser(config, parentDiv)
     allBrowsers.push(browser)
 
-    // A load that rejects leaves nothing behind: no browser in the page, none in the list
+    // A load that rejects still leaves a usable browser: in the page, in the list, and on the error as
+    // error.browser, so the caller can report the failure and load another genome or session into it.  If the
+    // failure came before a genome was set (the session file, or the genome itself) the browser gets an empty
+    // genome, see Genome.empty; a failure after that leaves the genome in place.  A caller that would rather
+    // start over with another createBrowser in the same div must remove this one first (removeBrowser).
     try {
         const sessionURL = config.sessionURL || config.session || config.hubURL
         if (sessionURL) {
@@ -62,7 +66,17 @@ async function createBrowser(parentDiv, config) {
             await browser.loadSessionObject(config)
         }
     } catch (error) {
-        removeBrowser(browser)
+        try {
+            if (!browser.genome) {
+                browser.initializeWithoutGenome()
+            }
+            browser.navbar.navbarDidResize()
+            if (error instanceof Object) {
+                error.browser = browser
+            }
+        } catch (e) {
+            console.error(e)   // The load error is the one to report
+        }
         throw error
     }
 

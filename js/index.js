@@ -3,7 +3,7 @@
 import MenuUtils from "./ui/menuUtils.js"
 import DataRangeDialog from "./ui/components/dataRangeDialog.js"
 import IGVGraphics from "./igv-canvas.js"
-import {createBrowser, createTrack, removeAllBrowsers, removeBrowser, visibilityChange} from './igv-create.js'
+import {createBrowser, createTrack, getAllBrowsers, removeAllBrowsers, removeBrowser, visibilityChange} from './igv-create.js'
 import version from "./version.js"
 import * as TrackUtils from "./util/trackUtils.js"
 import {igvxhr} from "../node_modules/igv-utils/src/index.js"
@@ -43,6 +43,7 @@ export default {
     createBrowser,
     removeBrowser,
     removeAllBrowsers,
+    getAllBrowsers,
     visibilityChange,
     setGoogleOauthToken,
     setOauthToken,

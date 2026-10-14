@@ -472,68 +472,15 @@ class Browser {
             this.sampleNameViewportWidth = session.sampleNameViewportWidth
         }
 
-        // Track gear column
-        if (this.config.gearColumnPosition === 'left') {
-            const gearcolumn = createColumn(this.columnContainer, 'igv-gear-menu-column')
-            if (false === this.config.showGearColumn) {
-                gearcolumn.style.width = '0px'  // Don't use display none, need element to attach menu
-            }
-        }
-
-        // axis column
-        const axisColumn = createColumn(this.columnContainer, 'igv-axis-column')
-        if (false === this.config.showAxis) {
-            axisColumn.style.display = 'none'
-        }
-        if (this.config.axisWidth !== undefined) {
-            axisColumn.style.width = this.config.axisWidth + 'px'
-        }
-
-        // sample info column
-        createColumn(this.columnContainer, 'igv-sample-info-column')
-
-        // SampleName column
-        createColumn(this.columnContainer, 'igv-sample-name-column')
-
-        // Track scrollbar column
-        createColumn(this.columnContainer, 'igv-scrollbar-column')
-
-        // Track drag/reorder column
-        const dragColumn = createColumn(this.columnContainer, 'igv-track-drag-column')
-        if (false === this.config.showTrackDragHandles) {
-            dragColumn.style.display = 'none'
-        }
-
-        // Track gear column
-        if (this.config.gearColumnPosition !== 'left') {
-            const gearcolumn = createColumn(this.columnContainer, 'igv-gear-menu-column')
-            if (false === this.config.showGearColumn) {
-                gearcolumn.style.width = '0px'
-            }
-        }
+        this.#createColumns()
 
         if (!genome) {
             console.warn("No genome or reference object specified")
+            this.#setEmptyGenome()
             return
         }
 
         await this.loadReference(genomeConfig, genomeConfig.locus || session.locus, genome)
-
-        this.centerLineList = this.createCenterLineList(this.columnContainer)
-
-        // Create ideogram and ruler track.  Really this belongs in browser initialization, but creation is
-        // deferred because ideogram and ruler are treated as "tracks", and tracks require a reference frame
-        if (false !== session.showIdeogram) {
-            const track = new IdeogramTrack(this)
-            const trackView = new TrackView(this, this.columnContainer, track)
-            this.trackViews.push(trackView)
-        }
-
-        if (false !== session.showRuler) {
-            const track = new RulerTrack(this)
-            const trackView = new TrackView(this, this.columnContainer, track)
-            this.trackViews.push(trackView)
-        }
 
         if (session.qtlSelections) {
             this.qtlSelections = QTLSelections.fromJSON(session.qtlSelections)
@@ -680,6 +627,118 @@ class Browser {
     }
 
     /**
+     * Create the fixed columns of the column container, in order: gear (if on the left), axis, sample info, sample
+     * name, scrollbar, drag handles, gear.  The locus columns are inserted between sample name and scrollbar as
+     * reference frames are created.
+     */
+    #createColumns() {
+
+        // Track gear column
+        if (this.config.gearColumnPosition === 'left') {
+            const gearcolumn = createColumn(this.columnContainer, 'igv-gear-menu-column')
+            if (false === this.config.showGearColumn) {
+                gearcolumn.style.width = '0px'  // Don't use display none, need element to attach menu
+            }
+        }
+
+        // axis column
+        const axisColumn = createColumn(this.columnContainer, 'igv-axis-column')
+        if (false === this.config.showAxis) {
+            axisColumn.style.display = 'none'
+        }
+        if (this.config.axisWidth !== undefined) {
+            axisColumn.style.width = this.config.axisWidth + 'px'
+        }
+
+        // sample info column
+        createColumn(this.columnContainer, 'igv-sample-info-column')
+
+        // SampleName column
+        createColumn(this.columnContainer, 'igv-sample-name-column')
+
+        // Track scrollbar column
+        createColumn(this.columnContainer, 'igv-scrollbar-column')
+
+        // Track drag/reorder column
+        const dragColumn = createColumn(this.columnContainer, 'igv-track-drag-column')
+        if (false === this.config.showTrackDragHandles) {
+            dragColumn.style.display = 'none'
+        }
+
+        // Track gear column
+        if (this.config.gearColumnPosition !== 'left') {
+            const gearcolumn = createColumn(this.columnContainer, 'igv-gear-menu-column')
+            if (false === this.config.showGearColumn) {
+                gearcolumn.style.width = '0px'
+            }
+        }
+    }
+
+    /**
+     * Give the browser an empty genome (Genome.empty), for a browser that has none: created without a genome, or
+     * whose genome failed to load.  The navbar shows no genome and no chromosomes; loadGenome and loadSession work
+     * from here.
+     */
+    #setEmptyGenome() {
+        if (this.genome) {
+            this.genome.onLoadFailure = undefined   // A failure of the genome being replaced is no longer of interest
+        }
+        this.genome = Genome.empty()
+        this.referenceFrameList = undefined   // No genome, no loci
+        this.navbar.updateGenome(this.genome)
+        this.centerLineList = []
+        this.stopSpinner()   // Shown until the first tracks load, which won't happen without a genome
+    }
+
+    /**
+     * Put a browser that has no genome into a usable state: the fixed columns, no tracks, and an empty genome.
+     * Called by createBrowser when the initial load fails before a genome is set, so the caller gets a browser it
+     * can load another genome or session into, rather than nothing.  Not for a browser that has a genome: a load
+     * that fails leaves that genome in place.
+     */
+    initializeWithoutGenome() {
+        this.cleanHouseForSession()
+        this.#createColumns()
+        this.#setEmptyGenome()
+    }
+
+    /**
+     * Fail, with a message for the user, if the browser has no genome (see Genome.empty): tracks and regions of
+     * interest need one, and would be discarded by the genome load that must come first.
+     *
+     * @param what  What was to be loaded, for the message
+     */
+    #requireGenome(what) {
+        if (!this.genome || this.genome.isEmpty) {
+            throw new Error(`No genome is loaded. Load a genome before loading ${what}.`)
+        }
+    }
+
+    /**
+     * Create the ideogram and ruler track views, if the browser has none yet and they are not turned off.  They
+     * are tracks, so they need a reference frame, and are created when the first genome is loaded, when the browser
+     * has no other tracks.  A genome change keeps them (see removeAllTracks), so this is a no-op then.
+     */
+    #createIdeogramAndRuler() {
+
+        if (!this.referenceFrameList) {
+            return   // No locus could be set, so there is nothing to show them in
+        }
+
+        const has = id => this.trackViews.some(trackView => trackView.track.id === id)
+
+        if (false !== this.config.showIdeogram && !has('ideogram')) {
+            const track = new IdeogramTrack(this)
+            this.trackViews.push(new TrackView(this, this.columnContainer, track))
+        }
+
+        if (false !== this.config.showRuler && !has('ruler')) {
+            const track = new RulerTrack(this)
+            this.trackViews.push(new TrackView(this, this.columnContainer, track))
+        }
+    }
+
+    /**
      * Load a reference genome object.  This includes the sequence, and optional cytoband, but no tracks.  This method
      * is used by loadGenome and loadSession.
      *
@@ -737,6 +796,9 @@ class Browser {
                 }
             }
         }
+
+        // The first genome of a browser: the ideogram and ruler can be created now there is a reference frame
+        this.#createIdeogramAndRuler()
 
         if (genomeChange) {
 
@@ -949,6 +1011,8 @@ class Browser {
      */
     async loadTrackList(configList) {
 
+        this.#requireGenome("tracks")
+
         const results = await this.#settleTrackList(configList)
 
         const failure = results.find(({status}) => status === 'rejected')
@@ -1116,6 +1180,7 @@ class Browser {
      * @returns {Promise<void>}
      */
     async loadROI(config) {
+        this.#requireGenome("regions of interest")
         return this.roiManager.loadROI(config, this.genome)
     }
 
@@ -1449,6 +1514,10 @@ class Browser {
     }
 
     async layoutChange() {
+
+        if (!this.referenceFrameList) {
+            return   // No genome, so nothing is laid out
+        }
 
         const status = this.referenceFrameList.find(referenceFrame => referenceFrame.bpPerPixel < 0)
 
@@ -1989,6 +2058,11 @@ class Browser {
 
         if (this.sampleNameViewportWidth) {
             json['sampleNameViewportWidth'] = this.sampleNameViewportWidth
+        }
+
+        // A browser with no genome has no reference, locus, or tracks to save
+        if (!this.genome || this.genome.isEmpty) {
+            return json
         }
 
         json["reference"] = this.genome.toJSON()
