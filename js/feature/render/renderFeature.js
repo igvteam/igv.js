@@ -155,7 +155,7 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
                             const leftExon = i > 0 && feature.exons[i - 1].readingFrame !== undefined ? feature.exons[i - 1] : undefined
                             const riteExon = i < feature.exons.length - 1 && feature.exons[i + 1].readingFrame !== undefined ? feature.exons[i + 1] : undefined
 
-                            renderAminoAcidSequence.call(this, ctx, feature.strand, leftExon, exon, riteExon, bpStart, options.bpPerPixel, py, h, options.sequenceInterval)
+                            renderAminoAcidSequence.call(this, ctx, feature.strand, leftExon, exon, riteExon, bpStart, options.bpPerPixel, py, h, options.sequenceInterval, options.axis)
                         }
                     }
 
@@ -184,7 +184,7 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
     }
 }
 
-function renderAminoAcidSequence(ctx, strand, leftExon, exon, riteExon, bpStart, bpPerPixel, y, height, sequenceInterval) {
+function renderAminoAcidSequence(ctx, strand, leftExon, exon, riteExon, bpStart, bpPerPixel, y, height, sequenceInterval, axis) {
 
     const aaColors =
         [
@@ -199,6 +199,11 @@ function renderAminoAcidSequence(ctx, strand, leftExon, exon, riteExon, bpStart,
 
         if ('STOP' === aminoAcidLetter) {
             aminoAcidLetter = '*'
+        }
+
+        // Pre-flip about the letter's center for juicebox's y-axis transpose, as for feature labels
+        if ('y' === axis) {
+            IGVGraphics.labelTransformWithContext(ctx, xs + width / 2)
         }
 
         const aminoAcidLetterWidth = ctx.measureText(aminoAcidLetter).width

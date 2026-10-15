@@ -1,6 +1,7 @@
 import "./utils/mockObjects.js"
 import {assert} from 'chai'
 import {renderFeature} from "../js/feature/render/renderFeature.js"
+import SequenceInterval from "../js/genome/sequenceInterval.js"
 
 suite("testRenderFeature", function () {
 
@@ -52,6 +53,38 @@ suite("testRenderFeature", function () {
         assert.equal(label.scaleX, -1)
         assert.equal(label.x, 200)
         assert.equal(label.textAlign, "center")
+    })
+
+    // ATG TAA at 10 pixels per bp: "M" spans pixels 0-30 and "*" (stop) spans 30-60. Each 6-pixel-wide letter is
+    // centered in its codon, so on an x track it is anchored at its left edge, 12 and 42, and on a y track it is
+    // flipped about its center, 15 and 45, which puts the anchor at its right edge, 18 and 48.
+    const codingFeature = {
+        chr: "chr1", start: 0, end: 6, strand: "+", name: "CDS1", row: 0,
+        exons: [{start: 0, end: 6, readingFrame: 0}]
+    }
+
+    function aminoAcidsDrawnWith(axis) {
+        const ctx = new RecordingContext()
+        const bpPerPixel = 0.1
+        const options = Object.assign(drawOptions(axis), {
+            bpPerPixel,
+            drawLabel: false,
+            sequenceInterval: new SequenceInterval("chr1", 0, 6, "ATGTAA")
+        })
+        renderFeature.call(track, codingFeature, 0, bpPerPixel, 100, ctx, options)
+        return ctx.texts
+    }
+
+    test("amino acids are drawn upright with no axis", function () {
+        const [m, stop] = aminoAcidsDrawnWith(undefined)
+        assert.deepEqual([m.text, m.scaleX, m.x], ["M", 1, 12])
+        assert.deepEqual([stop.text, stop.scaleX, stop.x], ["*", 1, 42])
+    })
+
+    test("amino acids are mirrored about their centers on a y-axis track", function () {
+        const [m, stop] = aminoAcidsDrawnWith("y")
+        assert.deepEqual([m.text, m.scaleX, m.x], ["M", -1, 18])
+        assert.deepEqual([stop.text, stop.scaleX, stop.x], ["*", -1, 48])
     })
 })
 
