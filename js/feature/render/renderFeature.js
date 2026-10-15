@@ -389,6 +389,12 @@ function renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, referen
                 labelY - textMetrics.actualBoundingBoxAscent - 1,
                 textMetrics.width + 2,
                 textMetrics.actualBoundingBoxAscent + textMetrics.actualBoundingBoxDescent + 2)
+
+            // juicebox transposes y-axis tiles, which mirrors text. Pre-flip the label about its center
+            // so it reads correctly, and stays on its feature, once transposed.
+            if ('y' === options.axis) {
+                IGVGraphics.labelTransformWithContext(ctx, centerX)
+            }
             IGVGraphics.fillText(ctx, name, centerX, labelY, geneFontStyle, transform)
 
         }
