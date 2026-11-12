@@ -1,7 +1,31 @@
 import {IGVColor} from "../../node_modules/igv-utils/src/index.js"
 import {createImplicitExons, findUTRs} from "../feature/exonUtils.js"
 
+const BED_FIELD_NAMES = [["chrom"], ["chromStart"], ["chromEnd"], ["name"], ["score"], ["strand"], ["thickStart"],
+    ["thickEnd"], ["reserved", "itemRgb", "color"], ["blockCount"], ["blockSizes"], ["chromStarts", "blockStarts"]]
+
+/**
+ * Infer the number of standard BED fields for files that do not record it (definedFieldCount == 0 in the header,
+ * as written by early versions of bedToBigBed).  With autosql, count the leading fields with standard BED names.
+ * Without autosql all fields are assumed to be standard.
+ */
+function inferDefinedFieldCount(fieldCount, autoSql) {
+    if (!autoSql) {
+        return Math.max(3, Math.min(fieldCount, BED_FIELD_NAMES.length))
+    }
+    let n = 3
+    while (n < autoSql.fields.length && n < BED_FIELD_NAMES.length && n < fieldCount) {
+        const name = autoSql.fields[n].name.toLowerCase()
+        if (!BED_FIELD_NAMES[n].some(bedName => bedName.toLowerCase() === name)) break
+        n++
+    }
+    return n
+}
+
 function getDecoder(definedFieldCount, fieldCount, autoSql, format) {
+    if (definedFieldCount === 0) {
+        definedFieldCount = inferDefinedFieldCount(fieldCount, autoSql)
+    }
 //biggenepred
     if ("biginteract" === format || (autoSql && ('chromatinInteract' === autoSql.table || 'interact' === autoSql.table))) {
         return decodeInteract

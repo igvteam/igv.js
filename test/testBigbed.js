@@ -201,6 +201,30 @@ table chromatinInteract
     })
 
     /**
+     * File written by an early version of bedToBigBed, definedFieldCount == 0 in the header.  See
+     * https://github.com/igvteam/igv/issues/1903
+     */
+    test("no definedFieldCount", async function () {
+
+        this.timeout(20000)
+
+        const url = "https://ftp.ebi.ac.uk/pub/databases/ensembl/encode/integration_data_jan2011/byDataType/openchrom/jan2011/fdrPeaks/wgEncodeDukeDnase8988T.fdr01peaks.hg19.bb",
+            chr = "chr21",
+            start = 9437000,
+            end = 9438000
+
+        const bwReader = new BWReader({url: url, format: "bigbed"})
+        await bwReader.loadHeader()
+        const features = await bwReader.readFeatures(chr, start, chr, end)
+        assert.ok(features.length > 0)
+        assert.equal(features[0].score, 370)
+        assert.strictEqual(typeof features[0].score, "number")
+        assert.equal(features[0].signalValue, "10")
+        assert.notProperty(features[0], "chrom")
+
+    })
+
+    /**
      * Test parsing a aliasBbURL file from the T2T hub
      */
     test("test whole genome with alias", async function () {
