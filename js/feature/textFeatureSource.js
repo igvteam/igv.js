@@ -280,6 +280,8 @@ class TextFeatureSource extends BaseFeatureSource {
             } catch (error) {
                 console.error(error)
                 this.featureMap = new Map()   // Don't retry the load on every search
+            } finally {
+                this.searchLoad = undefined
             }
         }
         if (this.featureMap) {

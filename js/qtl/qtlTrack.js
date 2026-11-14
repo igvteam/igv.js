@@ -291,7 +291,14 @@ class QTLTrack extends TrackBase {
 
                             // possibly Expand region to bring phenotype in view
                             const canonicalChrName = this.browser.genome.getChromosomeName(chr)
-                            const features = await Promise.all([...genes].map(term => searchFeatures(this.browser, term)))
+                            // Look up a few genes at a time: all at once would queue requests in the browser
+                            // long enough to time out.  A lookup that fails only loses that gene.
+                            const terms = [...genes]
+                            const features = []
+                            for (let i = 0; i < terms.length; i += 4) {
+                                const lookups = terms.slice(i, i + 4).map(term => searchFeatures(this.browser, term).catch(() => undefined))
+                                features.push(...await Promise.all(lookups))
+                            }
                             for (let feature of features) {
                                 if (feature) {
                                     if (canonicalChrName === this.browser.genome.getChromosomeName(feature.chr)) {

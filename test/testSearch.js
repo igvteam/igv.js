@@ -197,49 +197,62 @@ suite("testSearch", function () {
         assert.isUndefined(await searchWebService(browser, "nosuchgene", searchConfig))
     })
 
-    test("webservice that cannot be reached is rested", async function () {
+    test("webservice that times out is rested", async function () {
 
-        const searchConfig = {type: "plain", url: "https://unreachable.example/a?name=$FEATURE$", coords: 0}
+        const searchConfig = {type: "plain", url: "https://slow.example/a?name=$FEATURE$", coords: 0, timeout: 100}
         const loadString = igvxhr.loadString
+        const now = Date.now
+        let time = 1000
+        Date.now = () => time
         const requests = []
         igvxhr.loadString = async (url, options) => {
             requests.push({url, options})
+            time += options.timeout    // The request takes the whole timeout
             const error = new Error("timeout")
             error.status = 0
             throw error
         }
-        try {
-            let failed = false
+        const fails = async (term, config = searchConfig) => {
             try {
-                await searchWebService(browser, "gene1", searchConfig)
+                await searchWebService(browser, term, config)
+                return false
             } catch (e) {
-                failed = true
+                return true
             }
-            assert.isTrue(failed)
+        }
+        try {
+            assert.isTrue(await fails("gene1"))
+            assert.equal(requests[0].options.timeout, 100)
 
-            // The service is not tried again for other terms, they are reported as not found
-            assert.isUndefined(await searchWebService(browser, "gene2", searchConfig))
-            assert.isUndefined(await searchWebService(browser, "gene1", searchConfig))
+            // The service is not tried again, for this or other terms, and says so by failing
+            assert.isTrue(await fails("gene2"))
+            assert.isTrue(await fails("gene1"))
             assert.equal(requests.length, 1)
 
-            // A timeout is always set, the configured one if there is one
-            assert.isAbove(requests[0].options.timeout, 0)
-            await searchWebService(browser, "gene1", {...searchConfig, url: "https://unreachable.example/b?name=$FEATURE$", timeout: 123}).catch(() => {})
-            assert.equal(requests[1].options.timeout, 123)
+            // ... until some time has passed
+            time += 10 * 60 * 1000
+            assert.isTrue(await fails("gene2"))
+            assert.equal(requests.length, 2)
+
+            // A timeout is set when the config has none
+            await fails("gene1", {type: "plain", url: "https://slow.example/b?name=$FEATURE$", coords: 0})
+            assert.isAbove(requests[2].options.timeout, 0)
         } finally {
             igvxhr.loadString = loadString
+            Date.now = now
         }
     })
 
     test("webservice error for one term does not rest the service", async function () {
 
+        // Status 0 that comes back at once is not a timeout, it could be an error response blocked by CORS
         const searchConfig = {type: "plain", url: "https://failing.example/?name=$FEATURE$", coords: 0}
         const loadString = igvxhr.loadString
         let requests = 0
         igvxhr.loadString = async () => {
             requests++
-            const error = new Error("bad request")
-            error.status = 400
+            const error = new Error("blocked")
+            error.status = 0
             throw error
         }
         try {

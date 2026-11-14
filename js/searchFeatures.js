@@ -19,9 +19,9 @@ const DEFAULT_SEARCH_CONFIG = {
 const MAX_NOT_FOUND = 100
 const notFoundURLs = new Set()
 
-// Services that timed out or could not be reached are skipped for a while, so a search of several terms, or a
-// repeated search, waits for one timeout and not one per lookup.  Keyed by the service url template; the value is
-// the time (ms) at which the service will be tried again.
+// A service that timed out is skipped for a while, so a search of several terms, or a repeated search, waits for
+// one timeout and not one per lookup.  Keyed by the service url template; the value is the time (ms) at which the
+// service will be tried again.
 const SERVICE_RETRY_INTERVAL = 60000
 const unavailableServices = new Map()
 
@@ -84,18 +84,22 @@ async function searchWebService(browser, locus, searchConfig) {
     const retryTime = unavailableServices.get(searchConfig.url)
     if (retryTime !== undefined) {
         if (Date.now() < retryTime) {
-            return undefined
+            // Thrown, not returned as a miss, so the caller can tell "not searched" from "not found"
+            throw new Error("the service timed out and is not being tried for now")
         }
         unavailableServices.delete(searchConfig.url)
     }
 
+    const timeout = searchConfig.timeout ?? DEFAULT_TIMEOUT
+    const requestTime = Date.now()
     let result
     try {
-        result = await igvxhr.loadString(path, {timeout: searchConfig.timeout ?? DEFAULT_TIMEOUT})
+        result = await igvxhr.loadString(path, {timeout})
     } catch (error) {
-        // Status 0 is a timeout or a service that could not be reached.  That says nothing about this term, so
-        // the miss is not remembered, the service is rested instead.
-        if (error && error.status === 0) {
+        // A timeout says nothing about this term, so the miss is not remembered, the service is rested instead.
+        // A timeout has status 0, but so does a response blocked by CORS, which can be the answer for a single
+        // term; the time taken tells them apart.
+        if (error && error.status === 0 && Date.now() - requestTime >= timeout) {
             unavailableServices.set(searchConfig.url, Date.now() + SERVICE_RETRY_INTERVAL)
         }
         throw error
