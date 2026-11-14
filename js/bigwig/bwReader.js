@@ -283,11 +283,20 @@ class BWReader {
         if (this._searchTrees === undefined &&
             this.header.extraIndexOffsets &&
             this.header.extraIndexOffsets.length > 0) {
-            this._searchTrees = []
-            for (let offset of this.header.extraIndexOffsets) {
-                const type = undefined
-                const bpTree = await BPTree.loadBpTree(this.path, this.config, offset, type, this.indexLoader)
-                this._searchTrees.push(bpTree)
+            // One load, shared by searches that arrive while it is in progress.  The trees are not exposed until
+            // all are loaded, a partial list would read as "not found".
+            this._searchTreesLoad ??= (async () => {
+                const searchTrees = []
+                for (let offset of this.header.extraIndexOffsets) {
+                    const type = undefined
+                    searchTrees.push(await BPTree.loadBpTree(this.path, this.config, offset, type, this.indexLoader))
+                }
+                this._searchTrees = searchTrees
+            })()
+            try {
+                await this._searchTreesLoad
+            } finally {
+                this._searchTreesLoad = undefined
             }
         }
         return this._searchTrees

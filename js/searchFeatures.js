@@ -98,8 +98,8 @@ async function searchWebService(browser, locus, searchConfig) {
     } catch (error) {
         // A timeout says nothing about this term, so the miss is not remembered, the service is rested instead.
         // A timeout has status 0, but so does a response blocked by CORS, which can be the answer for a single
-        // term; the time taken tells them apart.
-        if (error && error.status === 0 && Date.now() - requestTime >= timeout) {
+        // term; the time taken tells them apart.  A timeout of 0 means no timeout.
+        if (error && error.status === 0 && timeout > 0 && Date.now() - requestTime >= timeout) {
             unavailableServices.set(searchConfig.url, Date.now() + SERVICE_RETRY_INTERVAL)
         }
         throw error

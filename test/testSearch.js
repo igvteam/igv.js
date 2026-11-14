@@ -259,6 +259,12 @@ suite("testSearch", function () {
             await searchWebService(browser, "gene1", searchConfig).catch(() => {})
             await searchWebService(browser, "gene2", searchConfig).catch(() => {})
             assert.equal(requests, 2)
+
+            // Nor with the timeout turned off
+            const noTimeout = {...searchConfig, url: "https://failing.example/b?name=$FEATURE$", timeout: 0}
+            await searchWebService(browser, "gene1", noTimeout).catch(() => {})
+            await searchWebService(browser, "gene2", noTimeout).catch(() => {})
+            assert.equal(requests, 4)
         } finally {
             igvxhr.loadString = loadString
         }
