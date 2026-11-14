@@ -249,6 +249,7 @@ class TrackViewport extends Viewport {
 
             // Expand the requested range so we can pan a bit without reloading.  But not beyond chromosome bounds
             const chromosome = await this.browser.genome.loadChromosome(chr)
+            if (this.disposed) return undefined
             const chrLength = chromosome ? chromosome.bpLength : Number.MAX_SAFE_INTEGER
             const pixelWidth = this.viewportElement.clientWidth// * 3;
             const bpWidth = pixelWidth * referenceFrame.bpPerPixel
@@ -266,6 +267,7 @@ class TrackViewport extends Viewport {
             const fromCache = this.featureCache &&
                 this.featureCache.containsRange(chr, bpStart, bpEnd, referenceFrame.bpPerPixel, this.windowFunction)
             const features = await this.getFeatures(track, chr, bpStart, bpEnd, referenceFrame.bpPerPixel)
+            if (this.disposed) return undefined   // The viewport was replaced or removed during the load
             if (features) {
                 let roiFeatures = []
                 if (track.roiSets && track.roiSets.length > 0) {
@@ -273,6 +275,7 @@ class TrackViewport extends Viewport {
                         const features = await roiSet.getFeatures(chr, bpStart, bpEnd, referenceFrame.bpPerPixel)
                         roiFeatures.push({track: roiSet, features})
                     }
+                    if (this.disposed) return undefined
                 }
 
                 const mr = track && (track.resolutionAware)   //
@@ -293,14 +296,16 @@ class TrackViewport extends Viewport {
             }
         } catch (error) {
             // Track might have been removed during load
-            if (this.trackView && this.trackView.disposed !== true) {
+            if (!this.disposed && this.trackView && this.trackView.disposed !== true) {
                 this.showMessage(NOT_LOADED_MESSAGE)
                 this.browser.alert.present(trackLoadError(this.track.config, error))
                 console.error(error)
             }
         } finally {
-            this.loading = false
-            this.stopSpinner()
+            if (!this.disposed) {
+                this.loading = false
+                this.stopSpinner()
+            }
         }
     }
 
@@ -852,8 +857,10 @@ class TrackViewport extends Viewport {
 
                         popupTimerID = setTimeout(async () => {
 
-                                const content = await this.handleTrackClick(event)
-                                if (content) {
+                                // The viewport may be replaced (a locus change) before the timer fires or the
+                                // popup data arrives
+                                const content = this.disposed ? undefined : await this.handleTrackClick(event)
+                                if (content && !this.disposed) {
 
                                     if (false === event.shiftKey) {
 
@@ -1029,6 +1036,9 @@ class TrackViewport extends Viewport {
 
         const features = 'annotation' === track.type ? track.clickedFeatures(clickState) : undefined
         const dataList = await track.popupData(clickState, features)
+        if (this.disposed) {
+            return
+        }
 
         const popupClickHandlerResult = this.browser.fireEvent('trackclick', [track, dataList, clickState.genomicLocation, features])
 

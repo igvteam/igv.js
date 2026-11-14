@@ -49,6 +49,7 @@ class IdeogramViewport extends TrackViewport {
     async loadFeatures() {
         const chr = this.referenceFrame.chr;
         const features = await  this.referenceFrame.genome.getCytobands(chr)
+        if (this.disposed) return undefined   // The viewport was replaced or removed during the load
         this.featureCache.set(chr, features)
         return features
     }

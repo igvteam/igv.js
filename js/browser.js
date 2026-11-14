@@ -609,9 +609,12 @@ class Browser {
 
     cleanHouseForSession() {
 
+        this.clearViewportInteraction()
+
         for (let trackView of this.trackViews) {
-            // empty axis column, viewport columns, sampleName column, scroll column, drag column, gear column
-            trackView.removeDOMFromColumnContainer()
+            // empty axis column, viewport columns, sampleName column, scroll column, drag column, gear column, and
+            // release the tracks, which may have listeners on the browser
+            trackView.dispose()
         }
 
         // discard all columns   TODO - why do we do this?
@@ -1544,8 +1547,6 @@ class Browser {
 
     async updateViews() {
 
-        const trackViews = this.trackViews
-
         this.updateLocusSearchWidget()
 
         for (const {bpPerPixel, chr, start} of this.referenceFrameList) {
@@ -1553,6 +1554,8 @@ class Browser {
                 await this.genome.getSequence(chr, start, start + 1)
             }
         }
+
+        const trackViews = this.trackViews
 
         for (const centerGuide of this.centerLineList) {
             centerGuide.repaint()
@@ -1584,9 +1587,18 @@ class Browser {
             // Calculate group autoscale dataRange
             if (Object.entries(groupAutoscaleTrackViews).length > 0) {
                 for (const [group, trackViews] of Object.entries(groupAutoscaleTrackViews)) {
+                    const viewports = trackViews.map(trackView => [...trackView.viewports])
                     const inViewFeatures = await Promise.all(trackViews.map(trackView => trackView.getInViewFeatures()))
+
+                    // Viewports replaced during the load (a locus change, a closed multi-locus panel) make this
+                    // update obsolete.  Stop, so a range computed without their features is not applied; the
+                    // change that replaced them does its own update.  A track removed during the load is
+                    // different: nothing updates the rest of its group, so carry on without it.
+                    if (trackViews.some((trackView, i) => !trackView.disposed && viewports[i].some(viewport => viewport.disposed))) return
+
                     const dataRange = doAutoscale(inViewFeatures.flat())
                     for (const trackView of trackViews) {
+                        if (trackView.disposed) continue   // Track was removed during the load
                         trackView.track.dataRange = Object.assign({}, dataRange)
                         trackView.track.autoscale = false
                     }
@@ -1907,9 +1919,10 @@ class Browser {
             // create reference frame list based on search loci
             this.referenceFrameList = createReferenceFrameList(loci, this.genome, this.flanking, this.minimumBases(), this.calculateViewportWidth(loci.length), this.isSoftclipped())
 
-            // discard track viewport DOM elements
+            // discard track viewports
+            this.clearViewportInteraction()
             for (let trackView of this.trackViews) {
-                trackView.removeViewportsFromColumnContainer()
+                trackView.disposeViewports()
             }
 
             // discard ONLY viewport columns
@@ -2387,6 +2400,16 @@ class Browser {
     }
 
 
+    /**
+     * Forget a pan or vertical scroll that is in progress.  Called before viewports are disposed of, as the
+     * interaction state refers to one of them.
+     */
+    clearViewportInteraction() {
+        this.dragObject = undefined
+        this.isScrolling = false
+        this.vpMouseDown = undefined
+    }
+
     cancelTrackPan() {
 
         const dragObject = this.dragObject
@@ -2397,6 +2420,11 @@ class Browser {
         if (dragObject && dragObject.viewport.referenceFrame.start !== dragObject.start) {
             this.updateViews()
             this.fireEvent('trackdragend', [dragObject.viewport])
+            for (const trackView of this.trackViews) {
+                if (typeof trackView.track.trackDragEnd === 'function') {
+                    trackView.track.trackDragEnd()
+                }
+            }
         }
     }
 
@@ -2563,8 +2591,7 @@ class Browser {
     }
 
     removeKeyboardHandler() {
-        console.log("Remove handler")
-        document.addEventListener("keyup", this.keyUpHandler)
+        document.removeEventListener("keyup", this.keyUpHandler)
     }
 
 

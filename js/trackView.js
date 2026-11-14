@@ -439,10 +439,16 @@ class TrackView {
         // Trigger viewport to load features needed to cover current genomic range
         // NOTE: these must be loaded synchronously, do not user Promise.all,  not all file readers are thread safe
         for (let viewport of viewportsToReload) {
+            if (viewport.disposed) break
             await viewport.loadFeatures()
         }
 
         if (this.disposed) return   // Track was removed during load
+
+        // Viewports replaced during the load (a locus change, a closed multi-locus panel) make this update
+        // obsolete.  Stop, so the track is not autoscaled without their features; the change that replaced them
+        // does its own update.
+        if (visibleViewports.some(viewport => viewport.disposed)) return
 
         // Special case for variant tracks in multilocus view.  The # of rows to allocate to the variant (site)
         // section depends on data from all the views.  We only need to adjust this however if any data was loaded
@@ -560,6 +566,8 @@ class TrackView {
         let allFeatures = []
         const visibleViewports = this.viewports.filter(viewport => viewport.isVisible())
         for (let vp of visibleViewports) {
+
+            if (vp.disposed) continue   // Replaced during an earlier viewport's load
 
             const referenceFrame = vp.referenceFrame
             const {chr, start, bpPerPixel} = vp.referenceFrame
@@ -740,7 +748,7 @@ class TrackView {
             this.innerScroll.removeEventListener('mousedown', this.boundTrackScrollMouseDownHandler)
             this.browser.columnContainer.removeEventListener('mouseup', this.boundColumnContainerMouseUpHandler)
             this.browser.columnContainer.removeEventListener('mousemove', this.boundColumnContainerMouseMoveHandler)
-            this.browser.columnContainer.removeEventListener('mouseleave', this.boundColumnContainerMouseMoveHandler)
+            this.browser.columnContainer.removeEventListener('mouseleave', this.boundColumnContainerMouseUpHandler)
         }
     }
 
@@ -843,7 +851,7 @@ class TrackView {
         } else {
             this.dragHandle.removeEventListener('mousedown', this.boundTrackDragMouseDownHandler)
             document.removeEventListener('mouseup', this.boundDocumentTrackDragMouseUpHandler)
-            this.dragHandle.removeEventListener('mouseup', this.boundTrackDragMouseEnterHandler)
+            this.dragHandle.removeEventListener('mouseenter', this.boundTrackDragMouseEnterHandler)
             this.dragHandle.removeEventListener('mouseout', this.boundTrackDragMouseOutHandler)
         }
 
@@ -858,37 +866,15 @@ class TrackView {
 
     }
 
-    removeDOMFromColumnContainer() {
-
-        // Axis
-        this.axis.remove()
-        this.removeViewportsFromColumnContainer()
-
-        // Sample Info Viewport
-        this.sampleInfoViewport.dispose()
-
-        // SampleName Viewport
-        this.sampleNameViewport.dispose()
-
-        // empty trackScrollbar Column
-        this.removeTrackScrollMouseHandlers()
-        this.outerScroll.remove()
-
-        // empty trackDrag Column
-        this.removeTrackDragMouseHandlers()
-        this.dragHandle.remove()
-
-        // empty trackGear Column
-        this.removeTrackGearMouseHandlers()
-        this.gearContainer.remove()
-
-    }
-
-    removeViewportsFromColumnContainer() {
-        // Track Viewports
+    /**
+     * Discard the viewports.  They are disposed of, not just removed from the DOM, to release their listeners on
+     * the document and browser, which would otherwise keep them and their features alive.
+     */
+    disposeViewports() {
         for (let viewport of this.viewports) {
-            viewport.viewportElement.remove()
+            viewport.dispose()
         }
+        this.viewports = []
     }
 
     /**
@@ -898,9 +884,7 @@ class TrackView {
 
         this.axis.remove()
 
-        for (let viewport of this.viewports) {
-            viewport.dispose()
-        }
+        this.disposeViewports()
 
         this.sampleInfoViewport.dispose()
 
