@@ -602,7 +602,7 @@ class VariantTrack extends TrackBase {
                 //const stringInfoKeys = Object.keys(this.header.INFO).filter(key => this.header.INFO[key].Type === "String")
                 const colorByItems = this._colorByItems
                 menuItems.push('<hr/>')
-                const element = createElementWithString('<div class="igv-track-menu-category igv-track-menu-border-top">')
+                const element = createElementWithString('<div class="igv-track-menu-category igv-track-menu-border-top"></div>')
                 element.textContent = 'Color by:'
                 menuItems.push({name: undefined, element, click: undefined, init: undefined})
                 for (let key of colorByItems.keys()) {
@@ -650,7 +650,7 @@ class VariantTrack extends TrackBase {
         menuItems.push('<hr/>')
 
         if (this.getSampleCount() > 0) {
-            menuItems.push({ element: createElementWithString('<div class="igv-track-menu-border-top">') })
+            menuItems.push({ element: createElementWithString('<div class="igv-track-menu-border-top"></div>') })
             menuItems.push({
                 element: createCheckbox("Show Genotypes", this.showGenotypes),
                 click: function showGenotypesHandler() {
@@ -663,7 +663,7 @@ class VariantTrack extends TrackBase {
             })
         }
 
-        menuItems.push({element: createElementWithString('<div class="igv-track-menu-border-top">')})
+        menuItems.push({element: createElementWithString('<div class="igv-track-menu-border-top"></div>')})
         for (let displayMode of ["COLLAPSED", "SQUISHED", "EXPANDED"]) {
             var lut =
                 {

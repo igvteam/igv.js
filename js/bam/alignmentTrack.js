@@ -705,7 +705,7 @@ class AlignmentTrack extends TrackBase {
 
         // Color by items //////////////////////////////////////////////////
         menuItems.push('<hr/>')
-        let element = createElementWithString('<div class="igv-track-menu-category">')
+        let element = createElementWithString('<div class="igv-track-menu-category"></div>')
         element.innerText = 'Color by:'
         menuItems.push({name: undefined, element, click: undefined, init: undefined})
 

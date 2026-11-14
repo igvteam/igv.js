@@ -18,6 +18,14 @@ async function createBrowser(parentDiv, config) {
 
     if (undefined === config) config = {}
 
+    // In a page served as XHTML (application/xhtml+xml) the browser parses html strings as XML and throws on
+    // markup that is fine as html ("<br>", "&nbsp;"), which breaks track loading, menus, and popups.
+    const contentType = parentDiv?.ownerDocument?.contentType
+    if (contentType && contentType !== 'text/html') {
+        console.warn(`igv.js requires an HTML document, but this page is "${contentType}". ` +
+            `Tracks, menus, and popups may fail. Serve the page as text/html.`)
+    }
+
     // Initialize pre-defined genomes.  The genome list is shared among all browser instances
     if (!GenomeUtils.KNOWN_GENOMES) {
         await GenomeUtils.initializeGenomes(config)
