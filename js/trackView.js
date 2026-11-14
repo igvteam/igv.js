@@ -420,7 +420,7 @@ class TrackView {
 
         if (!(this.browser && this.browser.referenceFrameList)) return
 
-        let visibleViewports = this.viewports.filter(viewport => viewport.isVisible() && viewport.checkZoomIn())
+        const visibleViewports = this.viewports.filter(viewport => viewport.isVisible() && viewport.checkZoomIn())
 
         // Shift viewports left/right to current genomic state (pans canvas)
         visibleViewports.forEach(viewport => viewport.shift())
@@ -439,13 +439,16 @@ class TrackView {
         // Trigger viewport to load features needed to cover current genomic range
         // NOTE: these must be loaded synchronously, do not user Promise.all,  not all file readers are thread safe
         for (let viewport of viewportsToReload) {
+            if (viewport.disposed) break
             await viewport.loadFeatures()
         }
 
         if (this.disposed) return   // Track was removed during load
 
-        // Viewports replaced during the load (a locus change, a closed multi-locus panel) have been disposed of
-        visibleViewports = visibleViewports.filter(viewport => !viewport.disposed)
+        // Viewports replaced during the load (a locus change, a closed multi-locus panel) make this update
+        // obsolete.  Stop, so the track is not autoscaled without their features; the change that replaced them
+        // does its own update.
+        if (visibleViewports.some(viewport => viewport.disposed)) return
 
         // Special case for variant tracks in multilocus view.  The # of rows to allocate to the variant (site)
         // section depends on data from all the views.  We only need to adjust this however if any data was loaded

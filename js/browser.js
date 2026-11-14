@@ -609,6 +609,8 @@ class Browser {
 
     cleanHouseForSession() {
 
+        this.clearViewportInteraction()
+
         for (let trackView of this.trackViews) {
             // empty axis column, viewport columns, sampleName column, scroll column, drag column, gear column, and
             // release the tracks, which may have listeners on the browser
@@ -1585,7 +1587,15 @@ class Browser {
             // Calculate group autoscale dataRange
             if (Object.entries(groupAutoscaleTrackViews).length > 0) {
                 for (const [group, trackViews] of Object.entries(groupAutoscaleTrackViews)) {
+                    const viewports = trackViews.map(trackView => [...trackView.viewports])
                     const inViewFeatures = await Promise.all(trackViews.map(trackView => trackView.getInViewFeatures()))
+
+                    // Viewports replaced during the load (a locus change, a closed multi-locus panel) make this
+                    // update obsolete.  Stop, so a range computed without their features is not applied; the
+                    // change that replaced them does its own update.  A track removed during the load is
+                    // different: nothing updates the rest of its group, so carry on without it.
+                    if (trackViews.some((trackView, i) => !trackView.disposed && viewports[i].some(viewport => viewport.disposed))) return
+
                     const dataRange = doAutoscale(inViewFeatures.flat())
                     for (const trackView of trackViews) {
                         if (trackView.disposed) continue   // Track was removed during the load
@@ -1910,6 +1920,7 @@ class Browser {
             this.referenceFrameList = createReferenceFrameList(loci, this.genome, this.flanking, this.minimumBases(), this.calculateViewportWidth(loci.length), this.isSoftclipped())
 
             // discard track viewports
+            this.clearViewportInteraction()
             for (let trackView of this.trackViews) {
                 trackView.disposeViewports()
             }
@@ -2388,6 +2399,16 @@ class Browser {
         }
     }
 
+
+    /**
+     * Forget a pan or vertical scroll that is in progress.  Called before viewports are disposed of, as the
+     * interaction state refers to one of them.
+     */
+    clearViewportInteraction() {
+        this.dragObject = undefined
+        this.isScrolling = false
+        this.vpMouseDown = undefined
+    }
 
     cancelTrackPan() {
 
