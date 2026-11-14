@@ -224,6 +224,16 @@ table chromatinInteract
 
     })
 
+    test("concurrent first searches", async function () {
+
+        // Searches that start before the search index is loaded must all wait for it
+        const bbReader = new BWReader({url: "test/data/bb/GCA_009914755.4.chromAlias.bb", format: "bigbed"}, createGenome())
+        const features = await Promise.all(["CP068277.2", "chr1", "CP068276.2", "chr2"].map(term => bbReader.search(term)))
+        for (const feature of features) {
+            assert.ok(feature)
+        }
+    })
+
     /**
      * Test parsing a aliasBbURL file from the T2T hub
      */

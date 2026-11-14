@@ -508,6 +508,7 @@ interface CreateOptExtras {
 
     search?: {
         url: string;
+        timeout?: number;
         coords?: 0 | 1;
         chromosomeField?: string;
         startField?: string;

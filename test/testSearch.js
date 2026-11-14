@@ -5,6 +5,7 @@ import {createGenome} from "./utils/MockGenome.js"
 import search, {parseLocusString, searchWebService} from "../js/search.js"
 import FeatureSource from "../js/feature/featureSource.js"
 import {searchFeatures} from "../js/searchFeatures.js"
+import {igvxhr} from "../node_modules/igv-utils/src/index.js"
 
 const genome = createGenome()
 
@@ -194,6 +195,79 @@ suite("testSearch", function () {
 
         // Response file is gone, a second request would throw.  Expect the cached miss instead.
         assert.isUndefined(await searchWebService(browser, "nosuchgene", searchConfig))
+    })
+
+    test("webservice that times out is rested", async function () {
+
+        const searchConfig = {type: "plain", url: "https://slow.example/a?name=$FEATURE$", coords: 0, timeout: 100}
+        const loadString = igvxhr.loadString
+        const now = Date.now
+        let time = 1000
+        Date.now = () => time
+        const requests = []
+        igvxhr.loadString = async (url, options) => {
+            requests.push({url, options})
+            time += options.timeout    // The request takes the whole timeout
+            const error = new Error("timeout")
+            error.status = 0
+            throw error
+        }
+        const fails = async (term, config = searchConfig) => {
+            try {
+                await searchWebService(browser, term, config)
+                return false
+            } catch (e) {
+                return true
+            }
+        }
+        try {
+            assert.isTrue(await fails("gene1"))
+            assert.equal(requests[0].options.timeout, 100)
+
+            // The service is not tried again, for this or other terms, and says so by failing
+            assert.isTrue(await fails("gene2"))
+            assert.isTrue(await fails("gene1"))
+            assert.equal(requests.length, 1)
+
+            // ... until some time has passed
+            time += 10 * 60 * 1000
+            assert.isTrue(await fails("gene2"))
+            assert.equal(requests.length, 2)
+
+            // A timeout is set when the config has none
+            await fails("gene1", {type: "plain", url: "https://slow.example/b?name=$FEATURE$", coords: 0})
+            assert.isAbove(requests[2].options.timeout, 0)
+        } finally {
+            igvxhr.loadString = loadString
+            Date.now = now
+        }
+    })
+
+    test("webservice error for one term does not rest the service", async function () {
+
+        // Status 0 that comes back at once is not a timeout, it could be an error response blocked by CORS
+        const searchConfig = {type: "plain", url: "https://failing.example/?name=$FEATURE$", coords: 0}
+        const loadString = igvxhr.loadString
+        let requests = 0
+        igvxhr.loadString = async () => {
+            requests++
+            const error = new Error("blocked")
+            error.status = 0
+            throw error
+        }
+        try {
+            await searchWebService(browser, "gene1", searchConfig).catch(() => {})
+            await searchWebService(browser, "gene2", searchConfig).catch(() => {})
+            assert.equal(requests, 2)
+
+            // Nor with the timeout turned off
+            const noTimeout = {...searchConfig, url: "https://failing.example/b?name=$FEATURE$", timeout: 0}
+            await searchWebService(browser, "gene1", noTimeout).catch(() => {})
+            await searchWebService(browser, "gene2", noTimeout).catch(() => {})
+            assert.equal(requests, 4)
+        } finally {
+            igvxhr.loadString = loadString
+        }
     })
 
     test("search non-indexed searchable track, genome without chromosomeNames", async function () {
