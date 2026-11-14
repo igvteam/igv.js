@@ -549,6 +549,10 @@ class FeatureTrack extends TrackBase {
      * Called when the track is removed.  Do any needed cleanup here
      */
     dispose() {
+        if (this.trackDragEndHandler) {
+            this.browser.off('trackdragend', this.trackDragEndHandler)
+            this.trackDragEndHandler = undefined
+        }
         this.trackView = undefined
     }
 }
@@ -567,6 +571,7 @@ function monitorTrackDrag(track) {
     }
 
     if (track.browser.on) {
+        track.trackDragEndHandler = onDragEnd   // Removed in dispose
         track.browser.on('trackdragend', onDragEnd)
     }
 

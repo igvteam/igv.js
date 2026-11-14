@@ -744,7 +744,7 @@ class TrackView {
             this.innerScroll.removeEventListener('mousedown', this.boundTrackScrollMouseDownHandler)
             this.browser.columnContainer.removeEventListener('mouseup', this.boundColumnContainerMouseUpHandler)
             this.browser.columnContainer.removeEventListener('mousemove', this.boundColumnContainerMouseMoveHandler)
-            this.browser.columnContainer.removeEventListener('mouseleave', this.boundColumnContainerMouseMoveHandler)
+            this.browser.columnContainer.removeEventListener('mouseleave', this.boundColumnContainerMouseUpHandler)
         }
     }
 
@@ -859,32 +859,6 @@ class TrackView {
         } else {
             this.gear.removeEventListener('click', this.boundTrackGearClickHandler)
         }
-
-    }
-
-    removeDOMFromColumnContainer() {
-
-        // Axis
-        this.axis.remove()
-        this.removeViewportsFromColumnContainer()
-
-        // Sample Info Viewport
-        this.sampleInfoViewport.dispose()
-
-        // SampleName Viewport
-        this.sampleNameViewport.dispose()
-
-        // empty trackScrollbar Column
-        this.removeTrackScrollMouseHandlers()
-        this.outerScroll.remove()
-
-        // empty trackDrag Column
-        this.removeTrackDragMouseHandlers()
-        this.dragHandle.remove()
-
-        // empty trackGear Column
-        this.removeTrackGearMouseHandlers()
-        this.gearContainer.remove()
 
     }
 

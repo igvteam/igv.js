@@ -610,8 +610,9 @@ class Browser {
     cleanHouseForSession() {
 
         for (let trackView of this.trackViews) {
-            // empty axis column, viewport columns, sampleName column, scroll column, drag column, gear column
-            trackView.removeDOMFromColumnContainer()
+            // empty axis column, viewport columns, sampleName column, scroll column, drag column, gear column, and
+            // release the tracks, which may have listeners on the browser
+            trackView.dispose()
         }
 
         // discard all columns   TODO - why do we do this?
