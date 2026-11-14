@@ -274,7 +274,9 @@ class TextFeatureSource extends BaseFeatureSource {
             // Any chromosome will do, the whole file is read.  chromosomeNames is optional, fall back to a loaded chromosome.
             const chr = this.genome.chromosomeNames?.[0] ?? this.genome.chromosomes.keys().next().value
             try {
-                await this.getFeatures({chr, start: 0, end: Number.MAX_SAFE_INTEGER})
+                // One load, shared by searches that arrive while it is in progress
+                this.searchLoad ??= this.getFeatures({chr, start: 0, end: Number.MAX_SAFE_INTEGER})
+                await this.searchLoad
             } catch (error) {
                 console.error(error)
                 this.featureMap = new Map()   // Don't retry the load on every search

@@ -5,6 +5,7 @@ import {createGenome} from "./utils/MockGenome.js"
 import search, {parseLocusString, searchWebService} from "../js/search.js"
 import FeatureSource from "../js/feature/featureSource.js"
 import {searchFeatures} from "../js/searchFeatures.js"
+import {igvxhr} from "../node_modules/igv-utils/src/index.js"
 
 const genome = createGenome()
 
@@ -194,6 +195,60 @@ suite("testSearch", function () {
 
         // Response file is gone, a second request would throw.  Expect the cached miss instead.
         assert.isUndefined(await searchWebService(browser, "nosuchgene", searchConfig))
+    })
+
+    test("webservice that cannot be reached is rested", async function () {
+
+        const searchConfig = {type: "plain", url: "https://unreachable.example/a?name=$FEATURE$", coords: 0}
+        const loadString = igvxhr.loadString
+        const requests = []
+        igvxhr.loadString = async (url, options) => {
+            requests.push({url, options})
+            const error = new Error("timeout")
+            error.status = 0
+            throw error
+        }
+        try {
+            let failed = false
+            try {
+                await searchWebService(browser, "gene1", searchConfig)
+            } catch (e) {
+                failed = true
+            }
+            assert.isTrue(failed)
+
+            // The service is not tried again for other terms, they are reported as not found
+            assert.isUndefined(await searchWebService(browser, "gene2", searchConfig))
+            assert.isUndefined(await searchWebService(browser, "gene1", searchConfig))
+            assert.equal(requests.length, 1)
+
+            // A timeout is always set, the configured one if there is one
+            assert.isAbove(requests[0].options.timeout, 0)
+            await searchWebService(browser, "gene1", {...searchConfig, url: "https://unreachable.example/b?name=$FEATURE$", timeout: 123}).catch(() => {})
+            assert.equal(requests[1].options.timeout, 123)
+        } finally {
+            igvxhr.loadString = loadString
+        }
+    })
+
+    test("webservice error for one term does not rest the service", async function () {
+
+        const searchConfig = {type: "plain", url: "https://failing.example/?name=$FEATURE$", coords: 0}
+        const loadString = igvxhr.loadString
+        let requests = 0
+        igvxhr.loadString = async () => {
+            requests++
+            const error = new Error("bad request")
+            error.status = 400
+            throw error
+        }
+        try {
+            await searchWebService(browser, "gene1", searchConfig).catch(() => {})
+            await searchWebService(browser, "gene2", searchConfig).catch(() => {})
+            assert.equal(requests, 2)
+        } finally {
+            igvxhr.loadString = loadString
+        }
     })
 
     test("search non-indexed searchable track, genome without chromosomeNames", async function () {

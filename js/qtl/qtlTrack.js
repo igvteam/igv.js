@@ -291,8 +291,8 @@ class QTLTrack extends TrackBase {
 
                             // possibly Expand region to bring phenotype in view
                             const canonicalChrName = this.browser.genome.getChromosomeName(chr)
-                            for (let term of genes) {
-                                const feature = await searchFeatures(this.browser, term)
+                            const features = await Promise.all([...genes].map(term => searchFeatures(this.browser, term)))
+                            for (let feature of features) {
                                 if (feature) {
                                     if (canonicalChrName === this.browser.genome.getChromosomeName(feature.chr)) {
                                         start = Math.min(start, feature.start)
