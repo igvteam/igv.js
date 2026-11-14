@@ -266,6 +266,9 @@ class TrackViewport extends Viewport {
             const fromCache = this.featureCache &&
                 this.featureCache.containsRange(chr, bpStart, bpEnd, referenceFrame.bpPerPixel, this.windowFunction)
             const features = await this.getFeatures(track, chr, bpStart, bpEnd, referenceFrame.bpPerPixel)
+            if (!this.trackView) {
+                return undefined   // Viewport was disposed of during the load
+            }
             if (features) {
                 let roiFeatures = []
                 if (track.roiSets && track.roiSets.length > 0) {
