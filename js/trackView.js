@@ -445,8 +445,7 @@ class TrackView {
         if (this.disposed) return   // Track was removed during load
 
         // Viewports replaced during the load (a locus change, a closed multi-locus panel) have been disposed of
-        visibleViewports = visibleViewports.filter(viewport => this.viewports.includes(viewport))
-        if (visibleViewports.length === 0) return
+        visibleViewports = visibleViewports.filter(viewport => !viewport.disposed)
 
         // Special case for variant tracks in multilocus view.  The # of rows to allocate to the variant (site)
         // section depends on data from all the views.  We only need to adjust this however if any data was loaded
@@ -564,6 +563,8 @@ class TrackView {
         let allFeatures = []
         const visibleViewports = this.viewports.filter(viewport => viewport.isVisible())
         for (let vp of visibleViewports) {
+
+            if (vp.disposed) continue   // Replaced during an earlier viewport's load
 
             const referenceFrame = vp.referenceFrame
             const {chr, start, bpPerPixel} = vp.referenceFrame
@@ -847,7 +848,7 @@ class TrackView {
         } else {
             this.dragHandle.removeEventListener('mousedown', this.boundTrackDragMouseDownHandler)
             document.removeEventListener('mouseup', this.boundDocumentTrackDragMouseUpHandler)
-            this.dragHandle.removeEventListener('mouseup', this.boundTrackDragMouseEnterHandler)
+            this.dragHandle.removeEventListener('mouseenter', this.boundTrackDragMouseEnterHandler)
             this.dragHandle.removeEventListener('mouseout', this.boundTrackDragMouseOutHandler)
         }
 
@@ -866,7 +867,7 @@ class TrackView {
      * Discard the viewports.  They are disposed of, not just removed from the DOM, to release their listeners on
      * the document and browser, which would otherwise keep them and their features alive.
      */
-    removeViewportsFromColumnContainer() {
+    disposeViewports() {
         for (let viewport of this.viewports) {
             viewport.dispose()
         }
@@ -880,9 +881,7 @@ class TrackView {
 
         this.axis.remove()
 
-        for (let viewport of this.viewports) {
-            viewport.dispose()
-        }
+        this.disposeViewports()
 
         this.sampleInfoViewport.dispose()
 

@@ -60,8 +60,6 @@ class FeatureTrack extends TrackBase {
         } else {
             this.render = config.render || renderFeature
             this.arrowSpacing = 30
-            // adjust label positions to make sure they're always visible
-            monitorTrackDrag(this)
             this.squishedRowHeight = config.squishedRowHeight || 15
             this.expandedRowHeight = config.expandedRowHeight || 30
             this.height = config.height || this.margin + 2 * this.expandedRowHeight
@@ -546,37 +544,20 @@ class FeatureTrack extends TrackBase {
 
 
     /**
+     * Called by the browser when a pan ends.  Repaint to move feature names whose center went out of view.
+     */
+    trackDragEnd() {
+        if (this.trackView && this.displayMode !== "SQUISHED") {
+            this.trackView.repaintViews()
+        }
+    }
+
+    /**
      * Called when the track is removed.  Do any needed cleanup here
      */
     dispose() {
-        if (this.trackDragEndHandler) {
-            this.browser.off('trackdragend', this.trackDragEndHandler)
-            this.trackDragEndHandler = undefined
-        }
         this.trackView = undefined
     }
 }
-
-/**
- * Monitors track drag events, updates label position to ensure that they're always visible.
- * @param track
- */
-function monitorTrackDrag(track) {
-
-    function onDragEnd() {
-        if (track.trackView && track.displayMode !== "SQUISHED") {
-            // Repaint views to adjust feature name if center is moved out of view
-            track.trackView.repaintViews()
-        }
-    }
-
-    if (track.browser.on) {
-        track.trackDragEndHandler = onDragEnd   // Removed in dispose
-        track.browser.on('trackdragend', onDragEnd)
-    }
-
-
-}
-
 
 export default FeatureTrack

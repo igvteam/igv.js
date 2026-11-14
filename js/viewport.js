@@ -147,6 +147,9 @@ class Viewport {
                 this[key] = undefined;
             }
         }
+
+        // Code that holds a viewport across an await checks this before touching it again
+        this.disposed = true;
     }
 }
 
