@@ -413,98 +413,53 @@ function getFeatureLabelY(featureY, transform) {
     return transform ? featureY + 20 : featureY + 25
 }
 
+/**
+ * Translate the codons split across the edges of an exon.  A split codon with no neighbouring coding exon to
+ * complete it, as at the first or last exon of a feature covering part of a protein, is left untranslated, as is
+ * one with sequence missing for either of its parts.
+ *
+ * @returns {{left: {triplet, aminoAcidLetter}|undefined, rite: {triplet, aminoAcidLetter}|undefined}} the codons
+ * at the left and right edges of the exon
+ */
 function getAminoAcidLetterWithExonGap(strand, phase, phaseExtentStart, phaseExtentEnd, remainder, leftExon, exon, riteExon, sequenceInterval) {
 
-    let ss
-    let ee
-    let stringA
-    let stringB
-    let triplet
+    // Translate a codon split into two parts, given in genomic order
+    const translate = (startA, endA, startB, endB) => {
+        const stringA = sequenceInterval.getSequence(startA, endA)
+        const stringB = sequenceInterval.getSequence(startB, endB)
+        if (!stringA || !stringB) {
+            return undefined
+        }
+        let triplet = stringA + stringB
+        if ('+' !== strand) {
+            triplet = complementSequence(triplet.split('').reverse().join(''))
+        }
+        return {triplet, aminoAcidLetter: translationDict[triplet]}
+    }
 
     const aminoAcidLetters = {left: undefined, rite: undefined}
     if ('+' === strand) {
 
-        if (phase) {
-            stringB = sequenceInterval.getSequence(phaseExtentStart, phaseExtentEnd)
-
-            if (!stringB) {
-                return undefined
-            }
-
-            [ss, ee] = [getCodingEnd(leftExon) - (3 - phase), getCodingEnd(leftExon)]
-            stringA = sequenceInterval.getSequence(ss, ee)
-
-            if (!stringA) {
-                return undefined
-            }
-
-            triplet = stringA + stringB
-            aminoAcidLetters.left = {triplet, aminoAcidLetter: translationDict[triplet]}
+        if (phase && leftExon) {
+            const leftEnd = getCodingEnd(leftExon)
+            aminoAcidLetters.left = translate(leftEnd - (3 - phase), leftEnd, phaseExtentStart, phaseExtentEnd)
         }
 
-        if (remainder) {
-
-            if (!riteExon) {
-                return undefined
-            }
-
-            stringA = sequenceInterval.getSequence(remainder.start, remainder.end)
-
-            if (!stringA) {
-                return undefined
-            }
-
-            const ritePhase = getExonPhase(riteExon)
+        if (remainder && riteExon) {
             const riteStart = getCodingStart(riteExon)
-            stringB = sequenceInterval.getSequence(riteStart, riteStart + ritePhase)
-
-            if (!stringB) {
-                return undefined
-            }
-
-            triplet = stringA + stringB
-            aminoAcidLetters.rite = {triplet, aminoAcidLetter: translationDict[triplet]}
+            aminoAcidLetters.rite = translate(remainder.start, remainder.end, riteStart, riteStart + getExonPhase(riteExon))
         }
 
     } else {
 
-        if (phase) {
-            stringA = sequenceInterval.getSequence(phaseExtentStart, phaseExtentEnd)
-
-            if (!stringA) {
-                return undefined
-            }
-
-            [ss, ee] = [getCodingStart(riteExon), getCodingStart(riteExon) + (3 - phase)]
-            stringB = sequenceInterval.getSequence(ss, ee)
-
-            if (!stringB) {
-                return undefined
-            }
-
-            triplet = stringA + stringB
-            triplet = complementSequence(triplet.split('').reverse().join(''))
-            aminoAcidLetters.rite = {triplet, aminoAcidLetter: translationDict[triplet]}
+        if (phase && riteExon) {
+            const riteStart = getCodingStart(riteExon)
+            aminoAcidLetters.rite = translate(phaseExtentStart, phaseExtentEnd, riteStart, riteStart + (3 - phase))
         }
 
-        if (remainder) {
-            stringB = sequenceInterval.getSequence(remainder.start, remainder.end)
-
-            if (!stringB) {
-                return undefined
-            }
-
-            const leftPhase = getExonPhase(leftExon)
+        if (remainder && leftExon) {
             const leftEnd = getCodingEnd(leftExon)
-            stringA = sequenceInterval.getSequence(leftEnd - leftPhase, leftEnd)
-
-            if (!stringA) {
-                return undefined
-            }
-
-            triplet = stringA + stringB
-            triplet = complementSequence(triplet.split('').reverse().join(''))
-            aminoAcidLetters.left = {triplet, aminoAcidLetter: translationDict[triplet]}
+            aminoAcidLetters.left = translate(leftEnd - getExonPhase(leftExon), leftEnd, remainder.start, remainder.end)
         }
     }
 

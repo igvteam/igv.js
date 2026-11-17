@@ -86,6 +86,57 @@ suite("testRenderFeature", function () {
         assert.deepEqual([m.text, m.scaleX, m.x], ["M", -1, 18])
         assert.deepEqual([stop.text, stop.scaleX, stop.x], ["*", -1, 48])
     })
+
+    // A codon split at an exon edge is completed from the neighbouring exon.  When there is no neighbour, as at the
+    // first or last exon of a feature covering part of a protein, the split codon is skipped (igvteam/igv.js#2127).
+    //                     0         1         2
+    //                     0123456789012345678901234567
+    const splitSequence = "ATGGCTAAAGGTTTTCCCGGGATGTAAC"
+
+    function splitCodonsDrawnWith(strand, exons, sequenceEnd = splitSequence.length) {
+        const ctx = new RecordingContext()
+        const bpPerPixel = 0.1
+        const splitFeature = {
+            chr: "chr1", start: exons[0].start, end: exons[exons.length - 1].end, strand, name: "CDS2", row: 0, exons
+        }
+        const options = Object.assign(drawOptions(undefined), {
+            bpPerPixel,
+            drawLabel: false,
+            sequenceInterval: new SequenceInterval("chr1", 0, sequenceEnd, splitSequence.substring(0, sequenceEnd))
+        })
+        renderFeature.call(track, splitFeature, 0, bpPerPixel, 100, ctx, options)
+        return ctx.texts.map(t => t.text).join("")
+    }
+
+    test("split codon with no neighbouring exon - plus strand", function () {
+        // Trailing split codon, no exon to the right
+        assert.equal(splitCodonsDrawnWith("+", [{start: 0, end: 8, readingFrame: 0}]), "MA")
+        // Leading split codon, no exon to the left
+        assert.equal(splitCodonsDrawnWith("+", [{start: 1, end: 9, readingFrame: 2}]), "G*")
+        // Leading split codon with no exon to the left, trailing one completed from the right exon
+        assert.equal(splitCodonsDrawnWith("+",
+            [{start: 1, end: 8, readingFrame: 2}, {start: 12, end: 19, readingFrame: 2}]), "G*FPN")
+        // Leading split codon completed from the left exon is kept when the trailing one has no exon to the right
+        assert.equal(splitCodonsDrawnWith("+",
+            [{start: 0, end: 8, readingFrame: 0}, {start: 12, end: 18, readingFrame: 2}]), "MANFN")
+    })
+
+    test("split codon with no neighbouring exon - minus strand", function () {
+        // Trailing split codon, no exon to the left
+        assert.equal(splitCodonsDrawnWith("-", [{start: 0, end: 8, readingFrame: 0}]), "LA")
+        // Leading split codon, no exon to the right
+        assert.equal(splitCodonsDrawnWith("-", [{start: 0, end: 8, readingFrame: 2}]), "*P")
+        // Leading split codon completed from the right exon, trailing one with no exon to the left
+        assert.equal(splitCodonsDrawnWith("-",
+            [{start: 0, end: 6, readingFrame: 2}, {start: 12, end: 20, readingFrame: 0}]), "AKPGK")
+    })
+
+    test("split codon with sequence missing on one side keeps the other side", function () {
+        // The loaded sequence ends before the third exon, so the middle exon's trailing split codon can't be
+        // translated.  Its leading one, completed from the first exon, is still drawn.
+        const exons = [{start: 0, end: 8, readingFrame: 0}, {start: 12, end: 18, readingFrame: 2}, {start: 22, end: 28, readingFrame: 2}]
+        assert.equal(splitCodonsDrawnWith("+", exons, 20), "MANFN")
+    })
 })
 
 /**
