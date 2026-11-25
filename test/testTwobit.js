@@ -21,6 +21,20 @@ suite("testTwobit", function () {
     })
 
 
+    // The table places an "R" at chr1:11 (1-based) and a "Y" at chr1:50, replacing an "N" and a "T" respectively
+    test("twobit with ambiguity table", async function () {
+
+        const twobit = new TwobitSequence({
+            twoBitURL: "test/data/twobit/foo.2bit",
+            twoBitAmbiguityURL: "test/data/twobit/foo.ambiguity.tsv"
+        })
+        assert.equal(await twobit.readSequence("chr1", 5, 15), "NNNNNRNNNN")
+        assert.equal(await twobit.readSequence("chr1", 10, 11), "R")
+        assert.equal(await twobit.readSequence("chr1", 5, 10), "NNNNN")   // end is exclusive
+        assert.equal(await twobit.readSequence("chr1", 11, 16), "NNNNN")
+        assert.equal(await twobit.readSequence("chr1", 45, 52), "NNACYCT")
+    })
+
     test("twobit metadata", async function () {
         const url = "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/twobit/GCF_000002655.1.2bit"
         const twobit = new TwobitSequence({twoBitURL: url})

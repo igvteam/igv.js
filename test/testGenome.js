@@ -107,6 +107,22 @@ suite("testGenome", function () {
         assert.include(failure.warning, "may be slow")
     })
 
+    test("a 2bit ambiguity table failure leaves the sequence as read", async function () {
+
+        const genome = await Genome.createGenome({
+            id: "foo",
+            twoBitURL: "test/data/twobit/foo.2bit",
+            twoBitAmbiguityURL: "test/data/twobit/missing.ambiguity.tsv"
+        })
+
+        assert.equal(await genome.getSequence("chr1", 47, 50), "ACT")
+
+        assert.equal(genome.loadFailures.length, 1)
+        const [failure] = genome.loadFailures
+        assert.equal(failure.kind, "twoBitAmbiguity")
+        assert.equal(failure.url, "test/data/twobit/missing.ambiguity.tsv")
+    })
+
     test("an alias bigBed failure falls back to the default aliases, without preload", async function () {
 
         const genome = await Genome.createGenome({

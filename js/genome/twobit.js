@@ -28,6 +28,9 @@ class TwobitSequence {
     metaIndex = new Map()
     chromosomeNames
 
+    // IUPAC ambiguity codes, which the 2bit format cannot represent: Map of sequence name -> Map of 0-based position -> code
+    ambiguityCodes
+
     // Optional parts that failed to load, as {kind, url, message, warning}: left out, and reported by the browser
     loadFailures = []
 
@@ -40,6 +43,46 @@ class TwobitSequence {
      }
 
     async init() {
+        await Promise.all([this._initIndex(), this._loadAmbiguityCodes()])
+    }
+
+    /**
+     * Load the optional table of ambiguity codes: tab delimited sequence name, 1-based position, code.  If it fails
+     * the sequence is left as read from the 2bit file.
+     *
+     * @private
+     */
+    async _loadAmbiguityCodes() {
+        const url = this.config.twoBitAmbiguityURL
+        if (!url) {
+            return
+        }
+        try {
+            const ambiguityCodes = new Map()
+            const data = await igvxhr.loadString(url, buildOptions(this.config))
+            for (const line of data.split(/\r?\n/)) {
+                if (line.startsWith("#") || line.trim().length === 0) continue
+                const tokens = line.split("\t")
+                const position = Number.parseInt(tokens[1]) - 1
+                const code = tokens[2].trim().charAt(0)
+                if (Number.isNaN(position) || !code) {
+                    throw Error(`Invalid line: ${line}`)
+                }
+                if (!ambiguityCodes.has(tokens[0])) {
+                    ambiguityCodes.set(tokens[0], new Map())
+                }
+                ambiguityCodes.get(tokens[0]).set(position, code)
+            }
+            this.ambiguityCodes = ambiguityCodes
+        } catch (error) {
+            console.error(error)
+            this.loadFailures.push(loadFailure('twoBitAmbiguity', url, error,
+                "The table of ambiguity codes for the 2bit sequence could not be loaded, so ambiguous bases in the " +
+                "reference sequence will read \"N\"."))
+        }
+    }
+
+    async _initIndex() {
         let headerEnd
         if(this.bptURL) {
             // The sequence is required: read its header alongside the external index, so a missing or invalid file
@@ -137,6 +180,16 @@ class TwobitSequence {
                     ? maskedByteTo4Bases[byte][subPosition]
                     : byteTo4Bases[byte][subPosition]
 
+            }
+        }
+
+        const codes = this.ambiguityCodes?.get(seqName)
+        if (codes) {
+            for (const [position, code] of codes) {
+                if (position >= regionStart && position < regionEnd) {
+                    const i = position - regionStart
+                    sequenceBases = sequenceBases.slice(0, i) + code + sequenceBases.slice(i + 1)
+                }
             }
         }
         return sequenceBases
