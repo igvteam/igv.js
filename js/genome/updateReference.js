@@ -24,6 +24,7 @@ function updateReference(reference) {
         if (reference.indexURL) delete reference.indexURL
         reference.twoBitURL = updatedReference.twoBitURL
         if (updatedReference.twoBitBptURL) reference.twoBitBptURL = updatedReference.twoBitBptURL
+        if (updatedReference.twoBitAmbiguityURL) reference.twoBitAmbiguityURL = updatedReference.twoBitAmbiguityURL
         if (updatedReference.chromSizesURL) reference.chromSizesURL = updatedReference.chromSizesURL
     }
 }
@@ -43,6 +44,7 @@ const updates = {
     },
     "hg38": {
         "twoBitURL": "https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/hg38.2bit",
+        "twoBitAmbiguityURL": "https://igv.org/genomes/data/hg38/hg38.ambiguity.tsv",
         "chromSizesURL": "https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/hg38.chrom.sizes"
     },
     "hg19": {
