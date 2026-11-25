@@ -420,7 +420,8 @@ class TrackView {
 
         if (!(this.browser && this.browser.referenceFrameList)) return
 
-        let visibleViewports = this.viewports.filter(viewport => viewport.isVisible() && viewport.checkZoomIn())
+        const viewports = this.viewports
+        let visibleViewports = viewports.filter(viewport => viewport.isVisible() && viewport.checkZoomIn())
 
         // Shift viewports left/right to current genomic state (pans canvas)
         visibleViewports.forEach(viewport => viewport.shift())
@@ -438,17 +439,19 @@ class TrackView {
 
         // Trigger viewport to load features needed to cover current genomic range
         // NOTE: these must be loaded synchronously, do not user Promise.all,  not all file readers are thread safe
-        // A locus change during a load replaces the viewports, and disposes of the ones being loaded here
-        const isCurrent = viewport => this.viewports.includes(viewport)
         for (let viewport of viewportsToReload) {
-            if (isCurrent(viewport)) {
+            if (!viewport.disposed) {
                 await viewport.loadFeatures()
             }
         }
 
         if (this.disposed) return   // Track was removed during load
 
-        visibleViewports = visibleViewports.filter(isCurrent)
+        // A locus change during the load replaced the viewports, and started the update that paints the new ones
+        if (this.viewports !== viewports) return
+
+        // A multi-locus panel closed during the load
+        visibleViewports = visibleViewports.filter(viewport => !viewport.disposed)
 
         // Special case for variant tracks in multilocus view.  The # of rows to allocate to the variant (site)
         // section depends on data from all the views.  We only need to adjust this however if any data was loaded
@@ -556,6 +559,7 @@ class TrackView {
 
     /**
      * Return a promise to get all in-view features across all viewports.  Used for group autoscaling.
+     * Resolves to undefined if the viewports are replaced (a locus change) or the track is removed meanwhile.
      */
     async getInViewFeatures() {
 
@@ -564,10 +568,12 @@ class TrackView {
         }
 
         let allFeatures = []
-        const visibleViewports = this.viewports.filter(viewport => viewport.isVisible())
+        const viewports = this.viewports
+        const visibleViewports = viewports.filter(viewport => viewport.isVisible())
         for (let vp of visibleViewports) {
 
-            if (!this.viewports.includes(vp)) continue   // Disposed of by a locus change during a load
+            if (this.disposed || this.viewports !== viewports) return undefined
+            if (vp.disposed) continue   // A multi-locus panel closed during a load
 
             const referenceFrame = vp.referenceFrame
             const {chr, start, bpPerPixel} = vp.referenceFrame
@@ -590,6 +596,7 @@ class TrackView {
                 }
             }
         }
+        if (this.disposed || this.viewports !== viewports) return undefined
         return allFeatures
     }
 
@@ -863,32 +870,6 @@ class TrackView {
         } else {
             this.gear.removeEventListener('click', this.boundTrackGearClickHandler)
         }
-
-    }
-
-    removeDOMFromColumnContainer() {
-
-        // Axis
-        this.axis.remove()
-        this.removeViewportsFromColumnContainer()
-
-        // Sample Info Viewport
-        this.sampleInfoViewport.dispose()
-
-        // SampleName Viewport
-        this.sampleNameViewport.dispose()
-
-        // empty trackScrollbar Column
-        this.removeTrackScrollMouseHandlers()
-        this.outerScroll.remove()
-
-        // empty trackDrag Column
-        this.removeTrackDragMouseHandlers()
-        this.dragHandle.remove()
-
-        // empty trackGear Column
-        this.removeTrackGearMouseHandlers()
-        this.gearContainer.remove()
 
     }
 

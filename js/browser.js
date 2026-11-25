@@ -610,8 +610,8 @@ class Browser {
     cleanHouseForSession() {
 
         for (let trackView of this.trackViews) {
-            // empty axis column, viewport columns, sampleName column, scroll column, drag column, gear column
-            trackView.removeDOMFromColumnContainer()
+            // empties the axis, viewport, sampleInfo, sampleName, scroll, drag and gear columns, and releases the track
+            trackView.dispose()
         }
 
         // discard all columns   TODO - why do we do this?
@@ -1585,6 +1585,9 @@ class Browser {
             if (Object.entries(groupAutoscaleTrackViews).length > 0) {
                 for (const [group, trackViews] of Object.entries(groupAutoscaleTrackViews)) {
                     const inViewFeatures = await Promise.all(trackViews.map(trackView => trackView.getInViewFeatures()))
+                    if (inViewFeatures.includes(undefined)) {
+                        continue   // Superseded by a locus change or a track removal, whose own update sets the range
+                    }
                     const dataRange = doAutoscale(inViewFeatures.flat())
                     for (const trackView of trackViews) {
                         trackView.track.dataRange = Object.assign({}, dataRange)
@@ -2394,7 +2397,11 @@ class Browser {
         this.isScrolling = false
         this.vpMouseDown = undefined
 
-        if (dragObject && dragObject.viewport.referenceFrame.start !== dragObject.start) {
+        if (dragObject && dragObject.viewport.disposed) {
+            // The viewport was replaced during the drag, by a locus change for one.  Views are not updated while
+            // dragging, so the new ones are still to be loaded and painted
+            this.updateViews()
+        } else if (dragObject && dragObject.viewport.referenceFrame.start !== dragObject.start) {
             this.updateViews()
             this.fireEvent('trackdragend', [dragObject.viewport])
         }
@@ -2697,6 +2704,10 @@ handleMouseMove(e) {
     e.preventDefault()
 
     const {x, y} = DOMUtils.pageCoordinates(e)
+
+    if (this.vpMouseDown && this.vpMouseDown.viewport.disposed) {
+        this.cancelTrackPan()   // The viewport was replaced, by a locus change for one, with the mouse down
+    }
 
     if (this.vpMouseDown) {
 
