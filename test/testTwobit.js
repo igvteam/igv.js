@@ -21,6 +21,15 @@ suite("testTwobit", function () {
     })
 
 
+    // A read starting where a block of "N"s ends, the later blocks of "N"s must still be recognized
+    test("twobit read from end of N block", async function () {
+
+        const expectedSequence = "ACTCTATCTATCTATCTATCTATCTTTTTCCCCCCGGGGGGagagagagactctagcatcctcctacctcacNNacCNctTGGACNCcCaGGGatttcNNNcccNNCCNCgN"
+
+        const twobit = new TwobitSequence({twoBitURL: "test/data/twobit/foo.2bit"})
+        assert.equal(await twobit.readSequence("chr1", 47, 159), expectedSequence)
+    })
+
     // The table places an "R" at chr1:11 (1-based), replacing an "N", and a "Y" at chr1:50, which is a "T" and is
     // not replaced
     test("twobit with ambiguity table", async function () {

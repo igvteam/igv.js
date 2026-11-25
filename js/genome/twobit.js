@@ -399,7 +399,7 @@ class TwobitSequence {
         for (let block of blocks) {
             if (block.start > end) {
                 break
-            } else if (block.end < start) {
+            } else if (block.end <= start) {
                 continue
             } else {
                 overlappingBlocks.push(block)
