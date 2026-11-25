@@ -14,13 +14,6 @@ const isString = (x) => {
  */
 function updateReference(reference) {
 
-    // Supply the table of ambiguity codes to any reference with a known id.  Sessions store the expanded reference,
-    // not just the genome id, so a saved reference will not have it.
-    const twoBitAmbiguityURL = updates[reference.id]?.twoBitAmbiguityURL
-    if (twoBitAmbiguityURL && !reference.twoBitAmbiguityURL) {
-        reference.twoBitAmbiguityURL = twoBitAmbiguityURL
-    }
-
     if (!(requiresUpdate(reference) && updates[reference.id])) {
         return
     }
@@ -50,12 +43,10 @@ const updates = {
     },
     "hg38": {
         "twoBitURL": "https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/hg38.2bit",
-        "twoBitAmbiguityURL": "https://igv.org/genomes/data/hg38/hg38.ambiguity.tsv",
         "chromSizesURL": "https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/hg38.chrom.sizes"
     },
     "hg19": {
         "twoBitURL": "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/bigZips/hg19.2bit",
-        "twoBitAmbiguityURL": "https://igv.org/genomes/data/hg19/hg19.ambiguity.tsv",
         "chromSizesURL": "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/bigZips/hg19.chrom.sizes"
     },
     "hg18": {
