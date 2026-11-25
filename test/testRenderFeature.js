@@ -93,7 +93,7 @@ suite("testRenderFeature", function () {
     //                     0123456789012345678901234567
     const splitSequence = "ATGGCTAAAGGTTTTCCCGGGATGTAAC"
 
-    function splitCodonsDrawnWith(strand, exons, sequenceEnd = splitSequence.length) {
+    function drawSplitFeature(strand, exons, sequenceStart = 0, sequenceEnd = splitSequence.length) {
         const ctx = new RecordingContext()
         const bpPerPixel = 0.1
         const splitFeature = {
@@ -102,10 +102,16 @@ suite("testRenderFeature", function () {
         const options = Object.assign(drawOptions(undefined), {
             bpPerPixel,
             drawLabel: false,
-            sequenceInterval: new SequenceInterval("chr1", 0, sequenceEnd, splitSequence.substring(0, sequenceEnd))
+            sequenceInterval: new SequenceInterval("chr1", sequenceStart, sequenceEnd, splitSequence.substring(sequenceStart, sequenceEnd))
         })
         renderFeature.call(track, splitFeature, 0, bpPerPixel, 100, ctx, options)
-        return ctx.texts.map(t => t.text).join("")
+        return ctx
+    }
+
+    // The amino acid letters drawn, from left to right whichever the strand
+    function splitCodonsDrawnWith(strand, exons, sequenceStart, sequenceEnd) {
+        const texts = drawSplitFeature(strand, exons, sequenceStart, sequenceEnd).texts
+        return texts.sort((a, b) => a.x - b.x).map(t => t.text).join("")
     }
 
     test("split codon with no neighbouring exon - plus strand", function () {
@@ -115,27 +121,65 @@ suite("testRenderFeature", function () {
         assert.equal(splitCodonsDrawnWith("+", [{start: 1, end: 9, readingFrame: 2}]), "G*")
         // Leading split codon with no exon to the left, trailing one completed from the right exon
         assert.equal(splitCodonsDrawnWith("+",
-            [{start: 1, end: 8, readingFrame: 2}, {start: 12, end: 19, readingFrame: 2}]), "G*FPN")
+            [{start: 1, end: 8, readingFrame: 2}, {start: 12, end: 19, readingFrame: 2}]), "G*NFP")
         // Leading split codon completed from the left exon is kept when the trailing one has no exon to the right
         assert.equal(splitCodonsDrawnWith("+",
-            [{start: 0, end: 8, readingFrame: 0}, {start: 12, end: 18, readingFrame: 2}]), "MANFN")
+            [{start: 0, end: 8, readingFrame: 0}, {start: 12, end: 18, readingFrame: 2}]), "MANNF")
     })
 
     test("split codon with no neighbouring exon - minus strand", function () {
         // Trailing split codon, no exon to the left
-        assert.equal(splitCodonsDrawnWith("-", [{start: 0, end: 8, readingFrame: 0}]), "LA")
+        assert.equal(splitCodonsDrawnWith("-", [{start: 0, end: 8, readingFrame: 0}]), "AL")
         // Leading split codon, no exon to the right
-        assert.equal(splitCodonsDrawnWith("-", [{start: 0, end: 8, readingFrame: 2}]), "*P")
+        assert.equal(splitCodonsDrawnWith("-", [{start: 0, end: 8, readingFrame: 2}]), "P*")
         // Leading split codon completed from the right exon, trailing one with no exon to the left
         assert.equal(splitCodonsDrawnWith("-",
-            [{start: 0, end: 6, readingFrame: 2}, {start: 12, end: 20, readingFrame: 0}]), "AKPGK")
+            [{start: 0, end: 6, readingFrame: 2}, {start: 12, end: 20, readingFrame: 0}]), "AKKGP")
     })
 
-    test("split codon with sequence missing on one side keeps the other side", function () {
-        // The loaded sequence ends before the third exon, so the middle exon's trailing split codon can't be
-        // translated.  Its leading one, completed from the first exon, is still drawn.
-        const exons = [{start: 0, end: 8, readingFrame: 0}, {start: 12, end: 18, readingFrame: 2}, {start: 22, end: 28, readingFrame: 2}]
-        assert.equal(splitCodonsDrawnWith("+", exons, 20), "MANFN")
+    // Three exons, each split codon completed across an intron.  Fully loaded, the plus strand reads MAN NFP PV and
+    // the minus strand AK KGQ QL, a split codon being drawn once in each of the two exons it spans.
+    const threeExons = [{start: 0, end: 8, readingFrame: 0}, {start: 12, end: 18, readingFrame: 2}, {start: 22, end: 28, readingFrame: 2}]
+    const threeExonsMinus = [{start: 0, end: 6, readingFrame: 2}, {start: 12, end: 18, readingFrame: 2}, {start: 22, end: 28, readingFrame: 2}]
+
+    test("split codon with sequence missing on one side keeps the other side - plus strand", function () {
+        assert.equal(splitCodonsDrawnWith("+", threeExons), "MANNFPPV")
+        // The loaded sequence ends before the third exon: the middle exon's trailing split codon is skipped
+        assert.equal(splitCodonsDrawnWith("+", threeExons, 0, 20), "MANNF")
+        // The loaded sequence starts after the first exon: the middle exon's leading split codon is skipped
+        assert.equal(splitCodonsDrawnWith("+", threeExons, 10), "FPPV")
+    })
+
+    test("split codon with sequence missing on one side keeps the other side - minus strand", function () {
+        assert.equal(splitCodonsDrawnWith("-", threeExonsMinus), "AKKGQQL")
+        // The loaded sequence ends before the third exon: the middle exon's leading split codon is skipped
+        assert.equal(splitCodonsDrawnWith("-", threeExonsMinus, 0, 20), "AKKG")
+        // The loaded sequence starts after the first exon: the middle exon's trailing split codon is skipped
+        assert.equal(splitCodonsDrawnWith("-", threeExonsMinus, 10), "GQQL")
+    })
+
+    // A codon spanning three exons, the middle one a single base: G at 3, A at 8 and T at 12
+    test("codon split across three exons", function () {
+        // Plus strand: ATG G | A | T TTC CCG, the split codon GAT (D) drawn in each of its three exons
+        const exons = [{start: 0, end: 4, readingFrame: 0}, {start: 8, end: 9, readingFrame: 1}, {start: 12, end: 19, readingFrame: 2}]
+        assert.equal(splitCodonsDrawnWith("+", exons), "MDDDFP")
+        // With the far exon's sequence not loaded the codon is skipped in all three
+        assert.equal(splitCodonsDrawnWith("+", exons, 0, 10), "M")
+        // Minus strand, translated right to left: the split codon is ATC (I), then E and R to its right and H to its left
+        assert.equal(splitCodonsDrawnWith("-",
+            [{start: 0, end: 4, readingFrame: 2}, {start: 8, end: 9, readingFrame: 1}, {start: 12, end: 19, readingFrame: 0}]), "HIIIER")
+    })
+
+    test("untranslated split codon is given a backdrop at either end", function () {
+        // At 10 pixels per bp.  Plus strand: 1 bp leading at pixels 10-20, 2 bp trailing at 80-100
+        const hasRect = (ctx, x, width) => ctx.rects.some(r => r.x === x && r.width === width)
+        let ctx = drawSplitFeature("+", [{start: 1, end: 10, readingFrame: 2}])
+        assert.isTrue(hasRect(ctx, 10, 10), "leading split codon")
+        assert.isTrue(hasRect(ctx, 80, 20), "trailing split codon")
+        // Minus strand: 1 bp leading at pixels 90-100, 2 bp trailing at 10-30
+        ctx = drawSplitFeature("-", [{start: 1, end: 10, readingFrame: 2}])
+        assert.isTrue(hasRect(ctx, 90, 10), "leading split codon")
+        assert.isTrue(hasRect(ctx, 10, 20), "trailing split codon")
     })
 })
 
@@ -149,6 +193,7 @@ class RecordingContext {
         this.matrix = [1, 0, 0, 1, 0, 0]
         this.stack = []
         this.texts = []
+        this.rects = []
         this.textAlign = "start"
         this.fillStyle = undefined
         this.strokeStyle = undefined
@@ -192,7 +237,7 @@ class RecordingContext {
         return {width: 6 * text.length, actualBoundingBoxAscent: 8, actualBoundingBoxDescent: 2}
     }
 
-    fillRect() {}
+    fillRect(x, y, width, height) { this.rects.push({x, y, width, height}) }
     clearRect() {}
     beginPath() {}
     moveTo() {}

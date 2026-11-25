@@ -1,7 +1,7 @@
 import IGVGraphics from "../../igv-canvas.js"
 import {getCodingStart, getCodingEnd, getExonPhase} from "../exonUtils.js"
 import {translationDict} from "../../util/translationDict.js"
-import {complementSequence} from "../../util/sequenceUtils.js"
+import {reverseComplementSequence} from "../../util/sequenceUtils.js"
 
 const aminoAcidSequenceRenderThreshold = 0.25
 
@@ -152,10 +152,7 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
                         if (options.bpPerPixel < aminoAcidSequenceRenderThreshold &&
                             options.sequenceInterval) {
 
-                            const leftExon = i > 0 && feature.exons[i - 1].readingFrame !== undefined ? feature.exons[i - 1] : undefined
-                            const riteExon = i < feature.exons.length - 1 && feature.exons[i + 1].readingFrame !== undefined ? feature.exons[i + 1] : undefined
-
-                            renderAminoAcidSequence.call(this, ctx, feature.strand, leftExon, exon, riteExon, bpStart, options.bpPerPixel, py, h, options.sequenceInterval, options.axis)
+                            renderAminoAcidSequence(ctx, feature.strand, feature.exons, i, bpStart, options.bpPerPixel, py, h, options.sequenceInterval, options.axis)
                         }
                     }
 
@@ -184,7 +181,7 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
     }
 }
 
-function renderAminoAcidSequence(ctx, strand, leftExon, exon, riteExon, bpStart, bpPerPixel, y, height, sequenceInterval, axis) {
+function renderAminoAcidSequence(ctx, strand, exons, exonIndex, bpStart, bpPerPixel, y, height, sequenceInterval, axis) {
 
     const aaColors =
         [
@@ -192,10 +189,11 @@ function renderAminoAcidSequence(ctx, strand, leftExon, exon, riteExon, bpStart,
             'rgb(12, 12, 120)'
         ]
 
+    const plusStrand = '+' === strand
 
     ctx.save()
 
-    const renderAminoAcidLetter = (strand, width, xs, y, aminoAcidLetter) => {
+    const renderAminoAcidLetter = (width, xs, y, aminoAcidLetter) => {
 
         if ('STOP' === aminoAcidLetter) {
             aminoAcidLetter = '*'
@@ -210,34 +208,16 @@ function renderAminoAcidSequence(ctx, strand, leftExon, exon, riteExon, bpStart,
         IGVGraphics.fillText(ctx, aminoAcidLetter, xs + (width - aminoAcidLetterWidth) / 2, y - 4, {fillStyle: '#ffffff'})
     }
 
-    const doPaint = (strand, start, end, aminoAcidLetter, colorToggle, index) => {
+    // Paint the backdrop of a codon, or of the part of one in this exon, and its letter if it has one
+    const paintCodon = (start, end, aminoAcidLetter, colorToggle, isStartCandidate) => {
 
         const xs = Math.round((start - bpStart) / bpPerPixel)
         const xe = Math.round((end - bpStart) / bpPerPixel)
-
         const width = xe - xs
 
-        let aaLetter
-        if (undefined === aminoAcidLetter) {
-
-            if (sequenceInterval.hasSequence(start, end)) {
-
-                const sequence = sequenceInterval.getSequence(start, end)
-                if (sequence && 3 === sequence.length) {
-                    const key = '+' === strand ? sequence : complementSequence(sequence.split('').reverse().join(''))
-                    aaLetter = translationDict[key]
-                }
-            }
-
-        } else {
-            aaLetter = aminoAcidLetter
-        }
-
-        if ('M' === aminoAcidLetter) {
+        if ('M' === aminoAcidLetter && isStartCandidate) {
             ctx.fillStyle = '#83f902'
-        } else if ('M' === aaLetter && 0 === index) {
-            ctx.fillStyle = '#83f902'
-        } else if ('STOP' === aaLetter) {
+        } else if ('STOP' === aminoAcidLetter) {
             ctx.fillStyle = '#ff2101'
         } else {
             ctx.fillStyle = aaColors[colorToggle]
@@ -245,97 +225,67 @@ function renderAminoAcidSequence(ctx, strand, leftExon, exon, riteExon, bpStart,
 
         ctx.fillRect(xs, y, width, height)
 
-        if (aaLetter) {
+        if (aminoAcidLetter) {
             ctx.save()
-            renderAminoAcidLetter(strand, width, xs, y + height, aaLetter)
+            renderAminoAcidLetter(width, xs, y + height, aminoAcidLetter)
             ctx.restore()
         }
-
-        const widthBP = end - start
-        return widthBP > 0 && widthBP < 3 ? {start, end} : undefined
     }
 
-    const phase = getExonPhase(exon)
-    let ss = getCodingStart(exon)
-    let ee = getCodingEnd(exon)
-
-    let bpTripletStart
-    let bpTripletEnd
-
-    let remainder
-    let aminoAcidBackdropColorCounter
-    let colorToggle
-    let index
-    if ('+' === strand) {
-
-        if (phase > 0) {
-            ss += phase
+    // Translate a codon from its part in this exon and the given number of bases from the exons upstream (5') and
+    // downstream (3') of it, none for a codon wholly in this exon.  Undefined if those exons or any of the sequence
+    // are missing, as at the first or last exon of a feature covering part of a protein.
+    const translateCodon = (start, end, upstreamCount, downstreamCount) => {
+        const [leftCount, riteCount] = plusStrand ? [upstreamCount, downstreamCount] : [downstreamCount, upstreamCount]
+        const left = neighbouringCodingSegments(exons, exonIndex, -1, leftCount)
+        const rite = neighbouringCodingSegments(exons, exonIndex, 1, riteCount)
+        if (!left || !rite) {
+            return undefined
         }
-
-        aminoAcidBackdropColorCounter = 1
-        for (index = 0, bpTripletStart = ss; bpTripletStart < ee; index++, bpTripletStart += 3) {
-            colorToggle = aminoAcidBackdropColorCounter % 2
-            bpTripletEnd = Math.min(ee, bpTripletStart + 3)
-            remainder = doPaint(strand, bpTripletStart, bpTripletEnd, undefined, aminoAcidBackdropColorCounter % 2, index)
-            ++aminoAcidBackdropColorCounter
-        }
-
-        if (phase > 0 || remainder) {
-
-            const result = phase > 0
-                ? getAminoAcidLetterWithExonGap.call(this, strand, phase, ss - phase, ss, remainder, leftExon, exon, riteExon, sequenceInterval)
-                : getAminoAcidLetterWithExonGap.call(this, strand, undefined, undefined, undefined, remainder, leftExon, exon, riteExon, sequenceInterval)
-
-            if (result) {
-                const {left, rite} = result
-
-                if (left) {
-                    doPaint(strand, ss - phase, ss, left.aminoAcidLetter, 0, undefined)
-                }
-
-                if (rite) {
-                    doPaint(strand, remainder.start, remainder.end, rite.aminoAcidLetter, colorToggle, undefined)
-                }
-
+        let triplet = ''
+        for (const [segmentStart, segmentEnd] of [...left, [start, end], ...rite]) {
+            const sequence = sequenceInterval.getSequence(segmentStart, segmentEnd)
+            if (!sequence) {
+                return undefined
             }
-
+            triplet += sequence
         }
+        return translationDict[plusStrand ? triplet : reverseComplementSequence(triplet)]
+    }
 
-    } else {
+    const exon = exons[exonIndex]
+    const codingStart = getCodingStart(exon)
+    const codingEnd = getCodingEnd(exon)
+    const codingLength = codingEnd - codingStart
 
-        if (phase > 0) {
-            ee -= phase
-        }
+    // A stretch of this exon in genomic coordinates, given as offsets from the 5' edge of its coding region
+    const stretch = (from, to) => plusStrand ? [codingStart + from, codingStart + to] : [codingEnd - to, codingEnd - from]
 
-        aminoAcidBackdropColorCounter = 1
-        for (index = 0, bpTripletEnd = ee; bpTripletEnd > ss; index++, bpTripletEnd -= 3) {
-            colorToggle = aminoAcidBackdropColorCounter % 2
-            bpTripletStart = Math.max(ss, bpTripletEnd - 3)
-            remainder = doPaint(strand, bpTripletStart, bpTripletEnd, undefined, aminoAcidBackdropColorCounter % 2, index)
-            ++aminoAcidBackdropColorCounter
-        }
+    // The bases at the 5' edge that finish a codon begun in an earlier exon.  An exon shorter than its phase lies
+    // wholly inside that codon, which is then finished by the exons after it.
+    const phase = getExonPhase(exon) || 0
+    const leadLength = Math.min(phase, codingLength)
 
-        if (phase > 0 || remainder) {
+    const nextExon = exons[exonIndex + (plusStrand ? 1 : -1)]
 
-            const result = phase > 0
-                ? getAminoAcidLetterWithExonGap.call(this, strand, phase, ee, ee + phase, remainder, leftExon, exon, riteExon, sequenceInterval)
-                : getAminoAcidLetterWithExonGap.call(this, strand, undefined, undefined, undefined, remainder, leftExon, exon, riteExon, sequenceInterval)
+    // The backdrop of a leading split codon is painted even when the codon can't be translated, as the loop below
+    // does for a trailing one
+    if (leadLength > 0) {
+        const [start, end] = stretch(0, leadLength)
+        paintCodon(start, end, translateCodon(start, end, 3 - phase, phase - leadLength), 0, true)
+    }
 
-            if (result) {
-                const {left, rite} = result
+    for (let offset = leadLength, index = 0; offset < codingLength; offset += 3, index++) {
+        const [start, end] = stretch(offset, Math.min(offset + 3, codingLength))
 
-                if (rite) {
-                    doPaint(strand, ee, ee + phase, rite.aminoAcidLetter, 0, undefined)
-                }
+        // The last codon is finished by the next exon if it runs past this one, but only if the next exon agrees
+        // that it starts with the rest of it
+        const missing = 3 - (end - start)
+        const aminoAcidLetter = 0 === missing || (nextExon && getExonPhase(nextExon) === missing)
+            ? translateCodon(start, end, 0, missing)
+            : undefined
 
-                if (left) {
-                    doPaint(strand, remainder.start, remainder.end, left.aminoAcidLetter, colorToggle, undefined)
-                }
-
-            }
-
-        }
-
+        paintCodon(start, end, aminoAcidLetter, (index + 1) % 2, 0 === index || missing > 0)
     }
 
     ctx.restore()
@@ -414,56 +364,32 @@ function getFeatureLabelY(featureY, transform) {
 }
 
 /**
- * Translate the codons split across the edges of an exon.  A split codon with no neighbouring coding exon to
- * complete it, as at the first or last exon of a feature covering part of a protein, is left untranslated, as is
- * one with sequence missing for either of its parts.
+ * The n coding bases nearest to an exon on one side, which span more than one exon when the nearest has fewer than n.
  *
- * @returns {{left: {triplet, aminoAcidLetter}|undefined, rite: {triplet, aminoAcidLetter}|undefined}} the codons
- * at the left and right edges of the exon
+ * @param exons
+ * @param exonIndex  index of the exon
+ * @param step  -1 for the exons to the left, 1 for those to the right
+ * @param n  number of bases
+ * @returns {number[][]|undefined} [start, end] segments in genomic order, undefined if there are not n coding bases
+ * on that side
  */
-function getAminoAcidLetterWithExonGap(strand, phase, phaseExtentStart, phaseExtentEnd, remainder, leftExon, exon, riteExon, sequenceInterval) {
-
-    // Translate a codon split into two parts, given in genomic order
-    const translate = (startA, endA, startB, endB) => {
-        const stringA = sequenceInterval.getSequence(startA, endA)
-        const stringB = sequenceInterval.getSequence(startB, endB)
-        if (!stringA || !stringB) {
+function neighbouringCodingSegments(exons, exonIndex, step, n) {
+    const segments = []
+    for (let i = exonIndex + step; n > 0; i += step) {
+        const exon = exons[i]
+        if (!exon || exon.readingFrame === undefined) {
             return undefined
         }
-        let triplet = stringA + stringB
-        if ('+' !== strand) {
-            triplet = complementSequence(triplet.split('').reverse().join(''))
+        const start = getCodingStart(exon)
+        const end = getCodingEnd(exon)
+        const length = Math.min(n, end - start)
+        if (length <= 0) {
+            return undefined
         }
-        return {triplet, aminoAcidLetter: translationDict[triplet]}
+        segments.push(step < 0 ? [end - length, end] : [start, start + length])
+        n -= length
     }
-
-    const aminoAcidLetters = {left: undefined, rite: undefined}
-    if ('+' === strand) {
-
-        if (phase && leftExon) {
-            const leftEnd = getCodingEnd(leftExon)
-            aminoAcidLetters.left = translate(leftEnd - (3 - phase), leftEnd, phaseExtentStart, phaseExtentEnd)
-        }
-
-        if (remainder && riteExon) {
-            const riteStart = getCodingStart(riteExon)
-            aminoAcidLetters.rite = translate(remainder.start, remainder.end, riteStart, riteStart + getExonPhase(riteExon))
-        }
-
-    } else {
-
-        if (phase && riteExon) {
-            const riteStart = getCodingStart(riteExon)
-            aminoAcidLetters.rite = translate(phaseExtentStart, phaseExtentEnd, riteStart, riteStart + (3 - phase))
-        }
-
-        if (remainder && leftExon) {
-            const leftEnd = getCodingEnd(leftExon)
-            aminoAcidLetters.left = translate(leftEnd - getExonPhase(leftExon), leftEnd, remainder.start, remainder.end)
-        }
-    }
-
-    return aminoAcidLetters
+    return step < 0 ? segments.reverse() : segments
 }
 
 
