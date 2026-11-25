@@ -777,7 +777,7 @@ class TrackViewport extends Viewport {
             menuItems.push({label: 'Save Image (PNG)', click: () => this.savePNG()})
             menuItems.push({label: 'Save Image (SVG)', click: () => this.saveSVG()})
 
-            this.browser.menuPopup.presentTrackContextMenu(event, menuItems)
+            this.browser.menuPopup.presentTrackContextMenu(event, menuItems, this)
         })
 
     }
@@ -1035,6 +1035,7 @@ class TrackViewport extends Viewport {
 
         const features = 'annotation' === track.type ? track.clickedFeatures(clickState) : undefined
         const dataList = await track.popupData(clickState, features)
+        if (this.disposed) return undefined   // By a locus change, while the popup data loaded
 
         const popupClickHandlerResult = this.browser.fireEvent('trackclick', [track, dataList, clickState.genomicLocation, features])
 
@@ -1056,12 +1057,6 @@ class TrackViewport extends Viewport {
 
         if (this.popover) {
             this.popover.dispose()
-        }
-
-        // The single-click popup, whose handlers hold on to the viewport and the canvas that were clicked
-        if (popover) {
-            popover.dispose()
-            popover = undefined
         }
 
         this.browser.releaseViewport(this)

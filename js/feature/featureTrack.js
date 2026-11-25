@@ -60,6 +60,8 @@ class FeatureTrack extends TrackBase {
         } else {
             this.render = config.render || renderFeature
             this.arrowSpacing = 30
+            // Feature names are kept in view, so they are repositioned when a pan ends
+            this.repaintOnDragEnd = true
             this.squishedRowHeight = config.squishedRowHeight || 15
             this.expandedRowHeight = config.expandedRowHeight || 30
             this.height = config.height || this.margin + 2 * this.expandedRowHeight
@@ -547,7 +549,7 @@ class FeatureTrack extends TrackBase {
      * Called by the browser when a pan ends.  Repaint to move feature names whose center went out of view.
      */
     trackDragEnd() {
-        if (this.trackView && this.displayMode !== "SQUISHED") {
+        if (this.repaintOnDragEnd && this.trackView && this.displayMode !== "SQUISHED") {
             this.trackView.repaintViews()
         }
     }

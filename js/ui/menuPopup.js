@@ -182,8 +182,15 @@ class MenuPopup {
 
     }
 
-    presentTrackContextMenu(e, menuItems) {
+    /**
+     * @param e the mouse event
+     * @param menuItems
+     * @param viewport the viewport that was clicked, if the items act on one.  The browser hides the menu when
+     * that viewport is disposed of.
+     */
+    presentTrackContextMenu(e, menuItems, viewport) {
 
+        this.viewport = viewport
         this.popoverContent.innerHTML = ''
 
         const menuElements = createMenuElements(menuItems, () => this.hide())
@@ -201,6 +208,7 @@ class MenuPopup {
     hide() {
         this.popover.style.display = 'none'
         this.popoverContent.innerHTML = ''
+        this.viewport = undefined
     }
 
     dispose() {

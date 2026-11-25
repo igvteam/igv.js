@@ -1087,7 +1087,8 @@ class AlignmentTrack extends TrackBase {
                         label: 'Tag Name',
                         value: this.sortByTag ? this.sortByTag : '',
                         callback: (tag) => {
-                            if (tag) {
+                            // The viewport is disposed of by a locus change while the dialog is open
+                            if (tag && !viewport.disposed) {
                                 const newSortObject = {
                                     chr: viewport.referenceFrame.chr,
                                     position: Math.floor(clickState.genomicLocation),

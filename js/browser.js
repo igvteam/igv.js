@@ -2392,12 +2392,14 @@ class Browser {
 
 
     /**
-     * Drop what refers to a track viewport that is being disposed of, by a locus change for one: the context menu,
-     * whose items act on the viewport that was clicked, and a pan or scroll in progress in it.
+     * Drop what refers to a track viewport that is being disposed of, by a locus change for one: the context menu
+     * if it was opened on that viewport, as its items act on it, and a pan or scroll in progress in it.
      */
     releaseViewport(viewport) {
 
-        this.menuPopup.hide()
+        if (this.menuPopup.viewport === viewport) {
+            this.menuPopup.hide()
+        }
 
         if (this.vpMouseDown && this.vpMouseDown.viewport === viewport) {
             this.dragObject = undefined
