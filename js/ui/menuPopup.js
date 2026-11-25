@@ -13,7 +13,7 @@ class MenuPopup {
         const header = DOMUtils.div({class: 'igv-menu-popup-header'})
         this.popover.appendChild(header)
 
-        attachDialogCloseHandlerWithParent(header, () => this.popover.style.display = 'none')
+        attachDialogCloseHandlerWithParent(header, () => this.hide())
 
         this.popoverContent = DOMUtils.div()
         this.popover.appendChild(this.popoverContent)
@@ -161,7 +161,7 @@ class MenuPopup {
                         item.dialog.call(trackView.track, e);
                     }
 
-                    this.popover.style.display = 'none';
+                    this.hide();
                 };
 
                 if (undefined === element) {
@@ -186,7 +186,7 @@ class MenuPopup {
 
         this.popoverContent.innerHTML = ''
 
-        const menuElements = createMenuElements(menuItems, this.popover)
+        const menuElements = createMenuElements(menuItems, () => this.hide())
         for (let {el} of menuElements) {
             this.popoverContent.appendChild(el)
         }
@@ -214,7 +214,7 @@ class MenuPopup {
     }
 }
 
-function createMenuElements(itemList, popover) {
+function createMenuElements(itemList, hide) {
 
     return itemList.map(item => {
 
@@ -277,7 +277,7 @@ function createMenuElements(itemList, popover) {
 
                 function handleClick(e) {
                     item.click()
-                    DOMUtils.hide(popover)
+                    hide()
                     e.preventDefault()
                     e.stopPropagation()
                 }

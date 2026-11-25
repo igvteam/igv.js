@@ -296,16 +296,14 @@ class TrackViewport extends Viewport {
             }
         } catch (error) {
             // Track might have been removed during load
-            if (this.trackView && this.trackView.disposed !== true) {
+            if (!this.disposed) {
                 this.showMessage(NOT_LOADED_MESSAGE)
                 this.browser.alert.present(trackLoadError(this.track.config, error))
                 console.error(error)
             }
         } finally {
-            if (!this.disposed) {
-                this.loading = false
-                this.stopSpinner()
-            }
+            this.loading = false
+            this.stopSpinner()
         }
     }
 
@@ -1059,6 +1057,14 @@ class TrackViewport extends Viewport {
         if (this.popover) {
             this.popover.dispose()
         }
+
+        // The single-click popup, whose handlers hold on to the viewport and the canvas that were clicked
+        if (popover) {
+            popover.dispose()
+            popover = undefined
+        }
+
+        this.browser.releaseViewport(this)
 
         super.dispose()
     }

@@ -559,7 +559,7 @@ class TrackView {
 
     /**
      * Return a promise to get all in-view features across all viewports.  Used for group autoscaling.
-     * Resolves to undefined if the viewports are replaced (a locus change) or the track is removed meanwhile.
+     * Resolves to undefined if the viewports are replaced meanwhile (a locus change).
      */
     async getInViewFeatures() {
 
@@ -572,7 +572,6 @@ class TrackView {
         const visibleViewports = viewports.filter(viewport => viewport.isVisible())
         for (let vp of visibleViewports) {
 
-            if (this.disposed || this.viewports !== viewports) return undefined
             if (vp.disposed) continue   // A multi-locus panel closed during a load
 
             const referenceFrame = vp.referenceFrame
@@ -582,6 +581,8 @@ class TrackView {
 
             if (needsReload) {
                 await vp.loadFeatures()
+                if (this.disposed) return []   // Track was removed during load
+                if (this.viewports !== viewports) return undefined
             }
             if (vp.featureCache && vp.featureCache.features) {
 
@@ -596,7 +597,6 @@ class TrackView {
                 }
             }
         }
-        if (this.disposed || this.viewports !== viewports) return undefined
         return allFeatures
     }
 
@@ -877,7 +877,7 @@ class TrackView {
      * Discard the track viewports.  They are disposed of, not just removed from the page, to release their
      * listeners on the document and the browser, which would otherwise keep them and their features in memory.
      */
-    removeViewportsFromColumnContainer() {
+    disposeViewports() {
         for (let viewport of this.viewports) {
             viewport.dispose()
         }
@@ -891,9 +891,7 @@ class TrackView {
 
         this.axis.remove()
 
-        for (let viewport of this.viewports) {
-            viewport.dispose()
-        }
+        this.disposeViewports()
 
         this.sampleInfoViewport.dispose()
 

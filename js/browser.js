@@ -148,7 +148,6 @@ class Browser {
                 }
                 trackViewportPopoverList.length = 0
             }
-            this.menuPopup.hide()   // Its items act on a viewport that might be gone
         })
 
         this.addEventHandlers()
@@ -609,8 +608,6 @@ class Browser {
     }
 
     cleanHouseForSession() {
-
-        this.menuPopup.hide()   // Its items act on the viewports disposed of here
 
         for (let trackView of this.trackViews) {
             // empties the axis, viewport, sampleInfo, sampleName, scroll, drag and gear columns, and releases the track
@@ -1589,7 +1586,7 @@ class Browser {
                 for (const [group, trackViews] of Object.entries(groupAutoscaleTrackViews)) {
                     const inViewFeatures = await Promise.all(trackViews.map(trackView => trackView.getInViewFeatures()))
                     if (inViewFeatures.includes(undefined)) {
-                        continue   // Superseded by a locus change or a track removal, whose own update sets the range
+                        continue   // Superseded by a locus change, whose own update sets the range
                     }
                     const dataRange = doAutoscale(inViewFeatures.flat())
                     for (const trackView of trackViews) {
@@ -1915,7 +1912,7 @@ class Browser {
 
             // discard the track viewports
             for (let trackView of this.trackViews) {
-                trackView.removeViewportsFromColumnContainer()
+                trackView.disposeViewports()
             }
 
             // discard ONLY viewport columns
@@ -2393,6 +2390,21 @@ class Browser {
     }
 
 
+    /**
+     * Drop what refers to a track viewport that is being disposed of, by a locus change for one: the context menu,
+     * whose items act on the viewport that was clicked, and a pan or scroll in progress in it.
+     */
+    releaseViewport(viewport) {
+
+        this.menuPopup.hide()
+
+        if (this.vpMouseDown && this.vpMouseDown.viewport === viewport) {
+            this.dragObject = undefined
+            this.isScrolling = false
+            this.vpMouseDown = undefined
+        }
+    }
+
     cancelTrackPan() {
 
         const dragObject = this.dragObject
@@ -2400,11 +2412,7 @@ class Browser {
         this.isScrolling = false
         this.vpMouseDown = undefined
 
-        if (dragObject && dragObject.viewport.disposed) {
-            // The viewport was replaced during the drag, by a locus change for one.  Views are not updated while
-            // dragging, so the new ones are still to be loaded and painted
-            this.updateViews()
-        } else if (dragObject && dragObject.viewport.referenceFrame.start !== dragObject.start) {
+        if (dragObject && dragObject.viewport.referenceFrame.start !== dragObject.start) {
             this.updateViews()
             this.fireEvent('trackdragend', [dragObject.viewport])
         }
@@ -2707,10 +2715,6 @@ handleMouseMove(e) {
     e.preventDefault()
 
     const {x, y} = DOMUtils.pageCoordinates(e)
-
-    if (this.vpMouseDown && this.vpMouseDown.viewport.disposed) {
-        this.cancelTrackPan()   // The viewport was replaced, by a locus change for one, with the mouse down
-    }
 
     if (this.vpMouseDown) {
 
