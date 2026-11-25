@@ -21,7 +21,8 @@ suite("testTwobit", function () {
     })
 
 
-    // The table places an "R" at chr1:11 (1-based) and a "Y" at chr1:50, replacing an "N" and a "T" respectively
+    // The table places an "R" at chr1:11 (1-based), replacing an "N", and a "Y" at chr1:50, which is a "T" and is
+    // not replaced
     test("twobit with ambiguity table", async function () {
 
         const twobit = new TwobitSequence({
@@ -32,7 +33,7 @@ suite("testTwobit", function () {
         assert.equal(await twobit.readSequence("chr1", 10, 11), "R")
         assert.equal(await twobit.readSequence("chr1", 5, 10), "NNNNN")   // end is exclusive
         assert.equal(await twobit.readSequence("chr1", 11, 16), "NNNNN")
-        assert.equal(await twobit.readSequence("chr1", 45, 52), "NNACYCT")
+        assert.equal(await twobit.readSequence("chr1", 45, 52), "NNACTCT")
     })
 
     test("twobit metadata", async function () {

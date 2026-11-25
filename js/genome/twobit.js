@@ -186,8 +186,9 @@ class TwobitSequence {
         const codes = this.ambiguityCodes?.get(seqName)
         if (codes) {
             for (const [position, code] of codes) {
-                if (position >= regionStart && position < regionEnd) {
-                    const i = position - regionStart
+                // Only an "N" is replaced, so a table for another assembly cannot overwrite known bases
+                const i = position - regionStart
+                if (position >= regionStart && position < regionEnd && sequenceBases[i] === 'N') {
                     sequenceBases = sequenceBases.slice(0, i) + code + sequenceBases.slice(i + 1)
                 }
             }
