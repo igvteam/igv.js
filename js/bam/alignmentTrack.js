@@ -1146,7 +1146,8 @@ class AlignmentTrack extends TrackBase {
             const clickedAlignment = (typeof clickedObject.alignmentContaining === 'function') ?
                 clickedObject.alignmentContaining(clickState.genomicLocation, showSoftClips) :
                 clickedObject
-            if (clickedAlignment) {
+            // The items below are for a read.  A click on the downsampling row returns an interval, not a read.
+            if (clickedAlignment && typeof clickedAlignment.isPaired === 'function') {
                 if (clickedAlignment.isPaired() && clickedAlignment.isMateMapped()) {
                     list.push({
                         label: 'View mate in split screen',
