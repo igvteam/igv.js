@@ -1907,7 +1907,7 @@ class Browser {
             // create reference frame list based on search loci
             this.referenceFrameList = createReferenceFrameList(loci, this.genome, this.flanking, this.minimumBases(), this.calculateViewportWidth(loci.length), this.isSoftclipped())
 
-            // discard track viewport DOM elements
+            // discard the track viewports
             for (let trackView of this.trackViews) {
                 trackView.removeViewportsFromColumnContainer()
             }
@@ -2563,8 +2563,7 @@ class Browser {
     }
 
     removeKeyboardHandler() {
-        console.log("Remove handler")
-        document.addEventListener("keyup", this.keyUpHandler)
+        document.removeEventListener("keyup", this.keyUpHandler)
     }
 
 

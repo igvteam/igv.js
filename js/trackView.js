@@ -420,7 +420,7 @@ class TrackView {
 
         if (!(this.browser && this.browser.referenceFrameList)) return
 
-        const visibleViewports = this.viewports.filter(viewport => viewport.isVisible() && viewport.checkZoomIn())
+        let visibleViewports = this.viewports.filter(viewport => viewport.isVisible() && viewport.checkZoomIn())
 
         // Shift viewports left/right to current genomic state (pans canvas)
         visibleViewports.forEach(viewport => viewport.shift())
@@ -438,11 +438,17 @@ class TrackView {
 
         // Trigger viewport to load features needed to cover current genomic range
         // NOTE: these must be loaded synchronously, do not user Promise.all,  not all file readers are thread safe
+        // A locus change during a load replaces the viewports, and disposes of the ones being loaded here
+        const isCurrent = viewport => this.viewports.includes(viewport)
         for (let viewport of viewportsToReload) {
-            await viewport.loadFeatures()
+            if (isCurrent(viewport)) {
+                await viewport.loadFeatures()
+            }
         }
 
         if (this.disposed) return   // Track was removed during load
+
+        visibleViewports = visibleViewports.filter(isCurrent)
 
         // Special case for variant tracks in multilocus view.  The # of rows to allocate to the variant (site)
         // section depends on data from all the views.  We only need to adjust this however if any data was loaded
@@ -560,6 +566,8 @@ class TrackView {
         let allFeatures = []
         const visibleViewports = this.viewports.filter(viewport => viewport.isVisible())
         for (let vp of visibleViewports) {
+
+            if (!this.viewports.includes(vp)) continue   // Disposed of by a locus change during a load
 
             const referenceFrame = vp.referenceFrame
             const {chr, start, bpPerPixel} = vp.referenceFrame
@@ -884,11 +892,15 @@ class TrackView {
 
     }
 
+    /**
+     * Discard the track viewports.  They are disposed of, not just removed from the page, to release their
+     * listeners on the document and the browser, which would otherwise keep them and their features in memory.
+     */
     removeViewportsFromColumnContainer() {
-        // Track Viewports
         for (let viewport of this.viewports) {
-            viewport.viewportElement.remove()
+            viewport.dispose()
         }
+        this.viewports = []
     }
 
     /**
