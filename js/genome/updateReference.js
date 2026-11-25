@@ -14,6 +14,13 @@ const isString = (x) => {
  */
 function updateReference(reference) {
 
+    // Supply the table of ambiguity codes to any reference with a known id.  Sessions store the expanded reference,
+    // not just the genome id, so a saved reference will not have it.
+    const twoBitAmbiguityURL = updates[reference.id]?.twoBitAmbiguityURL
+    if (twoBitAmbiguityURL && !reference.twoBitAmbiguityURL) {
+        reference.twoBitAmbiguityURL = twoBitAmbiguityURL
+    }
+
     if (!(requiresUpdate(reference) && updates[reference.id])) {
         return
     }
@@ -24,7 +31,6 @@ function updateReference(reference) {
         if (reference.indexURL) delete reference.indexURL
         reference.twoBitURL = updatedReference.twoBitURL
         if (updatedReference.twoBitBptURL) reference.twoBitBptURL = updatedReference.twoBitBptURL
-        if (updatedReference.twoBitAmbiguityURL) reference.twoBitAmbiguityURL = updatedReference.twoBitAmbiguityURL
         if (updatedReference.chromSizesURL) reference.chromSizesURL = updatedReference.chromSizesURL
     }
 }

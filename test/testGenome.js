@@ -50,6 +50,30 @@ suite("testGenome", function () {
 
     })
 
+    test("update reference supplies the hg38 ambiguity table", function () {
+
+        const ambiguityURL = "https://igv.org/genomes/data/hg38/hg38.ambiguity.tsv"
+
+        // A reference as stored in a session, with no deprecated fasta url
+        const reference = {id: "hg38", twoBitURL: "https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/hg38.2bit"}
+        updateReference(reference)
+        assert.equal(reference.twoBitAmbiguityURL, ambiguityURL)
+
+        // A rescued reference
+        const rescued = {id: "hg38", fastaURL: "https://igv.org/genomes/data/hg38/hg38.fa"}
+        updateReference(rescued)
+        assert.isOk(rescued.twoBitURL)
+        assert.equal(rescued.twoBitAmbiguityURL, ambiguityURL)
+
+        // Other genomes, and a table that is already set, are left alone
+        const hg19 = {id: "hg19", twoBitURL: "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/bigZips/hg19.2bit"}
+        updateReference(hg19)
+        assert.isUndefined(hg19.twoBitAmbiguityURL)
+        const custom = {id: "hg38", twoBitURL: "hg38.2bit", twoBitAmbiguityURL: "my.tsv"}
+        updateReference(custom)
+        assert.equal(custom.twoBitAmbiguityURL, "my.tsv")
+    })
+
     test("chrom sizes failure is optional when the sequence names the chromosomes", async function () {
 
         const genome = await Genome.createGenome({
