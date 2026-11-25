@@ -28,6 +28,8 @@ const ELEMENT_SIZE = {
     f: 4
 }
 
+const textDecoder = new TextDecoder()
+
 const DEFAULT_ALLELE_FREQ_THRESHOLD = 0.2
 const DEFAULT_SAMPLING_WINDOW_SIZE = 100
 const DEFAULT_SAMPLING_DEPTH = 500
@@ -635,15 +637,12 @@ function decodeBamTags(ba) {
             value = dataView.getFloat32(p, true)
             p += 4
         } else if (type === 'Z') {
-            value = ''
-            for (; ;) {
-                var cc = ba[p++]
-                if (cc === 0) {
-                    break
-                } else {
-                    value += String.fromCharCode(cc)
-                }
-            }
+            // Decode in one call.  Appending a character at a time leaves a chain of concatenated strings
+            // that takes many times the memory of the text (#2126)
+            let end = p
+            while (end < len && ba[end] !== 0) end++
+            value = textDecoder.decode(ba.subarray(p, end))
+            p = end + 1
         } else if (type === 'B') {
             //‘cCsSiIf’, corresponding to int8 , uint8 t, int16 t, uint16 t, int32 t, uint32 t and float
             const elementType = String.fromCharCode(ba[p++])
