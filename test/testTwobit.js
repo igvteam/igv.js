@@ -21,7 +21,17 @@ suite("testTwobit", function () {
     })
 
 
-    // The table places an "R" at chr1:11 (1-based) and a "Y" at chr1:50, replacing an "N" and a "T" respectively
+    // A read starting where a block of "N"s ends, the later blocks of "N"s must still be recognized
+    test("twobit read from end of N block", async function () {
+
+        const expectedSequence = "ACTCTATCTATCTATCTATCTATCTTTTTCCCCCCGGGGGGagagagagactctagcatcctcctacctcacNNacCNctTGGACNCcCaGGGatttcNNNcccNNCCNCgN"
+
+        const twobit = new TwobitSequence({twoBitURL: "test/data/twobit/foo.2bit"})
+        assert.equal(await twobit.readSequence("chr1", 47, 159), expectedSequence)
+    })
+
+    // The table places an "R" at chr1:11 (1-based), replacing an "N", and a "Y" at chr1:50, which is a "T" and is
+    // not replaced
     test("twobit with ambiguity table", async function () {
 
         const twobit = new TwobitSequence({
@@ -32,7 +42,31 @@ suite("testTwobit", function () {
         assert.equal(await twobit.readSequence("chr1", 10, 11), "R")
         assert.equal(await twobit.readSequence("chr1", 5, 10), "NNNNN")   // end is exclusive
         assert.equal(await twobit.readSequence("chr1", 11, 16), "NNNNN")
-        assert.equal(await twobit.readSequence("chr1", 45, 52), "NNACYCT")
+        assert.equal(await twobit.readSequence("chr1", 45, 52), "NNACTCT")
+    })
+
+    // Tables bundled for hg38 and hg19 are used when the reference has no table, or its table fails to load
+    test("twobit with bundled ambiguity table", async function () {
+
+        this.timeout(20000)
+
+        const hg38 = "https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/hg38.2bit"
+        let twobit = new TwobitSequence({id: "hg38", twoBitURL: hg38})
+        assert.equal(await twobit.readSequence("chr3", 16902878, 16902888), "tgtgBGCGCA")
+
+        twobit = new TwobitSequence({id: "other", twoBitURL: hg38})
+        assert.equal(await twobit.readSequence("chr3", 16902878, 16902888), "tgtgNGCGCA")
+
+        twobit = new TwobitSequence({id: "hg38", twoBitURL: hg38, twoBitAmbiguityURL: "test/data/twobit/missing.ambiguity.tsv"})
+        assert.equal(await twobit.readSequence("chr3", 16902878, 16902888), "tgtgBGCGCA")
+        assert.equal(twobit.loadFailures.length, 0)
+
+        // A table that loads is used rather than the bundled one
+        twobit = new TwobitSequence({id: "hg38", twoBitURL: hg38, twoBitAmbiguityURL: "test/data/twobit/foo.ambiguity.tsv"})
+        assert.equal(await twobit.readSequence("chr3", 16902878, 16902888), "tgtgNGCGCA")
+
+        twobit = new TwobitSequence({id: "hg19", twoBitURL: "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/bigZips/hg19.2bit"})
+        assert.equal(await twobit.readSequence("chr3", 60830758, 60830768), "CTCCRRGCTT")
     })
 
     test("twobit metadata", async function () {

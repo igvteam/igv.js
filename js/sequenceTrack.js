@@ -2,6 +2,7 @@ import IGVGraphics from "./igv-canvas.js"
 import {isSecureContext} from "./util/igvUtils.js"
 import {reverseComplementSequence} from "./util/sequenceUtils.js"
 import {loadSequence} from "./genome/loadSequence.js"
+import {describeLoadFailure} from "./util/loadFailure.js"
 import {defaultNucleotideColors} from "./util/nucleotideColors.js"
 import {createBlatTrack} from "./blat/blatTrack.js"
 import {translationDict} from "./util/translationDict.js"
@@ -192,6 +193,12 @@ class SequenceTrack {
             if (!this.fasta) {
                 this.fasta = new WrappedFasta(this.config, this.browser.genome)
                 await this.fasta.init()
+                // Optional parts of this track's own sequence that failed to load, e.g. a 2bit index
+                const failures = this.fasta.loadFailures
+                if (failures.length > 0) {
+                    const descriptions = failures.map(describeLoadFailure)
+                    this.browser.alert.present(`Some resources could not be loaded:<br><br>${descriptions.join('<br><br>')}`)
+                }
             }
             return this.fasta
         } else {
@@ -373,6 +380,10 @@ class WrappedFasta {
         for (let name of this.fasta.chromosomeNames) {
             this.chrNameMap.set(this.genome.getChromosomeName(name), name)
         }
+    }
+
+    get loadFailures() {
+        return this.fasta.loadFailures ?? []
     }
 
     async getSequence(chr, start, end) {

@@ -9,6 +9,7 @@ import BinaryParser from "../binary.js"
 import BPTree from "../bigwig/bpTree.js"
 import {loadFailure, LoadError} from "../util/loadFailure.js"
 import {buildOptions} from "../util/igvUtils.js"
+import bundledAmbiguityCodes from "./ambiguityCodes.js"
 
 const twoBit = ['T', 'C', 'A', 'G']
 const byteTo4Bases = []
@@ -49,38 +50,43 @@ class TwobitSequence {
     }
 
     /**
-     * Load the optional table of ambiguity codes: tab delimited sequence name, 1-based position, code.  If it fails
-     * the sequence is left as read from the 2bit file.
+     * Load the optional table of ambiguity codes: tab delimited sequence name, 1-based position, code.  If there is
+     * none, or it fails, the table bundled for the genome is used, if there is one (hg38 and hg19); otherwise the
+     * sequence is left as read from the 2bit file.
      *
      * @private
      */
     async _loadAmbiguityCodes() {
+        const bundled = Object.hasOwn(bundledAmbiguityCodes, this.config.id ?? "") ?
+            bundledAmbiguityCodes[this.config.id] : undefined
         const url = this.config.twoBitAmbiguityURL
-        if (!url) {
-            return
-        }
-        try {
-            const ambiguityCodes = new Map()
-            const data = await igvxhr.loadString(url, buildOptions(this.config))
-            for (const line of data.split(/\r?\n/)) {
-                if (line.startsWith("#") || line.trim().length === 0) continue
-                const tokens = line.split("\t")
-                const position = Number.parseInt(tokens[1]) - 1
-                const code = tokens[2]?.trim().charAt(0)
-                if (Number.isNaN(position) || !code) {
-                    throw Error(`Invalid line: ${line}`)
+        if (url) {
+            try {
+                const rows = []
+                const data = await igvxhr.loadString(url, buildOptions(this.config))
+                for (const line of data.split(/\r?\n/)) {
+                    if (line.startsWith("#") || line.trim().length === 0) continue
+                    const tokens = line.split("\t")
+                    const position = Number.parseInt(tokens[1])
+                    const code = tokens[2]?.trim().charAt(0)
+                    if (Number.isNaN(position) || !code) {
+                        throw Error(`Invalid line: ${line}`)
+                    }
+                    rows.push([tokens[0], position, code])
                 }
-                if (!ambiguityCodes.has(tokens[0])) {
-                    ambiguityCodes.set(tokens[0], new Map())
+                this.ambiguityCodes = indexAmbiguityCodes(rows)
+                return
+            } catch (error) {
+                console.error(error)
+                if (!bundled) {
+                    this.loadFailures.push(loadFailure('twoBitAmbiguity', url, error,
+                        "The table of ambiguity codes for the 2bit sequence could not be loaded, so ambiguous bases in the " +
+                        "reference sequence will read \"N\"."))
                 }
-                ambiguityCodes.get(tokens[0]).set(position, code)
             }
-            this.ambiguityCodes = ambiguityCodes
-        } catch (error) {
-            console.error(error)
-            this.loadFailures.push(loadFailure('twoBitAmbiguity', url, error,
-                "The table of ambiguity codes for the 2bit sequence could not be loaded, so ambiguous bases in the " +
-                "reference sequence will read \"N\"."))
+        }
+        if (bundled) {
+            this.ambiguityCodes = indexAmbiguityCodes(bundled)
         }
     }
 
@@ -186,8 +192,9 @@ class TwobitSequence {
         const codes = this.ambiguityCodes?.get(seqName)
         if (codes) {
             for (const [position, code] of codes) {
-                if (position >= regionStart && position < regionEnd) {
-                    const i = position - regionStart
+                // Only an "N" is replaced, so a table for another assembly cannot overwrite known bases
+                const i = position - regionStart
+                if (position >= regionStart && position < regionEnd && sequenceBases[i] === 'N') {
                     sequenceBases = sequenceBases.slice(0, i) + code + sequenceBases.slice(i + 1)
                 }
             }
@@ -392,7 +399,7 @@ class TwobitSequence {
         for (let block of blocks) {
             if (block.start > end) {
                 break
-            } else if (block.end < start) {
+            } else if (block.end <= start) {
                 continue
             } else {
                 overlappingBlocks.push(block)
@@ -405,6 +412,20 @@ class TwobitSequence {
         const arrayBuffer = await igvxhr.loadArrayBuffer(this.url, buildOptions(this.config, {range: {start, size}}))
         return new BinaryParser(new DataView(arrayBuffer), this.littleEndian)
     }
+}
+
+/**
+ * Index rows of [sequence name, 1-based position, code] as a Map of sequence name -> Map of 0-based position -> code
+ */
+function indexAmbiguityCodes(rows) {
+    const ambiguityCodes = new Map()
+    for (const [name, position, code] of rows) {
+        if (!ambiguityCodes.has(name)) {
+            ambiguityCodes.set(name, new Map())
+        }
+        ambiguityCodes.get(name).set(position - 1, code)
+    }
+    return ambiguityCodes
 }
 
 class Block {
