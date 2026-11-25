@@ -148,6 +148,7 @@ class Browser {
                 }
                 trackViewportPopoverList.length = 0
             }
+            this.menuPopup.hide()   // Its items act on a viewport that might be gone
         })
 
         this.addEventHandlers()
@@ -608,6 +609,8 @@ class Browser {
     }
 
     cleanHouseForSession() {
+
+        this.menuPopup.hide()   // Its items act on the viewports disposed of here
 
         for (let trackView of this.trackViews) {
             // empties the axis, viewport, sampleInfo, sampleName, scroll, drag and gear columns, and releases the track

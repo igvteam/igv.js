@@ -195,8 +195,12 @@ class MenuPopup {
 
     }
 
+    /**
+     * Hide the menu and discard its items, whose click handlers hold on to the viewport that was clicked.
+     */
     hide() {
         this.popover.style.display = 'none'
+        this.popoverContent.innerHTML = ''
     }
 
     dispose() {
