@@ -55,6 +55,7 @@ const updates = {
     },
     "hg19": {
         "twoBitURL": "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/bigZips/hg19.2bit",
+        "twoBitAmbiguityURL": "https://igv.org/genomes/data/hg19/hg19.ambiguity.tsv",
         "chromSizesURL": "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/bigZips/hg19.chrom.sizes"
     },
     "hg18": {
