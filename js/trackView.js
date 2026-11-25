@@ -755,7 +755,7 @@ class TrackView {
             this.innerScroll.removeEventListener('mousedown', this.boundTrackScrollMouseDownHandler)
             this.browser.columnContainer.removeEventListener('mouseup', this.boundColumnContainerMouseUpHandler)
             this.browser.columnContainer.removeEventListener('mousemove', this.boundColumnContainerMouseMoveHandler)
-            this.browser.columnContainer.removeEventListener('mouseleave', this.boundColumnContainerMouseMoveHandler)
+            this.browser.columnContainer.removeEventListener('mouseleave', this.boundColumnContainerMouseUpHandler)
         }
     }
 
@@ -858,7 +858,7 @@ class TrackView {
         } else {
             this.dragHandle.removeEventListener('mousedown', this.boundTrackDragMouseDownHandler)
             document.removeEventListener('mouseup', this.boundDocumentTrackDragMouseUpHandler)
-            this.dragHandle.removeEventListener('mouseup', this.boundTrackDragMouseEnterHandler)
+            this.dragHandle.removeEventListener('mouseenter', this.boundTrackDragMouseEnterHandler)
             this.dragHandle.removeEventListener('mouseout', this.boundTrackDragMouseOutHandler)
         }
 

@@ -1590,6 +1590,7 @@ class Browser {
                     }
                     const dataRange = doAutoscale(inViewFeatures.flat())
                     for (const trackView of trackViews) {
+                        if (trackView.disposed) continue   // Track was removed during the load
                         trackView.track.dataRange = Object.assign({}, dataRange)
                         trackView.track.autoscale = false
                     }
@@ -2415,6 +2416,11 @@ class Browser {
         if (dragObject && dragObject.viewport.referenceFrame.start !== dragObject.start) {
             this.updateViews()
             this.fireEvent('trackdragend', [dragObject.viewport])
+            for (const trackView of this.trackViews) {
+                if (typeof trackView.track.trackDragEnd === 'function') {
+                    trackView.track.trackDragEnd()
+                }
+            }
         }
     }
 
