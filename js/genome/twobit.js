@@ -43,7 +43,9 @@ class TwobitSequence {
      }
 
     async init() {
-        await Promise.all([this._initIndex(), this._loadAmbiguityCodes()])
+        // Kept, so concurrent callers share one load
+        this.initPromise ??= Promise.all([this._initIndex(), this._loadAmbiguityCodes()])
+        await this.initPromise
     }
 
     /**
@@ -64,7 +66,7 @@ class TwobitSequence {
                 if (line.startsWith("#") || line.trim().length === 0) continue
                 const tokens = line.split("\t")
                 const position = Number.parseInt(tokens[1]) - 1
-                const code = tokens[2].trim().charAt(0)
+                const code = tokens[2]?.trim().charAt(0)
                 if (Number.isNaN(position) || !code) {
                     throw Error(`Invalid line: ${line}`)
                 }
@@ -117,9 +119,7 @@ class TwobitSequence {
 
     async readSequence(seqName, regionStart, regionEnd) {
 
-        if (!this.index) {
-            await this.init()
-        }
+        await this.init()
 
         const record = await this.getSequenceRecord(seqName)
         if (!record) {
