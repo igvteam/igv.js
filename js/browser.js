@@ -203,7 +203,8 @@ class Browser {
                 endField: config.search.endField || "end",
                 geneField: config.search.geneField || "gene",
                 snpField: config.search.snpField || "snp",
-                resultsField: config.search.resultsField
+                resultsField: config.search.resultsField,
+                timeout: config.search.timeout    // searchFeatures.js sets a default
             }
         }
     }

@@ -6,8 +6,11 @@ import {igvxhr, StringUtils} from "../node_modules/igv-utils/src/index.js"
  * This module is separate to avoid circular dependencies between search.js and hgvs.js
  */
 
+// Timeout (ms) for the web service request, for any service whose config does not set one.  It covers that
+// request only, not the search of MANE transcripts or tracks that comes first.
+const DEFAULT_TIMEOUT = 6000
+
 const DEFAULT_SEARCH_CONFIG = {
-    timeout: 2000,
     type: "plain",
     url: 'https://igv.org/genomes/locus.php?genome=$GENOME$&name=$FEATURE$',
     coords: 0
@@ -73,7 +76,8 @@ async function searchWebService(browser, locus, searchConfig) {
         return undefined
     }
 
-    const options = searchConfig.timeout ? {timeout: searchConfig.timeout} : undefined
+    const timeout = searchConfig.timeout ?? DEFAULT_TIMEOUT
+    const options = timeout ? {timeout} : undefined    // 0 turns the timeout off
     const result = await igvxhr.loadString(path, options)
 
     const feature = await processSearchResult(browser, result, searchConfig)
