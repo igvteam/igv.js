@@ -147,6 +147,8 @@ class Viewport {
                 this[key] = undefined;
             }
         }
+
+        this.disposed = true;
     }
 }
 

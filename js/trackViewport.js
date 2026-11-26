@@ -249,6 +249,7 @@ class TrackViewport extends Viewport {
 
             // Expand the requested range so we can pan a bit without reloading.  But not beyond chromosome bounds
             const chromosome = await this.browser.genome.loadChromosome(chr)
+            if (this.disposed) return undefined
             const chrLength = chromosome ? chromosome.bpLength : Number.MAX_SAFE_INTEGER
             const pixelWidth = this.viewportElement.clientWidth// * 3;
             const bpWidth = pixelWidth * referenceFrame.bpPerPixel
@@ -266,6 +267,7 @@ class TrackViewport extends Viewport {
             const fromCache = this.featureCache &&
                 this.featureCache.containsRange(chr, bpStart, bpEnd, referenceFrame.bpPerPixel, this.windowFunction)
             const features = await this.getFeatures(track, chr, bpStart, bpEnd, referenceFrame.bpPerPixel)
+            if (this.disposed) return undefined   // Disposed of during the load, by a locus change for one
             if (features) {
                 let roiFeatures = []
                 if (track.roiSets && track.roiSets.length > 0) {
@@ -273,6 +275,7 @@ class TrackViewport extends Viewport {
                         const features = await roiSet.getFeatures(chr, bpStart, bpEnd, referenceFrame.bpPerPixel)
                         roiFeatures.push({track: roiSet, features})
                     }
+                    if (this.disposed) return undefined
                 }
 
                 const mr = track && (track.resolutionAware)   //
@@ -293,7 +296,7 @@ class TrackViewport extends Viewport {
             }
         } catch (error) {
             // Track might have been removed during load
-            if (this.trackView && this.trackView.disposed !== true) {
+            if (!this.disposed) {
                 this.showMessage(NOT_LOADED_MESSAGE)
                 this.browser.alert.present(trackLoadError(this.track.config, error))
                 console.error(error)
@@ -632,6 +635,7 @@ class TrackViewport extends Viewport {
             return this.featureCache.features
         } else if (typeof track.getFeatures === "function") {
             const features = await track.getFeatures(chr, start, end, bpPerPixel, this)
+            if (this.disposed) return undefined
             this.checkContentHeight(features)
             return features
         } else {
@@ -773,7 +777,7 @@ class TrackViewport extends Viewport {
             menuItems.push({label: 'Save Image (PNG)', click: () => this.savePNG()})
             menuItems.push({label: 'Save Image (SVG)', click: () => this.saveSVG()})
 
-            this.browser.menuPopup.presentTrackContextMenu(event, menuItems)
+            this.browser.menuPopup.presentTrackContextMenu(event, menuItems, this)
         })
 
     }
@@ -852,7 +856,9 @@ class TrackViewport extends Viewport {
 
                         popupTimerID = setTimeout(async () => {
 
+                                if (this.disposed) return   // By a locus change, since the click
                                 const content = await this.handleTrackClick(event)
+                                if (this.disposed) return
                                 if (content) {
 
                                     if (false === event.shiftKey) {
@@ -1029,6 +1035,7 @@ class TrackViewport extends Viewport {
 
         const features = 'annotation' === track.type ? track.clickedFeatures(clickState) : undefined
         const dataList = await track.popupData(clickState, features)
+        if (this.disposed) return undefined   // By a locus change, while the popup data loaded
 
         const popupClickHandlerResult = this.browser.fireEvent('trackclick', [track, dataList, clickState.genomicLocation, features])
 
@@ -1051,6 +1058,8 @@ class TrackViewport extends Viewport {
         if (this.popover) {
             this.popover.dispose()
         }
+
+        this.browser.releaseViewport(this)
 
         super.dispose()
     }

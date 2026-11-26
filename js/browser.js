@@ -610,8 +610,8 @@ class Browser {
     cleanHouseForSession() {
 
         for (let trackView of this.trackViews) {
-            // empty axis column, viewport columns, sampleName column, scroll column, drag column, gear column
-            trackView.removeDOMFromColumnContainer()
+            // empties the axis, viewport, sampleInfo, sampleName, scroll, drag and gear columns, and releases the track
+            trackView.dispose()
         }
 
         // discard all columns   TODO - why do we do this?
@@ -1585,8 +1585,12 @@ class Browser {
             if (Object.entries(groupAutoscaleTrackViews).length > 0) {
                 for (const [group, trackViews] of Object.entries(groupAutoscaleTrackViews)) {
                     const inViewFeatures = await Promise.all(trackViews.map(trackView => trackView.getInViewFeatures()))
+                    if (inViewFeatures.includes(undefined)) {
+                        continue   // Superseded by a locus change, whose own update sets the range
+                    }
                     const dataRange = doAutoscale(inViewFeatures.flat())
                     for (const trackView of trackViews) {
+                        if (trackView.disposed) continue   // Track was removed during the load
                         trackView.track.dataRange = Object.assign({}, dataRange)
                         trackView.track.autoscale = false
                     }
@@ -1907,9 +1911,9 @@ class Browser {
             // create reference frame list based on search loci
             this.referenceFrameList = createReferenceFrameList(loci, this.genome, this.flanking, this.minimumBases(), this.calculateViewportWidth(loci.length), this.isSoftclipped())
 
-            // discard track viewport DOM elements
+            // discard the track viewports
             for (let trackView of this.trackViews) {
-                trackView.removeViewportsFromColumnContainer()
+                trackView.disposeViewports()
             }
 
             // discard ONLY viewport columns
@@ -2387,6 +2391,23 @@ class Browser {
     }
 
 
+    /**
+     * Drop what refers to a track viewport that is being disposed of, by a locus change for one: the context menu
+     * if it was opened on that viewport, as its items act on it, and a pan or scroll in progress in it.
+     */
+    releaseViewport(viewport) {
+
+        if (this.menuPopup.viewport === viewport) {
+            this.menuPopup.hide()
+        }
+
+        if (this.vpMouseDown && this.vpMouseDown.viewport === viewport) {
+            this.dragObject = undefined
+            this.isScrolling = false
+            this.vpMouseDown = undefined
+        }
+    }
+
     cancelTrackPan() {
 
         const dragObject = this.dragObject
@@ -2397,6 +2418,11 @@ class Browser {
         if (dragObject && dragObject.viewport.referenceFrame.start !== dragObject.start) {
             this.updateViews()
             this.fireEvent('trackdragend', [dragObject.viewport])
+            for (const trackView of this.trackViews) {
+                if (typeof trackView.track.trackDragEnd === 'function') {
+                    trackView.track.trackDragEnd()
+                }
+            }
         }
     }
 
@@ -2563,8 +2589,7 @@ class Browser {
     }
 
     removeKeyboardHandler() {
-        console.log("Remove handler")
-        document.addEventListener("keyup", this.keyUpHandler)
+        document.removeEventListener("keyup", this.keyUpHandler)
     }
 
 

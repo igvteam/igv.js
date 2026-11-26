@@ -90,9 +90,6 @@ class SegTrack extends TrackBase {
 
         this._initialColor = this.color || this.constructor.defaultColor
         this._initialAltColor = this.altColor || this.constructor.defaultColor
-
-        this.didTrackDragEnd = undefined
-        this.browser.on('trackdragend', () => this.didTrackDragEnd = true)
     }
 
     menuItemList() {
