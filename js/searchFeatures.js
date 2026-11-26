@@ -6,8 +6,9 @@ import {igvxhr, StringUtils} from "../node_modules/igv-utils/src/index.js"
  * This module is separate to avoid circular dependencies between search.js and hgvs.js
  */
 
-// Applied to any search service whose config does not set a timeout, so a hung service cannot block a search
-const DEFAULT_TIMEOUT = 5000
+// Timeout (ms) for the web service request, for any service whose config does not set one.  It covers that
+// request only, not the search of MANE transcripts or tracks that comes first.
+const DEFAULT_TIMEOUT = 6000
 
 const DEFAULT_SEARCH_CONFIG = {
     type: "plain",
@@ -18,12 +19,6 @@ const DEFAULT_SEARCH_CONFIG = {
 // Web service URLs that returned no result, to avoid repeating known misses.  Size is capped, oldest entries evicted.
 const MAX_NOT_FOUND = 100
 const notFoundURLs = new Set()
-
-// A service that timed out is skipped for a while, so a search of several terms, or a repeated search, waits for
-// one timeout and not one per lookup.  Keyed by the service url template; the value is the time (ms) at which the
-// service will be tried again.
-const SERVICE_RETRY_INTERVAL = 60000
-const unavailableServices = new Map()
 
 /**
  * Search for a feature by name in MANE transcripts, searchable tracks, and web services
@@ -81,29 +76,9 @@ async function searchWebService(browser, locus, searchConfig) {
         return undefined
     }
 
-    const retryTime = unavailableServices.get(searchConfig.url)
-    if (retryTime !== undefined) {
-        if (Date.now() < retryTime) {
-            // Thrown, not returned as a miss, so the caller can tell "not searched" from "not found"
-            throw new Error("the service timed out and is not being tried for now")
-        }
-        unavailableServices.delete(searchConfig.url)
-    }
-
     const timeout = searchConfig.timeout ?? DEFAULT_TIMEOUT
-    const requestTime = Date.now()
-    let result
-    try {
-        result = await igvxhr.loadString(path, {timeout})
-    } catch (error) {
-        // A timeout says nothing about this term, so the miss is not remembered, the service is rested instead.
-        // A timeout has status 0, but so does a response blocked by CORS, which can be the answer for a single
-        // term; the time taken tells them apart.  A timeout of 0 means no timeout.
-        if (error && error.status === 0 && timeout > 0 && Date.now() - requestTime >= timeout) {
-            unavailableServices.set(searchConfig.url, Date.now() + SERVICE_RETRY_INTERVAL)
-        }
-        throw error
-    }
+    const options = timeout ? {timeout} : undefined    // 0 turns the timeout off
+    const result = await igvxhr.loadString(path, options)
 
     const feature = await processSearchResult(browser, result, searchConfig)
     if (!feature) {
