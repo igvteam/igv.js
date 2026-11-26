@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>igv.js</title>
+</head>
+
+<body>
+
+<h1>CRAM and Ambiguity Codes</h1>
+
+This example loads a CRAM file at a locus with ambiguity codes in the reference. The 2bit format IGV uses does not
+support ambiguity files so unmodified the MD5 check at this location will fail. IGV fixes these positions by inserting
+the ambiguity code, this example file tests that.
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js"
+
+    const options =
+        {
+            "genome": "hg38",
+            "locus": "chr3:16902863-16902902",
+            "tracks": [
+                {
+                    "name": "NA12878.final.cram",
+                    "format": "cram",
+                    "url": "https://1000genomes.s3.amazonaws.com/1000G_2504_high_coverage/data/ERR3239334/NA12878.final.cram",
+                    "indexURL": "https://1000genomes.s3.amazonaws.com/1000G_2504_high_coverage/data/ERR3239334/NA12878.final.cram.crai"
+                }
+            ]
+        }
+
+    const igvDiv = document.getElementById("igvDiv")
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser")
+
+        })
+
+
+</script>
+
+</body>
+
+</html>

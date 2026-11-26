@@ -1298,7 +1298,7 @@ class Browser {
 
         const track = getTrack(type, config, this)
         if (undefined === track) {
-            this.alert.present(new Error(`Error creating track.  Could not determine track type for file: ${config.url || config}`), undefined)
+            this.alert.present(new Error(`Error creating track.  Unknown track type "${type}" for file: ${config.url || config}`), undefined)
         } else {
 
             if (config.roi && config.roi.length > 0) {
